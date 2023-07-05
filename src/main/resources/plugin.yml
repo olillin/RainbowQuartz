@@ -1,0 +1,8 @@
+name: RainbowQuartz
+version: '${version}'
+main: dev.hoodieboi.rainbowquartz.RainbowQuartz
+api-version: '1.20'
+prefix: RainbowQuartz
+authors: [OliTheHoodieBoi]
+description: Create custom items
+website: https://github.com/OliTheHoodieBoi/RainbowQuartz
