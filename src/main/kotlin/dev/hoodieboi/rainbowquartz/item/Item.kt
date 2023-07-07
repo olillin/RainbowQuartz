@@ -1,8 +1,10 @@
 package dev.hoodieboi.rainbowquartz.item
 
+import dev.hoodieboi.rainbowquartz.craft.Recipe
 import dev.hoodieboi.rainbowquartz.event.Event
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
+import net.kyori.adventure.text.format.TextDecoration
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
 import org.bukkit.attribute.Attribute
@@ -12,12 +14,20 @@ import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
 import org.bukkit.inventory.ItemFlag
 import org.bukkit.inventory.ItemStack
-import org.bukkit.inventory.Recipe
+import org.bukkit.inventory.meta.ItemMeta
+import org.bukkit.persistence.PersistentDataType
 import org.bukkit.plugin.EventExecutor
 import org.bukkit.plugin.Plugin
 
-class Item (val key: NamespacedKey, val result: ItemStack, private val recipes: List<Recipe>) {
+class Item (val key: NamespacedKey, val result: ItemStack, val recipes: List<Recipe>) {
     val listeners : MutableMap<Class<out Event>, MutableList<Listener>> = HashMap()
+
+    init {
+        // Set id
+        val meta = result.itemMeta
+        meta.rainbowQuartzId = key
+        result.itemMeta = meta
+    }
 
     /**
      * Registers all the events in the given listener class
@@ -76,16 +86,21 @@ class Item (val key: NamespacedKey, val result: ItemStack, private val recipes: 
             return this
         }
         fun setName(name: Component): ItemBuilder {
+            // Non-italic by default
+            var displayName: Component
+            if (name.hasDecoration(TextDecoration.ITALIC)) {
+                displayName = name
+            } else {
+                displayName = name.decoration(TextDecoration.ITALIC, false)
+            }
+            // Modify item
             val itemMeta = result.itemMeta
-            itemMeta.displayName(name)
+            itemMeta.displayName(displayName)
             result.itemMeta = itemMeta
             return this
         }
         fun setName(name: String): ItemBuilder {
-            val itemMeta = result.itemMeta
-            itemMeta.displayName(Component.text(name).color(NamedTextColor.WHITE).decorate())
-            result.itemMeta = itemMeta
-            return this
+            return setName(Component.text(name).color(NamedTextColor.WHITE))
         }
 
         fun addEnchant(enchantment: Enchantment, level: Int): ItemBuilder {
@@ -148,9 +163,53 @@ class Item (val key: NamespacedKey, val result: ItemStack, private val recipes: 
             return this
         }
 
+        fun addRecipe(recipe: Recipe): ItemBuilder {
+            recipes.add(recipe)
+            return this
+        }
+
+        fun removeRecipe(recipeType: Class<out Recipe>): ItemBuilder {
+            val iterator = recipes.iterator()
+
+            while (iterator.hasNext()) {
+                val recipe = iterator.next()
+
+                if (recipeType.isAssignableFrom(recipe.javaClass)) {
+                    iterator.remove()
+                }
+            }
+
+            return this
+        }
+
         init {
             recipes = ArrayList()
         }
-        fun build() = Item(key, result, recipes)
+        fun build(): Item {
+            return Item(key, result, recipes)
+        }
     }
 }
+
+var ItemMeta.rainbowQuartzId: NamespacedKey?
+    get() {
+        val id = persistentDataContainer.get(
+            NamespacedKey.fromString("rainbowquartz:id")!!,
+            PersistentDataType.STRING
+        ) ?: return null
+        return NamespacedKey.fromString(id)
+
+    }
+    set(value) {
+        if (value == null) {
+            persistentDataContainer.remove(
+                NamespacedKey.fromString("rainbowquartz:id")!!
+            )
+        } else {
+            persistentDataContainer.set(
+                NamespacedKey.fromString("rainbowquartz:id")!!,
+                PersistentDataType.STRING,
+                value.toString()
+            )
+        }
+    }

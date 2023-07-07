@@ -1,0 +1,3 @@
+vievitem {
+    item brigadier:string single_word;
+}

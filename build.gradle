@@ -1,5 +1,6 @@
 plugins {
     id 'org.jetbrains.kotlin.jvm' version '1.8.22'
+    id 'com.github.johnrengelman.shadow' version '7.1.2'
 }
 
 group = 'dev.hoodieboi'
@@ -15,13 +16,30 @@ repositories {
         name = 'sonatype'
         url = 'https://oss.sonatype.org/content/groups/public/'
     }
+    maven { url 'https://libraries.minecraft.net/' }
 }
 
 dependencies {
     compileOnly 'io.papermc.paper:paper-api:1.20.1-R0.1-SNAPSHOT'
+    shadow 'org.jetbrains.kotlin:kotlin-stdlib:1.8.22'
+    implementation 'me.lucko:commodore:2.2'
     testImplementation 'org.jetbrains.kotlin:kotlin-test'
     testImplementation 'io.papermc.paper:paper-api:1.20.1-R0.1-SNAPSHOT'
     testImplementation 'com.github.seeseemelk:MockBukkit-v1.20:3.4.3'
+}
+
+shadowJar {
+    dependsOn 'build'
+
+    manifest {
+        archiveClassifier = null
+    }
+
+    dependencies {
+        exclude(dependency('com.mojang:brigadier'))
+    }
+
+    relocate('me.lucko.commodore', 'dev.hoodieboi.rainbowquartz.commodore')
 }
 
 def targetJavaVersion = 17

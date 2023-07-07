@@ -5,6 +5,7 @@ import be.seeseemelk.mockbukkit.ServerMock
 import dev.hoodieboi.rainbowquartz.RainbowQuartz
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
+import net.kyori.adventure.text.format.TextDecoration
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
 import org.bukkit.attribute.Attribute
@@ -49,14 +50,29 @@ class ItemBuilderTest {
 
     @Test
     fun setNameComponent() {
-        val name = Component.text("Quartz Sword")
         val item = Item.ItemBuilder(key, Material.IRON_SWORD)
-                .setName(name)
+                .setName(Component.text("Quartz Sword"))
                 .build()
 
         val itemStack = ItemStack(Material.IRON_SWORD)
         val itemStackMeta = itemStack.itemMeta
-        itemStackMeta.displayName(name)
+        itemStackMeta.displayName(Component.text("Quartz Sword").decoration(TextDecoration.ITALIC, false))
+        itemStackMeta.rainbowQuartzId = key
+        itemStack.itemMeta = itemStackMeta
+
+        assertEquals(item.result, itemStack)
+    }
+
+    @Test
+    fun setNameComponentItalic() {
+        val item = Item.ItemBuilder(key, Material.LEATHER_LEGGINGS)
+            .setName(Component.text("Fancy Pants").decorate(TextDecoration.ITALIC))
+            .build()
+
+        val itemStack = ItemStack(Material.LEATHER_LEGGINGS)
+        val itemStackMeta = itemStack.itemMeta
+        itemStackMeta.displayName(Component.text("Fancy Pants").decoration(TextDecoration.ITALIC, true))
+        itemStackMeta.rainbowQuartzId = key
         itemStack.itemMeta = itemStackMeta
 
         assertEquals(item.result, itemStack)
@@ -71,7 +87,8 @@ class ItemBuilderTest {
 
         val itemStack = ItemStack(Material.IRON_SWORD)
         val itemStackMeta = itemStack.itemMeta
-        itemStackMeta.displayName(Component.text(name).color(NamedTextColor.WHITE).decorate())
+        itemStackMeta.displayName(Component.text(name).color(NamedTextColor.WHITE).decoration(TextDecoration.ITALIC, false))
+        itemStackMeta.rainbowQuartzId = key
         itemStack.itemMeta = itemStackMeta
 
         assertEquals(item.result, itemStack)
@@ -86,6 +103,7 @@ class ItemBuilderTest {
         val itemStack = ItemStack(Material.DIAMOND_SWORD)
         val itemStackMeta = itemStack.itemMeta
         itemStackMeta.addEnchant(Enchantment.FIRE_ASPECT, 1, true)
+        itemStackMeta.rainbowQuartzId = key
         itemStack.itemMeta = itemStackMeta
 
         assertEquals(item.result, itemStack)
@@ -100,6 +118,7 @@ class ItemBuilderTest {
         val itemStack = ItemStack(Material.DIAMOND_SWORD)
         val itemStackMeta = itemStack.itemMeta
         itemStackMeta.addEnchant(Enchantment.FIRE_ASPECT, 5, true)
+        itemStackMeta.rainbowQuartzId = key
         itemStack.itemMeta = itemStackMeta
 
         assertEquals(item.result, itemStack)
@@ -114,6 +133,7 @@ class ItemBuilderTest {
         val itemStack = ItemStack(Material.STICK)
         val itemStackMeta = itemStack.itemMeta
         itemStackMeta.addEnchant(Enchantment.KNOCKBACK, 5, true)
+        itemStackMeta.rainbowQuartzId = key
         itemStack.itemMeta = itemStackMeta
 
         assertEquals(item.result, itemStack)
@@ -130,6 +150,7 @@ class ItemBuilderTest {
         val itemStack = ItemStack(Material.DIAMOND_SWORD)
         val itemStackMeta = itemStack.itemMeta
         itemStackMeta.addEnchant(Enchantment.DAMAGE_ALL, 2, true)
+        itemStackMeta.rainbowQuartzId = key
         itemStack.itemMeta = itemStackMeta
 
         assertEquals(item.result, itemStack)
@@ -145,6 +166,7 @@ class ItemBuilderTest {
         val itemStack = ItemStack(Material.GOLDEN_CHESTPLATE)
         val itemStackMeta = itemStack.itemMeta
         itemStackMeta.addAttributeModifier(Attribute.GENERIC_KNOCKBACK_RESISTANCE, modifier)
+        itemStackMeta.rainbowQuartzId = key
         itemStack.itemMeta = itemStackMeta
 
         assertEquals(item.result, itemStack)
@@ -163,6 +185,7 @@ class ItemBuilderTest {
         val itemStack = ItemStack(Material.NETHERITE_CHESTPLATE)
         val itemStackMeta = itemStack.itemMeta
         itemStackMeta.addAttributeModifier(Attribute.GENERIC_ARMOR, modifier2)
+        itemStackMeta.rainbowQuartzId = key
         itemStack.itemMeta = itemStackMeta
 
         assertEquals(item.result, itemStack)
@@ -183,6 +206,7 @@ class ItemBuilderTest {
         val itemStack = ItemStack(Material.NETHERITE_CHESTPLATE)
         val itemStackMeta = itemStack.itemMeta
         itemStackMeta.addAttributeModifier(Attribute.GENERIC_KNOCKBACK_RESISTANCE, modifier1)
+        itemStackMeta.rainbowQuartzId = key
         itemStack.itemMeta = itemStackMeta
 
         assertEquals(item.result, itemStack)
@@ -197,6 +221,7 @@ class ItemBuilderTest {
         val itemStack = ItemStack(Material.GOLDEN_CHESTPLATE)
         val itemStackMeta = itemStack.itemMeta
         itemStackMeta.addItemFlags(ItemFlag.HIDE_ENCHANTS, ItemFlag.HIDE_UNBREAKABLE)
+        itemStackMeta.rainbowQuartzId = key
         itemStack.itemMeta = itemStackMeta
 
         assertEquals(item.result, itemStack)
@@ -213,6 +238,7 @@ class ItemBuilderTest {
         val itemStackMeta = itemStack.itemMeta
         itemStackMeta.addItemFlags(ItemFlag.HIDE_ENCHANTS, ItemFlag.HIDE_UNBREAKABLE)
         itemStackMeta.removeItemFlags(ItemFlag.HIDE_ENCHANTS)
+        itemStackMeta.rainbowQuartzId = key
         itemStack.itemMeta = itemStackMeta
 
         assertEquals(item.result, itemStack)
@@ -227,6 +253,7 @@ class ItemBuilderTest {
         val itemStack = ItemStack(Material.GOLDEN_HOE)
         val itemStackMeta = itemStack.itemMeta
         itemStackMeta.isUnbreakable = true
+        itemStackMeta.rainbowQuartzId = key
         itemStack.itemMeta = itemStackMeta
 
         assertEquals(item.result, itemStack)
@@ -242,6 +269,7 @@ class ItemBuilderTest {
         val itemStack = ItemStack(Material.GOLDEN_HOE)
         val itemStackMeta = itemStack.itemMeta
         itemStackMeta.isUnbreakable = false
+        itemStackMeta.rainbowQuartzId = key
         itemStack.itemMeta = itemStackMeta
 
         assertEquals(item.result, itemStack)

@@ -6,3 +6,24 @@ prefix: RainbowQuartz
 authors: [OliTheHoodieBoi]
 description: Create custom items
 website: https://github.com/OliTheHoodieBoi/RainbowQuartz
+
+commands:
+  getitem:
+    description: Get any custom item
+    usage: /getitem <item> [<amount>]
+    permission: rainbowquartz.command.getitem
+  viewitem:
+    description: View any custom item
+    usage: /getitem <item>
+    permission: rainbowquartz.command.viewitem
+
+permissions:
+  rainbowquartz.command.getitem:
+    description: Use the getitem command
+  rainbowquartz.command.viewitem:
+    description: Use the viewitem command
+  rainbowquartz.*:
+    default: op
+    children:
+      - rainbowquartz.command.getitem
+      - rainbowquartz.command.viewitem
