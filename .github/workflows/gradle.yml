@@ -29,10 +29,10 @@ jobs:
       with:
         java-version: '18'
         distribution: 'temurin'
-    - name: Build with Gradle
+    - name: Generate coverage report with JaCoCo and Gradle
       uses: gradle/gradle-build-action@67421db6bd0bf253fb4bd25b31ebb98943c375e1
       with:
-        arguments: build
+        arguments: jacocoTestReport
     - name: Upload coverage reports to Codecov
       uses: codecov/codecov-action@v3
       env:
