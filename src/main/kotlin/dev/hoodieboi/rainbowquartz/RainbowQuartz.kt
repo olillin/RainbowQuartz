@@ -11,16 +11,21 @@ import me.lucko.commodore.CommodoreProvider
 import me.lucko.commodore.file.CommodoreFileReader
 import net.kyori.adventure.text.Component.text
 import net.kyori.adventure.text.format.NamedTextColor.LIGHT_PURPLE
+import net.kyori.adventure.text.format.NamedTextColor.YELLOW
 import net.kyori.adventure.text.format.TextColor
 import net.kyori.adventure.text.format.TextDecoration
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
+import org.bukkit.attribute.Attribute
+import org.bukkit.attribute.AttributeModifier
 import org.bukkit.command.PluginCommand
 import org.bukkit.enchantments.Enchantment
+import org.bukkit.inventory.EquipmentSlot
 import org.bukkit.inventory.ItemFlag
 import org.bukkit.inventory.ItemStack
 import org.bukkit.plugin.java.JavaPlugin
 import java.io.IOException
+import java.util.*
 
 open class RainbowQuartz : JavaPlugin() {
 
@@ -100,5 +105,15 @@ open class RainbowQuartz : JavaPlugin() {
             .addRecipe(ShapelessRecipe()
                 .addIngredient(ItemStack(Material.COBBLESTONE), 4)
             ).build())
+
+        itemManager.registerItem(ItemBuilder(NamespacedKey(this, "boots_of_the_chicken"), Material.GOLDEN_BOOTS)
+            .setName(text("Boots of the Chicken").color(YELLOW))
+            .addRecipe(ShapedRecipe("F F", "L L")
+                .setIngredient('F', Material.FEATHER)
+                .setIngredient('L', Material.LEATHER))
+            .addAttributeModifier(
+                Attribute.GENERIC_MOVEMENT_SPEED,
+                AttributeModifier(UUID.randomUUID(), "boots_of_the_chicken", 1.2, AttributeModifier.Operation.MULTIPLY_SCALAR_1, EquipmentSlot.FEET))
+            .build())
     }
 }

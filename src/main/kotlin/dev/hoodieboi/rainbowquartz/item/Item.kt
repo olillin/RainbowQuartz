@@ -1,7 +1,6 @@
 package dev.hoodieboi.rainbowquartz.item
 
 import dev.hoodieboi.rainbowquartz.craft.Recipe
-import dev.hoodieboi.rainbowquartz.event.Event
 import net.kyori.adventure.key.Key
 import net.kyori.adventure.key.Keyed
 import net.kyori.adventure.text.Component
@@ -13,6 +12,7 @@ import org.bukkit.attribute.Attribute
 import org.bukkit.attribute.AttributeModifier
 import org.bukkit.enchantments.Enchantment
 import org.bukkit.event.EventPriority
+import org.bukkit.event.HandlerList
 import org.bukkit.event.Listener
 import org.bukkit.inventory.ItemFlag
 import org.bukkit.inventory.ItemStack
@@ -22,7 +22,7 @@ import org.bukkit.plugin.EventExecutor
 import org.bukkit.plugin.Plugin
 
 class Item (val key: NamespacedKey, val result: ItemStack, val recipes: List<Recipe>) : Keyed {
-    val listeners : MutableMap<Class<out Event>, MutableList<Listener>> = HashMap()
+    val handlerList : HandlerList = HandlerList()
 
     init {
         // Set id

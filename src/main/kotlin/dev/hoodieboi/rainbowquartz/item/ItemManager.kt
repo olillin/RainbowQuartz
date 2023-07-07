@@ -2,6 +2,7 @@ package dev.hoodieboi.rainbowquartz.item
 
 import org.bukkit.Bukkit
 import org.bukkit.NamespacedKey
+import org.bukkit.inventory.ItemStack
 
 class ItemManager {
 
@@ -16,7 +17,7 @@ class ItemManager {
     @Throws(ItemAlreadyRegisteredException::class)
     fun registerItem(item: Item) {
         if (items.containsKey(item.key)) {
-            throw ItemAlreadyRegisteredException()
+            throw ItemAlreadyRegisteredException(item)
         }
 
         items[item.key] = item
@@ -30,6 +31,11 @@ class ItemManager {
         return items[key]
     }
 
+    fun getItem(itemStack: ItemStack): Item? {
+        val key: NamespacedKey = itemStack.itemMeta.rainbowQuartzId ?: return null
+        return getItem(key)
+    }
+
     fun containsItem(key: NamespacedKey): Boolean {
         return getItem(key) != null
     }
@@ -38,5 +44,5 @@ class ItemManager {
         items.clear()
     }
 
-    class ItemAlreadyRegisteredException : Exception() {}
+    class ItemAlreadyRegisteredException(item: Item) : Exception("Item ${item.key} has already been registered.")
 }
