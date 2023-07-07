@@ -3,6 +3,8 @@ package dev.hoodieboi.rainbowquartz.item
 import be.seeseemelk.mockbukkit.MockBukkit
 import be.seeseemelk.mockbukkit.ServerMock
 import dev.hoodieboi.rainbowquartz.RainbowQuartz
+import dev.hoodieboi.rainbowquartz.craft.ShapedRecipe
+import dev.hoodieboi.rainbowquartz.item.Item.ItemBuilder
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
 import org.junit.jupiter.api.AfterEach
@@ -10,11 +12,12 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.util.*
 import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
 
 class ItemRegisterTest {
-    lateinit private var server: ServerMock
-    lateinit private var plugin: RainbowQuartz
-    lateinit private var key: NamespacedKey
+    private lateinit var server: ServerMock
+    private lateinit var plugin: RainbowQuartz
+    private lateinit var key: NamespacedKey
 
     @BeforeEach
     fun setUp() {
@@ -30,10 +33,22 @@ class ItemRegisterTest {
 
     @Test
     fun registerItem() {
-        val item = Item.ItemBuilder(key, Material.STICK).build()
+        val item = ItemBuilder(key, Material.STICK).build()
 
         RainbowQuartz.itemManager.registerItem(item)
 
-        assertEquals(RainbowQuartz.itemManager.getItem(key), item)
+        assertEquals(item, RainbowQuartz.itemManager.getItem(key))
+    }
+
+    @Test
+    fun registerRecipe() {
+        RainbowQuartz.itemManager.registerItem(ItemBuilder(key, Material.GOLDEN_SWORD)
+            .addRecipe(ShapedRecipe(" G ", "BGB", " R ")
+                .setIngredient('G', Material.GOLD_INGOT)
+                .setIngredient('B', Material.BLAZE_POWDER)
+                .setIngredient('R', Material.BLAZE_ROD))
+            .build())
+
+        assertNotNull(server.getRecipe(NamespacedKey.fromString("$key.shaped")!!))
     }
 }

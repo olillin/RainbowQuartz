@@ -2,6 +2,8 @@ package dev.hoodieboi.rainbowquartz.item
 
 import dev.hoodieboi.rainbowquartz.craft.Recipe
 import dev.hoodieboi.rainbowquartz.event.Event
+import net.kyori.adventure.key.Key
+import net.kyori.adventure.key.Keyed
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.format.TextDecoration
@@ -19,7 +21,7 @@ import org.bukkit.persistence.PersistentDataType
 import org.bukkit.plugin.EventExecutor
 import org.bukkit.plugin.Plugin
 
-class Item (val key: NamespacedKey, val result: ItemStack, val recipes: List<Recipe>) {
+class Item (val key: NamespacedKey, val result: ItemStack, val recipes: List<Recipe>) : Keyed {
     val listeners : MutableMap<Class<out Event>, MutableList<Listener>> = HashMap()
 
     init {
@@ -58,6 +60,10 @@ class Item (val key: NamespacedKey, val result: ItemStack, val recipes: List<Rec
         TODO()
     }
 
+    override fun key(): Key {
+        return key
+    }
+
     override fun toString(): String {
         return "Item($key){material=${result.type}}"
     }
@@ -67,6 +73,13 @@ class Item (val key: NamespacedKey, val result: ItemStack, val recipes: List<Rec
         return key.equals(other.key)
                 && result.equals(other.result)
                 && recipes.equals(other.recipes)
+    }
+
+    override fun hashCode(): Int {
+        var result = key.hashCode()
+        result = 31 * result + result.hashCode()
+        result = 31 * result + recipes.hashCode()
+        return result
     }
 
     class ItemBuilder(val key: NamespacedKey, private val result: ItemStack) {
@@ -87,11 +100,10 @@ class Item (val key: NamespacedKey, val result: ItemStack, val recipes: List<Rec
         }
         fun setName(name: Component): ItemBuilder {
             // Non-italic by default
-            var displayName: Component
-            if (name.hasDecoration(TextDecoration.ITALIC)) {
-                displayName = name
+            val displayName: Component = if (name.hasDecoration(TextDecoration.ITALIC)) {
+                name
             } else {
-                displayName = name.decoration(TextDecoration.ITALIC, false)
+                name.decoration(TextDecoration.ITALIC, false)
             }
             // Modify item
             val itemMeta = result.itemMeta
