@@ -1,5 +1,6 @@
 package dev.hoodieboi.rainbowquartz.item
 
+import co.aikar.timings.TimedEventExecutor
 import dev.hoodieboi.rainbowquartz.craft.Recipe
 import net.kyori.adventure.key.Key
 import net.kyori.adventure.key.Keyed
@@ -11,6 +12,7 @@ import org.bukkit.NamespacedKey
 import org.bukkit.attribute.Attribute
 import org.bukkit.attribute.AttributeModifier
 import org.bukkit.enchantments.Enchantment
+import org.bukkit.event.Event
 import org.bukkit.event.EventPriority
 import org.bukkit.event.HandlerList
 import org.bukkit.event.Listener
@@ -18,11 +20,12 @@ import org.bukkit.inventory.ItemFlag
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.ItemMeta
 import org.bukkit.persistence.PersistentDataType
-import org.bukkit.plugin.EventExecutor
-import org.bukkit.plugin.Plugin
+import org.bukkit.plugin.*
+import java.lang.reflect.Method
+import java.lang.reflect.Modifier
 
 class Item (val key: NamespacedKey, val result: ItemStack, val recipes: List<Recipe>) : Keyed {
-    val handlerList : HandlerList = HandlerList()
+    val handlers : MutableMap<Class<out Event>, HandlerList> = HashMap()
 
     init {
         // Set id
@@ -37,8 +40,17 @@ class Item (val key: NamespacedKey, val result: ItemStack, val recipes: List<Rec
      * @param listener Listener to register
      * @param plugin Plugin to register
      */
-    fun registerEvents(listener: Listener, plugin: Plugin) {
-        TODO()
+    @Throws(IllegalPluginAccessException::class)
+    fun registerEvents(listener: Listener, plugin: Plugin): Item {
+        if (!plugin.isEnabled) {
+            throw IllegalPluginAccessException("Plugin attempted to register $listener while not enabled");
+        }
+
+        for ((key, value) in plugin.pluginLoader.createRegisteredListeners(listener, plugin)) {
+            getEventListeners(getRegistrationClass(key)).registerAll(value)
+        }
+
+        return this
     }
 
     /**
@@ -50,14 +62,68 @@ class Item (val key: NamespacedKey, val result: ItemStack, val recipes: List<Rec
      * @param executor EventExecutor to register
      * @param plugin Plugin to register
      */
+    @Throws(IllegalPluginAccessException::class)
     fun registerEvent(
-        event: Class<out org.bukkit.event.Event?>,
+        event: Class<out Event?>,
         listener: Listener,
         priority: EventPriority,
         executor: EventExecutor,
         plugin: Plugin
-    ) {
-        TODO()
+    ): Item {
+        return registerEvent(event, listener, priority, executor, plugin, false)
+    }
+
+    /**
+     * Registers the specified executor to the given event class
+     *
+     * @param event Event type to register
+     * @param listener Listener to register
+     * @param priority Priority to register this event at
+     * @param executor EventExecutor to register
+     * @param plugin Plugin to register
+     */
+    @Throws(IllegalPluginAccessException::class)
+    fun registerEvent(
+        event: Class<out Event?>,
+        listener: Listener,
+        priority: EventPriority,
+        executor: EventExecutor,
+        plugin: Plugin,
+        ignoreCancelled: Boolean
+    ): Item {
+        if (!plugin.isEnabled) {
+            throw IllegalPluginAccessException("Plugin attempted to register $event while not enabled")
+        }
+        val timedExecutor = TimedEventExecutor(executor, plugin, null, event) // Paper
+
+        getEventListeners(event).register(RegisteredListener(listener, timedExecutor, priority, plugin, ignoreCancelled))
+        return this
+    }
+
+    fun getEventListeners(type: Class<out Event>): HandlerList {
+        val handler = handlers[type]
+        if (handler != null) {
+            return handler
+        } else {
+            val newHandler = HandlerList()
+            handlers[type] = newHandler
+            return newHandler
+        }
+    }
+
+    private fun getRegistrationClass(clazz: Class<out Event>): Class<out Event> {
+        try {
+            clazz.getDeclaredMethod("getHandlerList")
+            return clazz
+        } catch (e: NoSuchMethodException) {
+            if (clazz.superclass != null
+                    && !clazz.superclass.equals(Event::javaClass)
+                    && Event::class.java.isAssignableFrom(clazz.superclass)) {
+                return getRegistrationClass(clazz.superclass.asSubclass(Event::class.java))
+            } else {
+                throw IllegalPluginAccessException("Unable to find handler list for event ${clazz.getName()}. Static getHandlerList method required!")
+            }
+        }
     }
 
     override fun key(): Key {

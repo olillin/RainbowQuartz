@@ -10,6 +10,10 @@ import org.bukkit.inventory.ItemStack
 class EventDispatcher : Listener {
     private fun processEvent(itemStack: ItemStack, event: Event) {
         val item = RainbowQuartz.itemManager.getItem(itemStack) ?: return
+        val registeredListeners = item.getEventListeners(event::class.java).registeredListeners
+        for (listener in registeredListeners) {
+            listener.callEvent(event)
+        }
     }
 
     @EventHandler

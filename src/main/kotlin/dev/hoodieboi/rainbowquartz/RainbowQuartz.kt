@@ -20,14 +20,19 @@ import org.bukkit.attribute.Attribute
 import org.bukkit.attribute.AttributeModifier
 import org.bukkit.command.PluginCommand
 import org.bukkit.enchantments.Enchantment
+import org.bukkit.event.EventHandler
+import org.bukkit.event.Listener
+import org.bukkit.event.player.PlayerDropItemEvent
 import org.bukkit.inventory.EquipmentSlot
 import org.bukkit.inventory.ItemFlag
 import org.bukkit.inventory.ItemStack
 import org.bukkit.plugin.java.JavaPlugin
+import org.bukkit.potion.PotionEffect
+import org.bukkit.potion.PotionEffectType
 import java.io.IOException
 import java.util.*
 
-open class RainbowQuartz : JavaPlugin() {
+open class RainbowQuartz : JavaPlugin(), Listener {
 
     companion object {
         val itemManager: ItemManager = ItemManager()
@@ -86,7 +91,7 @@ open class RainbowQuartz : JavaPlugin() {
             .setName(text("Super Potato").color(LIGHT_PURPLE).decoration(TextDecoration.ITALIC, false))
             .addRecipe(ShapedRecipe("PP", "PP")
                 .setIngredient('P', Material.POTATO)
-            ).build())
+            ).build().registerEvents(this, this))
 
         itemManager.registerItem(ItemBuilder(NamespacedKey(this, "coal_lump"), Material.CHARCOAL)
             .setName("Lump of Coal")
@@ -115,5 +120,10 @@ open class RainbowQuartz : JavaPlugin() {
                 Attribute.GENERIC_MOVEMENT_SPEED,
                 AttributeModifier(UUID.randomUUID(), "boots_of_the_chicken", 1.2, AttributeModifier.Operation.MULTIPLY_SCALAR_1, EquipmentSlot.FEET))
             .build())
+    }
+
+    @EventHandler
+    fun onDropSuperPotato(event: PlayerDropItemEvent) {
+        event.player.addPotionEffect(PotionEffect(PotionEffectType.LEVITATION, 100, 0))
     }
 }
