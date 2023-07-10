@@ -22,7 +22,6 @@ repositories {
 
 dependencies {
     compileOnly 'io.papermc.paper:paper-api:1.20.1-R0.1-SNAPSHOT'
-    shadow 'org.jetbrains.kotlin:kotlin-stdlib:1.8.22'
     implementation 'me.lucko:commodore:2.2'
     testImplementation 'org.jetbrains.kotlin:kotlin-test'
     testImplementation 'io.papermc.paper:paper-api:1.20.1-R0.1-SNAPSHOT'
@@ -38,6 +37,7 @@ shadowJar {
 
     dependencies {
         exclude(dependency('com.mojang:brigadier'))
+        exclude('kotlin/')
     }
 
     relocate('me.lucko.commodore', 'dev.hoodieboi.rainbowquartz.commodore')
