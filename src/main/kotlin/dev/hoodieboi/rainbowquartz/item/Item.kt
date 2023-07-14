@@ -1,7 +1,10 @@
 package dev.hoodieboi.rainbowquartz.item
 
 import co.aikar.timings.TimedEventExecutor
+import dev.hoodieboi.rainbowquartz.RainbowQuartz
 import dev.hoodieboi.rainbowquartz.craft.Recipe
+import dev.hoodieboi.rainbowquartz.event.EventContext
+import dev.hoodieboi.rainbowquartz.event.EventDispatcher
 import net.kyori.adventure.key.Key
 import net.kyori.adventure.key.Keyed
 import net.kyori.adventure.text.Component
@@ -22,7 +25,7 @@ import org.bukkit.inventory.meta.ItemMeta
 import org.bukkit.persistence.PersistentDataType
 import org.bukkit.plugin.*
 import java.lang.reflect.Method
-import java.lang.reflect.Modifier
+import java.util.function.Function
 
 class Item (val key: NamespacedKey, val result: ItemStack, val recipes: List<Recipe>) : Keyed {
     val handlers : MutableMap<Class<out Event>, HandlerList> = HashMap()
@@ -34,43 +37,9 @@ class Item (val key: NamespacedKey, val result: ItemStack, val recipes: List<Rec
         result.itemMeta = meta
     }
 
-    /**
-     * Registers all the events in the given listener class
-     *
-     * @param listener Listener to register
-     * @param plugin Plugin to register
-     */
     @Throws(IllegalPluginAccessException::class)
-    fun registerEvents(listener: Listener, plugin: Plugin): Item {
-        if (!plugin.isEnabled) {
-            throw IllegalPluginAccessException("Plugin attempted to register $listener while not enabled");
-        }
-
-        for ((key, value) in plugin.pluginLoader.createRegisteredListeners(listener, plugin)) {
-            getEventListeners(getRegistrationClass(key)).registerAll(value)
-        }
-
-        return this
-    }
-
-    /**
-     * Registers the specified executor to the given event class
-     *
-     * @param event Event type to register
-     * @param listener Listener to register
-     * @param priority Priority to register this event at
-     * @param executor EventExecutor to register
-     * @param plugin Plugin to register
-     */
-    @Throws(IllegalPluginAccessException::class)
-    fun registerEvent(
-        event: Class<out Event?>,
-        listener: Listener,
-        priority: EventPriority,
-        executor: EventExecutor,
-        plugin: Plugin
-    ): Item {
-        return registerEvent(event, listener, priority, executor, plugin, false)
+    fun <T: Event> listen(context: EventContext<T>, listener: Function<Event, Unit>) {
+        RainbowQuartz.eventDispatcher.startListening(TODO("EVENT_TYPE"))
     }
 
     /**

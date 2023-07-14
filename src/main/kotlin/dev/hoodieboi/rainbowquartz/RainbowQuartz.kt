@@ -2,6 +2,7 @@ package dev.hoodieboi.rainbowquartz
 
 import dev.hoodieboi.rainbowquartz.craft.*
 import dev.hoodieboi.rainbowquartz.event.EventDispatcher
+import dev.hoodieboi.rainbowquartz.event.handler.PotionEffectHandler
 import dev.hoodieboi.rainbowquartz.item.Item.ItemBuilder
 import dev.hoodieboi.rainbowquartz.item.ItemManager
 import dev.hoodieboi.rainbowquartz.plugin.command.GetItem
@@ -36,10 +37,11 @@ open class RainbowQuartz : JavaPlugin(), Listener {
 
     companion object {
         val itemManager: ItemManager = ItemManager()
+        lateinit var eventDispatcher: EventDispatcher
     }
 
     override fun onEnable() {
-        server.pluginManager.registerEvents(EventDispatcher(), this)
+        eventDispatcher = EventDispatcher(server.pluginManager)
         registerCommands()
 
         generateTestResources()
@@ -91,7 +93,11 @@ open class RainbowQuartz : JavaPlugin(), Listener {
             .setName(text("Super Potato").color(LIGHT_PURPLE).decoration(TextDecoration.ITALIC, false))
             .addRecipe(ShapedRecipe("PP", "PP")
                 .setIngredient('P', Material.POTATO)
-            ).build().registerEvents(this, this))
+            ).build()
+            .listen<PlayerDropItemEvent>(
+                PlayerDropItemEventContext.DROPPED_ITEM,
+                PotionEffectHandler(PotionEffect(PotionEffectType.LEVITATION))
+            ))
 
         itemManager.registerItem(ItemBuilder(NamespacedKey(this, "coal_lump"), Material.CHARCOAL)
             .setName("Lump of Coal")
