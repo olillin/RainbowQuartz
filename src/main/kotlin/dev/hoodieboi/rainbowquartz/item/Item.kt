@@ -210,10 +210,14 @@ class Item (val key: NamespacedKey, val item: ItemStack, val recipes: List<Recip
         }
         fun setName(name: Component): ItemBuilder {
             // Non-italic by default
-            val displayName: Component = if (name.hasDecoration(TextDecoration.ITALIC)) {
+            var displayName: Component = if (name.hasDecoration(TextDecoration.ITALIC)) {
                 name
             } else {
                 name.decoration(TextDecoration.ITALIC, false)
+            }
+            // White by default
+            if (displayName.color() == null) {
+                displayName = displayName.color(NamedTextColor.WHITE)
             }
             // Modify item
             val itemMeta = result.itemMeta
@@ -222,7 +226,58 @@ class Item (val key: NamespacedKey, val item: ItemStack, val recipes: List<Recip
             return this
         }
         fun setName(name: String): ItemBuilder {
-            return setName(Component.text(name).color(NamedTextColor.WHITE))
+            return setName(Component.text(name))
+        }
+
+        fun addLore(vararg lore: Component): ItemBuilder {
+            val itemMeta = result.itemMeta
+            if (!itemMeta.hasLore()) {
+                itemMeta.lore(ArrayList())
+            }
+            val metaLore = itemMeta.lore()!!
+            val iterator = lore.iterator()
+            while (iterator.hasNext()) {
+                var component = iterator.next()
+                // Non-italic by default
+                if (!component.hasDecoration(TextDecoration.ITALIC)) {
+                    component = component.decoration(TextDecoration.ITALIC, false)
+                }
+                // Gray by default
+                if (component.color() == null) {
+                    component = component.color(NamedTextColor.GRAY)
+                }
+                metaLore.add(component)
+            }
+            itemMeta.lore(metaLore)
+            result.itemMeta = itemMeta
+            return this
+        }
+
+        fun addLore(lore: String): ItemBuilder {
+            return addLore(Component.text(lore).color(NamedTextColor.GRAY))
+        }
+
+        fun insertLore(index: Int, lore: Component): ItemBuilder {
+            val itemMeta = result.itemMeta
+            if (!itemMeta.hasLore()) {
+                itemMeta.lore(ArrayList())
+            }
+            val metaLore = itemMeta.lore()!!
+            metaLore.add(index, lore)
+            itemMeta.lore(metaLore)
+            result.itemMeta = itemMeta
+            return this
+        }
+
+        fun insertLore(index: Int, lore: String): ItemBuilder {
+            return insertLore(index, Component.text(lore))
+        }
+
+        fun removeLore(): ItemBuilder {
+            val itemMeta = result.itemMeta
+            itemMeta.lore(null)
+            result.itemMeta = itemMeta
+            return this
         }
 
         fun addEnchant(enchantment: Enchantment, level: Int): ItemBuilder {

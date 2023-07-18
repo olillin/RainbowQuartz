@@ -7,6 +7,8 @@ import dev.hoodieboi.rainbowquartz.item.ItemManager
 import dev.hoodieboi.rainbowquartz.plugin.command.GetItemCommand
 import dev.hoodieboi.rainbowquartz.plugin.command.MenuCommand
 import dev.hoodieboi.rainbowquartz.plugin.command.ViewItemCommand
+import dev.hoodieboi.rainbowquartz.plugin.gui.GuiEventListener
+import dev.hoodieboi.rainbowquartz.plugin.gui.MenuManager
 import me.lucko.commodore.Commodore
 import me.lucko.commodore.CommodoreProvider
 import me.lucko.commodore.file.CommodoreFileReader
@@ -15,6 +17,7 @@ import net.kyori.adventure.text.format.NamedTextColor.LIGHT_PURPLE
 import net.kyori.adventure.text.format.NamedTextColor.YELLOW
 import net.kyori.adventure.text.format.TextColor
 import net.kyori.adventure.text.format.TextDecoration
+import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
 import org.bukkit.attribute.Attribute
@@ -38,10 +41,13 @@ open class RainbowQuartz : JavaPlugin(), Listener {
 
     companion object {
         val itemManager: ItemManager = ItemManager()
+        lateinit var menuManager: MenuManager
     }
 
     override fun onEnable() {
         server.pluginManager.registerEvents(EventDispatcher(), this)
+        server.pluginManager.registerEvents(GuiEventListener(), this)
+        menuManager = MenuManager(this)
         registerCommands()
 
         generateTestResources()
@@ -72,14 +78,17 @@ open class RainbowQuartz : JavaPlugin(), Listener {
             val commodore = CommodoreProvider.getCommodore(this)
 
             // register completions for each command
-            registerCompletionsFromFile(commodore, menuCommand)
-            registerCompletionsFromFile(commodore, menuCommand)
+            registerCompletionsFromFile(commodore, getItemCommand)
+            registerCompletionsFromFile(commodore, viewItemCommand)
         }
     }
 
-    @Throws(IOException::class)
     private fun registerCompletionsFromFile(commodore: Commodore, command: PluginCommand) {
-        val file = getResource("commodore/${command.name}.commodore")
+        val uri = "commodore/${command.name}.commodore"
+        val file = getResource(uri)
+        if (file == null) {
+            Bukkit.getLogger().warning("Unable to register completions for command ${command.name}: Could not find file $uri")
+        }
         commodore.register(command, CommodoreFileReader.INSTANCE.parse<Any>(file))
     }
 

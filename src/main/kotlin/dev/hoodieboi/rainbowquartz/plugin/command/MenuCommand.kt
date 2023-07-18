@@ -1,8 +1,8 @@
 package dev.hoodieboi.rainbowquartz.plugin.command
 
+import dev.hoodieboi.rainbowquartz.RainbowQuartz
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor.RED
-import org.bukkit.Bukkit
 import org.bukkit.command.Command
 import org.bukkit.command.CommandSender
 import org.bukkit.command.TabExecutor
@@ -15,14 +15,11 @@ class MenuCommand : TabExecutor {
             return true
         }
 
-        val menu = Bukkit.createInventory(sender, 81, "RainbowQuartz Menu")
-
-        sender.openInventory(menu)
+        RainbowQuartz.menuManager.MAIN_MENU.showMenu(sender)
         return true
     }
 
     override fun onTabComplete(sender: CommandSender, command: Command, label: String, args: Array<out String>?): MutableList<String> {
         return mutableListOf()
     }
-
 }

@@ -56,7 +56,7 @@ class ItemBuilderTest {
 
         val itemStack = ItemStack(Material.IRON_SWORD)
         val itemStackMeta = itemStack.itemMeta
-        itemStackMeta.displayName(Component.text("Quartz Sword").decoration(TextDecoration.ITALIC, false))
+        itemStackMeta.displayName(Component.text("Quartz Sword").color(NamedTextColor.WHITE).decoration(TextDecoration.ITALIC, false))
         itemStackMeta.rainbowQuartzId = key
         itemStack.itemMeta = itemStackMeta
 
@@ -71,7 +71,7 @@ class ItemBuilderTest {
 
         val itemStack = ItemStack(Material.LEATHER_LEGGINGS)
         val itemStackMeta = itemStack.itemMeta
-        itemStackMeta.displayName(Component.text("Fancy Pants").decoration(TextDecoration.ITALIC, true))
+        itemStackMeta.displayName(Component.text("Fancy Pants").color(NamedTextColor.WHITE).decoration(TextDecoration.ITALIC, true))
         itemStackMeta.rainbowQuartzId = key
         itemStack.itemMeta = itemStackMeta
 
