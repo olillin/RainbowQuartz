@@ -11,6 +11,7 @@ import org.bukkit.Material
 import org.bukkit.NamespacedKey
 import org.bukkit.attribute.Attribute
 import org.bukkit.attribute.AttributeModifier
+import org.bukkit.configuration.serialization.ConfigurationSerializable
 import org.bukkit.enchantments.Enchantment
 import org.bukkit.event.Event
 import org.bukkit.event.EventPriority
@@ -21,17 +22,42 @@ import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.ItemMeta
 import org.bukkit.persistence.PersistentDataType
 import org.bukkit.plugin.*
-import java.lang.reflect.Method
-import java.lang.reflect.Modifier
 
-class Item (val key: NamespacedKey, val result: ItemStack, val recipes: List<Recipe>) : Keyed {
+class Item (val key: NamespacedKey, val item: ItemStack, val recipes: List<Recipe>) : Keyed, ConfigurationSerializable {
     val handlers : MutableMap<Class<out Event>, HandlerList> = HashMap()
 
     init {
         // Set id
-        val meta = result.itemMeta
+        val meta = item.itemMeta
         meta.rainbowQuartzId = key
-        result.itemMeta = meta
+        item.itemMeta = meta
+    }
+
+    companion object {
+//        fun deserialize(args: Map<String, Any>): Item {
+//            val key = NamespacedKey.fromString(args["id"] as String)!!
+//            val itemStack = ItemStack.deserialize(args["item"] as Map<String, Any>)
+//            val builder = Item.ItemBuilder(key,  itemStack)
+//            for (recipeArgs in args["recipes"] as List<Map<String, Any>>) {
+//                val type = recipeArgs["type"]
+//                val recipeType = recipeTypes.first{ t -> t.suffix == type }
+//                val recipe = recipeType.deserialize()
+//                builder.addRecipe(recipe)
+//            }
+//            return builder.build()
+//        }
+
+        private val recipeTypes: List<Class<out Recipe>>
+            get() = listOf(
+                dev.hoodieboi.rainbowquartz.craft.BlastingRecipe::class.java,
+                dev.hoodieboi.rainbowquartz.craft.CampfireRecipe::class.java,
+                dev.hoodieboi.rainbowquartz.craft.FurnaceRecipe::class.java,
+                dev.hoodieboi.rainbowquartz.craft.ShapedRecipe::class.java,
+                dev.hoodieboi.rainbowquartz.craft.ShapelessRecipe::class.java,
+                dev.hoodieboi.rainbowquartz.craft.SmithingTransformRecipe::class.java,
+                dev.hoodieboi.rainbowquartz.craft.SmokingRecipe::class.java,
+                dev.hoodieboi.rainbowquartz.craft.StonecuttingRecipe::class.java
+            )
     }
 
     /**
@@ -131,13 +157,31 @@ class Item (val key: NamespacedKey, val result: ItemStack, val recipes: List<Rec
     }
 
     override fun toString(): String {
-        return "Item($key){material=${result.type}}"
+        return "Item($key){material=${item.type}}"
+    }
+
+    override fun serialize(): MutableMap<String, Any> {
+        val out = HashMap<String, Any>()
+
+        out["item"] = item
+
+        if (recipes.isNotEmpty()) {
+            val recipesMap = HashMap<String, Any>()
+
+            for (recipe in recipes) {
+                recipesMap[recipe.key(this).toString()] = recipe
+            }
+
+            out["recipes"] = recipesMap
+        }
+
+        return out
     }
 
     override fun equals(other: Any?): Boolean {
         if (other !is Item) return false
         return key.equals(other.key)
-                && result.equals(other.result)
+                && item.equals(other.item)
                 && recipes.equals(other.recipes)
     }
 

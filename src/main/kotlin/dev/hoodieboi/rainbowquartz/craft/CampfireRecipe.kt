@@ -2,13 +2,13 @@ package dev.hoodieboi.rainbowquartz.craft
 
 import dev.hoodieboi.rainbowquartz.item.Item
 import org.bukkit.Material
-import org.bukkit.NamespacedKey
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.RecipeChoice
-import org.bukkit.inventory.RecipeChoice.MaterialChoice
 import org.bukkit.inventory.RecipeChoice.ExactChoice
+import org.bukkit.inventory.RecipeChoice.MaterialChoice
 
 class CampfireRecipe(input: RecipeChoice) : CookingRecipe(input) {
+    override val suffix = "campfire"
     init {
         cookTime = 600
     }
@@ -18,8 +18,8 @@ class CampfireRecipe(input: RecipeChoice) : CookingRecipe(input) {
 
     override fun toBukkitRecipe(item: Item): org.bukkit.inventory.CampfireRecipe {
         return org.bukkit.inventory.CampfireRecipe(
-            NamespacedKey.fromString(item.key.toString() + ".campfire")!!,
-            item.result,
+            key(item),
+            item.item,
             input,
             exp,
             cookTime

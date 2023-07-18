@@ -9,6 +9,7 @@ import org.bukkit.inventory.RecipeChoice.MaterialChoice
 import org.bukkit.inventory.RecipeChoice.ExactChoice
 
 class SmokingRecipe(input: RecipeChoice) : CookingRecipe(input) {
+    override val suffix = "smoking"
     init {
         cookTime = 100
     }
@@ -18,13 +19,23 @@ class SmokingRecipe(input: RecipeChoice) : CookingRecipe(input) {
 
     override fun toBukkitRecipe(item: Item): org.bukkit.inventory.SmokingRecipe {
         val recipe = org.bukkit.inventory.SmokingRecipe(
-            NamespacedKey.fromString(item.key.toString() + ".smoking")!!,
-            item.result,
+            key(item),
+            item.item,
             input,
             exp,
             cookTime
         )
         recipe.group = group
         return recipe
+    }
+
+    override fun serialize(): MutableMap<String, Any> {
+        return mutableMapOf(
+            "type" to "smoking",
+            "group" to group,
+            "input" to input,
+            "exp" to exp,
+            "cookTime" to cookTime
+        )
     }
 }

@@ -8,13 +8,14 @@ import org.bukkit.inventory.RecipeChoice
 import org.bukkit.inventory.RecipeChoice.MaterialChoice
 import org.bukkit.inventory.RecipeChoice.ExactChoice
 
-class ShapelessRecipe : Recipe {
+class ShapelessRecipe : Recipe() {
+    override val suffix = "shapeless"
     val ingredients: MutableList<RecipeChoice> = ArrayList()
     var group: String = ""
     override fun toBukkitRecipe(item: Item): org.bukkit.inventory.ShapelessRecipe {
         val recipe = org.bukkit.inventory.ShapelessRecipe(
-            NamespacedKey.fromString(item.key.toString() + ".shapeless")!!,
-            item.result
+            key(item),
+            item.item
         )
         recipe.group = group
 
@@ -81,5 +82,13 @@ class ShapelessRecipe : Recipe {
     fun setGroup(group: String): ShapelessRecipe {
         this.group = group
         return this
+    }
+
+    override fun serialize(): MutableMap<String, Any> {
+        return mutableMapOf(
+            "type" to suffix,
+            "group" to group,
+            "ingredients" to ingredients
+        )
     }
 }

@@ -4,8 +4,9 @@ import dev.hoodieboi.rainbowquartz.craft.*
 import dev.hoodieboi.rainbowquartz.event.EventDispatcher
 import dev.hoodieboi.rainbowquartz.item.Item.ItemBuilder
 import dev.hoodieboi.rainbowquartz.item.ItemManager
-import dev.hoodieboi.rainbowquartz.plugin.command.GetItem
-import dev.hoodieboi.rainbowquartz.plugin.command.ViewItem
+import dev.hoodieboi.rainbowquartz.plugin.command.GetItemCommand
+import dev.hoodieboi.rainbowquartz.plugin.command.MenuCommand
+import dev.hoodieboi.rainbowquartz.plugin.command.ViewItemCommand
 import me.lucko.commodore.Commodore
 import me.lucko.commodore.CommodoreProvider
 import me.lucko.commodore.file.CommodoreFileReader
@@ -19,6 +20,7 @@ import org.bukkit.NamespacedKey
 import org.bukkit.attribute.Attribute
 import org.bukkit.attribute.AttributeModifier
 import org.bukkit.command.PluginCommand
+import org.bukkit.command.TabExecutor
 import org.bukkit.enchantments.Enchantment
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
@@ -49,11 +51,19 @@ open class RainbowQuartz : JavaPlugin(), Listener {
     private fun registerCommands() {
 
         val getItemCommand = server.getPluginCommand("getitem")
-        getItemCommand!!.setExecutor(GetItem())
-        getItemCommand.tabCompleter = GetItem()
+        var executor: TabExecutor = GetItemCommand()
+        getItemCommand!!.setExecutor(executor)
+        getItemCommand.tabCompleter = executor
+
         val viewItemCommand = server.getPluginCommand("viewitem")
-        viewItemCommand!!.setExecutor(ViewItem())
-        viewItemCommand.tabCompleter = ViewItem()
+        executor = ViewItemCommand()
+        viewItemCommand!!.setExecutor(executor)
+        viewItemCommand.tabCompleter = executor
+
+        val menuCommand = server.getPluginCommand("rainbowquartz")
+        executor = MenuCommand()
+        menuCommand!!.setExecutor(executor)
+        menuCommand.tabCompleter = executor
 
         // check if brigadier is supported by server
         if (CommodoreProvider.isSupported()) {
@@ -62,8 +72,8 @@ open class RainbowQuartz : JavaPlugin(), Listener {
             val commodore = CommodoreProvider.getCommodore(this)
 
             // register completions for each command
-            registerCompletionsFromFile(commodore, getItemCommand)
-            registerCompletionsFromFile(commodore, viewItemCommand)
+            registerCompletionsFromFile(commodore, menuCommand)
+            registerCompletionsFromFile(commodore, menuCommand)
         }
     }
 

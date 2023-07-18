@@ -9,13 +9,15 @@ import org.bukkit.inventory.RecipeChoice.MaterialChoice
 import org.bukkit.inventory.RecipeChoice.ExactChoice
 
 class FurnaceRecipe(input: RecipeChoice) : CookingRecipe(input) {
+    override val suffix: String = "furnace"
     constructor(input: Material) : this(MaterialChoice(input))
+
     constructor(input: ItemStack) : this(ExactChoice(input))
 
     override fun toBukkitRecipe(item: Item): org.bukkit.inventory.FurnaceRecipe {
         val recipe = org.bukkit.inventory.FurnaceRecipe(
-            NamespacedKey.fromString(item.key.toString() + ".furnace")!!,
-            item.result,
+            key(item),
+            item.item,
             input,
             exp,
             cookTime

@@ -8,11 +8,13 @@ import org.bukkit.inventory.RecipeChoice
 import org.bukkit.inventory.RecipeChoice.MaterialChoice
 import org.bukkit.inventory.RecipeChoice.ExactChoice
 
-class StonecuttingRecipe(var input: RecipeChoice) : Recipe {
+class StonecuttingRecipe(var input: RecipeChoice) : Recipe() {
+    override val suffix = "stonecutting"
+
     override fun toBukkitRecipe(item: Item): org.bukkit.inventory.StonecuttingRecipe {
         return org.bukkit.inventory.StonecuttingRecipe(
-            NamespacedKey.fromString(item.key.toString() + ".stonecutting")!!,
-            item.result,
+            key(item),
+            item.item,
             input
         )
     }
@@ -26,5 +28,12 @@ class StonecuttingRecipe(var input: RecipeChoice) : Recipe {
     }
     fun setInput(input: ItemStack): StonecuttingRecipe {
         return setInput(ExactChoice(input))
+    }
+
+    override fun serialize(): MutableMap<String, Any> {
+        return mutableMapOf(
+            "type" to suffix,
+            "input" to input
+        )
     }
 }

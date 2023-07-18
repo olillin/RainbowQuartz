@@ -17,6 +17,11 @@ commands:
     description: View any custom item
     usage: /getitem <item>
     permission: rainbowquartz.command.viewitem
+  rainbowquartz:
+    description: Open the main menu
+    usage: /rainbowquartz
+    aliases: raq
+    permission: rainbowquartz.command
 
 permissions:
   rainbowquartz.command.getitem:
