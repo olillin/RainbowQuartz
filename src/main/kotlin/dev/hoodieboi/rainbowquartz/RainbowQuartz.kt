@@ -7,8 +7,7 @@ import dev.hoodieboi.rainbowquartz.item.ItemManager
 import dev.hoodieboi.rainbowquartz.plugin.command.GetItemCommand
 import dev.hoodieboi.rainbowquartz.plugin.command.MenuCommand
 import dev.hoodieboi.rainbowquartz.plugin.command.ViewItemCommand
-import dev.hoodieboi.rainbowquartz.plugin.gui.GuiEventListener
-import dev.hoodieboi.rainbowquartz.plugin.gui.MenuManager
+import dev.hoodieboi.rainbowquartz.plugin.gui.GuiEventDispatcher
 import me.lucko.commodore.Commodore
 import me.lucko.commodore.CommodoreProvider
 import me.lucko.commodore.file.CommodoreFileReader
@@ -17,7 +16,6 @@ import net.kyori.adventure.text.format.NamedTextColor.LIGHT_PURPLE
 import net.kyori.adventure.text.format.NamedTextColor.YELLOW
 import net.kyori.adventure.text.format.TextColor
 import net.kyori.adventure.text.format.TextDecoration
-import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
 import org.bukkit.attribute.Attribute
@@ -41,13 +39,13 @@ open class RainbowQuartz : JavaPlugin(), Listener {
 
     companion object {
         val itemManager: ItemManager = ItemManager()
-        lateinit var menuManager: MenuManager
+        lateinit var guiEventDispatcher: GuiEventDispatcher
     }
 
     override fun onEnable() {
         server.pluginManager.registerEvents(EventDispatcher(), this)
-        server.pluginManager.registerEvents(GuiEventListener(), this)
-        menuManager = MenuManager(this)
+        guiEventDispatcher = GuiEventDispatcher(this)
+        guiEventDispatcher.start()
         registerCommands()
 
         generateTestResources()
@@ -67,7 +65,7 @@ open class RainbowQuartz : JavaPlugin(), Listener {
         viewItemCommand.tabCompleter = executor
 
         val menuCommand = server.getPluginCommand("rainbowquartz")
-        executor = MenuCommand()
+        executor = MenuCommand(this)
         menuCommand!!.setExecutor(executor)
         menuCommand.tabCompleter = executor
 
@@ -87,7 +85,7 @@ open class RainbowQuartz : JavaPlugin(), Listener {
         val uri = "commodore/${command.name}.commodore"
         val file = getResource(uri)
         if (file == null) {
-            Bukkit.getLogger().warning("Unable to register completions for command ${command.name}: Could not find file $uri")
+            logger.warning("Unable to register completions for command ${command.name}: Could not find file $uri")
         }
         commodore.register(command, CommodoreFileReader.INSTANCE.parse<Any>(file))
     }
@@ -106,7 +104,7 @@ open class RainbowQuartz : JavaPlugin(), Listener {
                 .setIngredient('S', Material.STICK)
             ).build())
 
-        itemManager.registerItem(ItemBuilder(NamespacedKey.minecraft("super_potato"), Material.BAKED_POTATO, 4)
+        itemManager.registerItem(ItemBuilder(NamespacedKey.minecraft("super_potato"), Material.BAKED_POTATO)
             .setName(text("Super Potato").color(LIGHT_PURPLE).decoration(TextDecoration.ITALIC, false))
             .addRecipe(ShapedRecipe("PP", "PP")
                 .setIngredient('P', Material.POTATO)

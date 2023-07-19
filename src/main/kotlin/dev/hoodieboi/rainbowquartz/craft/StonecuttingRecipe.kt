@@ -2,11 +2,10 @@ package dev.hoodieboi.rainbowquartz.craft
 
 import dev.hoodieboi.rainbowquartz.item.Item
 import org.bukkit.Material
-import org.bukkit.NamespacedKey
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.RecipeChoice
-import org.bukkit.inventory.RecipeChoice.MaterialChoice
 import org.bukkit.inventory.RecipeChoice.ExactChoice
+import org.bukkit.inventory.RecipeChoice.MaterialChoice
 
 class StonecuttingRecipe(var input: RecipeChoice) : Recipe() {
     override val suffix = "stonecutting"

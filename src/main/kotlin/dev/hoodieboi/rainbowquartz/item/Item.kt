@@ -180,9 +180,9 @@ class Item (val key: NamespacedKey, val item: ItemStack, val recipes: List<Recip
 
     override fun equals(other: Any?): Boolean {
         if (other !is Item) return false
-        return key.equals(other.key)
-                && item.equals(other.item)
-                && recipes.equals(other.recipes)
+        return key == other.key
+                && item == other.item
+                && recipes == other.recipes
     }
 
     override fun hashCode(): Int {
@@ -192,11 +192,10 @@ class Item (val key: NamespacedKey, val item: ItemStack, val recipes: List<Recip
         return result
     }
 
-    class ItemBuilder(val key: NamespacedKey, private val result: ItemStack) {
-        private val recipes: MutableList<Recipe>
-
-        constructor(key: NamespacedKey, material: Material, amount: Int): this(key, ItemStack(material, amount))
+    class ItemBuilder(val key: NamespacedKey, private val result: ItemStack, private val recipes: MutableList<Recipe>) {
+        constructor(key: NamespacedKey, itemStack: ItemStack): this(key, itemStack, mutableListOf())
         constructor(key: NamespacedKey, material: Material) : this(key, ItemStack(material))
+        constructor(item: Item) : this(item.key, item.item, item.recipes.toMutableList())
 
         fun getMaterial() = result.type
         fun setMaterial(material: Material): ItemBuilder {
@@ -359,9 +358,6 @@ class Item (val key: NamespacedKey, val item: ItemStack, val recipes: List<Recip
             return this
         }
 
-        init {
-            recipes = ArrayList()
-        }
         fun build(): Item {
             return Item(key, result, recipes)
         }

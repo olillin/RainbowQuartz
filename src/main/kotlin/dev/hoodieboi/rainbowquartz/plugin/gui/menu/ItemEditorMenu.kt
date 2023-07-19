@@ -10,48 +10,48 @@ import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
 import org.bukkit.entity.HumanEntity
+import org.bukkit.event.EventHandler
 import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.PlayerInventory
 import org.bukkit.plugin.Plugin
 import kotlin.math.ceil
 
-class ItemEditorMenu(val plugin: Plugin, override val id: Int) : Menu() {
-    override fun showMenu(viewer: HumanEntity) {
-        showMenu(viewer, 0)
-    }
+class ItemEditorMenu(val viewer: HumanEntity, private val plugin: Plugin, val page: Int) : Menu() {
+    constructor(viewer: HumanEntity, plugin: Plugin) : this(viewer, plugin, 0)
 
-    fun showMenu(viewer: HumanEntity, page: Int) {
-        val inventory = Bukkit.createInventory(viewer, 54, title("Item Editor"))
+    override val inventory: Inventory
+    init {
+        inventory = Bukkit.createInventory(viewer, 54, Component.text("Item Editor"))
 
         // Stationary icons
         inventory.setItem(0, Item.ItemBuilder(NamespacedKey(plugin, "create_item"), Material.NETHER_STAR)
             .setName(Component.text("New item").color(NamedTextColor.AQUA))
             .addLore("Create a new Item")
             .build().item)
-        inventory.setItem(1, EMPTY_ITEM)
-        inventory.setItem(9, EMPTY_ITEM)
-        inventory.setItem(10, EMPTY_ITEM)
+        inventory.setItem(1, EMPTY_PANEL)
+        inventory.setItem(9, EMPTY_PANEL)
+        inventory.setItem(10, EMPTY_PANEL)
         inventory.setItem(18, Item.ItemBuilder(NamespacedKey(plugin, "search"), Material.OAK_SIGN)
             .setName(Component.text("Search").color(NamedTextColor.LIGHT_PURPLE))
             .addLore("Find an item by id, name,")
             .addLore("item type or namespace")
             .build().item)
-        inventory.setItem(19, EMPTY_ITEM)
-        inventory.setItem(27, EMPTY_ITEM)
-        inventory.setItem(28, EMPTY_ITEM)
-        inventory.setItem(36, EMPTY_ITEM)
-        inventory.setItem(37, EMPTY_ITEM)
+        inventory.setItem(19, EMPTY_PANEL)
+        inventory.setItem(27, EMPTY_PANEL)
+        inventory.setItem(28, EMPTY_PANEL)
+        inventory.setItem(36, EMPTY_PANEL)
+        inventory.setItem(37, EMPTY_PANEL)
         inventory.setItem(45, Item.ItemBuilder(NamespacedKey(plugin, "back"), Material.ARROW)
             .setName(Component.text("Back").color(NamedTextColor.RED))
             .build().item)
-        inventory.setItem(46, EMPTY_ITEM)
+        inventory.setItem(46, EMPTY_PANEL)
 
         // Paginator
         val paginatorWidth = 6
         val paginatorHeight = 6
         val paginatorVolume = paginatorWidth * paginatorHeight
-        render_paginator(inventory, page, 2, 0, paginatorWidth, paginatorHeight)
+        renderPaginator(inventory, page, 2, 0, paginatorWidth, paginatorHeight)
         val itemCount = RainbowQuartz.itemManager.itemKeys.size
         val pages = ceil(itemCount.toDouble() / paginatorVolume).toInt()
         val itemsShown = if(page < pages-1) paginatorVolume else itemCount % paginatorVolume
@@ -61,7 +61,7 @@ class ItemEditorMenu(val plugin: Plugin, override val id: Int) : Menu() {
             .addLore(Component.text("Page ")
                 .append(Component.text("$page"))
                 .append(Component.text("/$pages"))
-            ).build().item else EMPTY_ITEM)
+            ).build().item else EMPTY_PANEL)
         inventory.setItem(17, Item.ItemBuilder(NamespacedKey(plugin, "page_indicator"), Material.PAPER)
             .setName(Component.text("Page ${page+1}/$pages").color(NamedTextColor.YELLOW))
             .addLore("Showing $itemsShown/$itemCount items")
@@ -71,15 +71,15 @@ class ItemEditorMenu(val plugin: Plugin, override val id: Int) : Menu() {
             .addLore(Component.text("Page ")
                 .append(Component.text("${page+2}"))
                 .append(Component.text("/$pages"))
-            ).build().item else EMPTY_ITEM)
-        inventory.setItem(35, EMPTY_ITEM)
-        inventory.setItem(44, EMPTY_ITEM)
-        inventory.setItem(53, EMPTY_ITEM)
+            ).build().item else EMPTY_PANEL)
+        inventory.setItem(35, EMPTY_PANEL)
+        inventory.setItem(44, EMPTY_PANEL)
+        inventory.setItem(53, EMPTY_PANEL)
 
         viewer.openInventory(inventory)
     }
 
-    fun render_paginator(inventory: Inventory, page: Int, x: Int, y: Int, width: Int, height: Int) {
+    private fun renderPaginator(inventory: Inventory, page: Int, x: Int, y: Int, width: Int, height: Int) {
         val iterator = RainbowQuartz.itemManager.itemKeys.iterator()
         // Skip hidden
         repeat (page * width * height) {
@@ -99,21 +99,38 @@ class ItemEditorMenu(val plugin: Plugin, override val id: Int) : Menu() {
         }
     }
 
-    override fun onClick(event: InventoryClickEvent) {
+    @EventHandler
+    fun onClick(event: InventoryClickEvent) {
+        event.isCancelled = true
+        if (event.currentItem == null) return
         // Ignore player inventory
-        if (event.clickedInventory is PlayerInventory) return
+        if (event.clickedInventory is PlayerInventory) {
+            // Allow player inventory manipulation
+            if (!event.isShiftClick) {
+                event.isCancelled = false
+            }
+            return
+        }
+
         event.isCancelled = true
 
-        val item = event.inventory.getItem(event.slot) ?: return
+        val item = event.currentItem ?: return
         val id = item.itemMeta?.rainbowQuartzId ?: return
-        event.whoClicked.sendMessage("ID: $id")
+        event.whoClicked.sendMessage(Component.text("ID: $id"))
 
-        if (id.key == "back") {
-            RainbowQuartz.menuManager.MAIN_MENU.showMenu(event.whoClicked)
-            return
-        } else if (id.key == "next_page" || id.key == "previous_page") {
-            val page = (item.itemMeta.lore()!![0].children()[0] as TextComponent).content().toInt() - 1
-            RainbowQuartz.menuManager.ITEM_EDITOR.showMenu(event.whoClicked, page)
+        when (id.key) {
+            "back" -> {
+                MainMenu(event.whoClicked, plugin)
+                return
+            }
+            "next_page", "previous_page" -> {
+                val page = (item.itemMeta.lore()!![0].children()[0] as TextComponent).content().toInt() - 1
+                ItemEditorMenu(event.whoClicked, plugin, page)
+            }
+            else -> {
+                val rainbowQuartzItem = RainbowQuartz.itemManager.getItem(item) ?: return
+                EditItemMenu(event.whoClicked, plugin, Item.ItemBuilder(rainbowQuartzItem))
+            }
         }
     }
 }

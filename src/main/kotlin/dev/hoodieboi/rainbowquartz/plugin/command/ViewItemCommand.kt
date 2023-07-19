@@ -51,7 +51,7 @@ class ViewItemCommand : TabExecutor {
         command: Command,
         label: String,
         args: Array<out String>
-    ): MutableList<String>? {
+    ): MutableList<String> {
         return if (args.size == 1) {
             RainbowQuartz.itemManager.itemKeys.map{i -> i.toString()}.toMutableList()
         } else {
