@@ -23,8 +23,8 @@ import org.bukkit.inventory.meta.ItemMeta
 import org.bukkit.persistence.PersistentDataType
 import org.bukkit.plugin.*
 
-class Item (val key: NamespacedKey, val item: ItemStack, val recipes: List<Recipe>) : Keyed, ConfigurationSerializable {
-    val handlers : MutableMap<Class<out Event>, HandlerList> = HashMap()
+class Item(val key: NamespacedKey, val item: ItemStack, val recipes: List<Recipe>) : Keyed, ConfigurationSerializable {
+    val handlers: MutableMap<Class<out Event>, HandlerList> = HashMap()
 
     init {
         // Set id
@@ -34,6 +34,12 @@ class Item (val key: NamespacedKey, val item: ItemStack, val recipes: List<Recip
     }
 
     companion object {
+        fun formatName(name: Component?): Component? {
+            return name
+                ?.color(name.color() ?: NamedTextColor.WHITE)
+                ?.decorationIfAbsent(TextDecoration.ITALIC, TextDecoration.State.FALSE)
+        }
+
 //        fun deserialize(args: Map<String, Any>): Item {
 //            val key = NamespacedKey.fromString(args["id"] as String)!!
 //            val itemStack = ItemStack.deserialize(args["item"] as Map<String, Any>)
@@ -122,7 +128,15 @@ class Item (val key: NamespacedKey, val item: ItemStack, val recipes: List<Recip
         }
         val timedExecutor = TimedEventExecutor(executor, plugin, null, event) // Paper
 
-        getEventListeners(event).register(RegisteredListener(listener, timedExecutor, priority, plugin, ignoreCancelled))
+        getEventListeners(event).register(
+            RegisteredListener(
+                listener,
+                timedExecutor,
+                priority,
+                plugin,
+                ignoreCancelled
+            )
+        )
         return this
     }
 
@@ -143,8 +157,9 @@ class Item (val key: NamespacedKey, val item: ItemStack, val recipes: List<Recip
             return clazz
         } catch (e: NoSuchMethodException) {
             if (clazz.superclass != null
-                    && !clazz.superclass.equals(Event::javaClass)
-                    && Event::class.java.isAssignableFrom(clazz.superclass)) {
+                && !clazz.superclass.equals(Event::javaClass)
+                && Event::class.java.isAssignableFrom(clazz.superclass)
+            ) {
                 return getRegistrationClass(clazz.superclass.asSubclass(Event::class.java))
             } else {
                 throw IllegalPluginAccessException("Unable to find handler list for event ${clazz.getName()}. Static getHandlerList method required!")
@@ -193,39 +208,45 @@ class Item (val key: NamespacedKey, val item: ItemStack, val recipes: List<Recip
     }
 
     class ItemBuilder(val key: NamespacedKey, private val result: ItemStack, private val recipes: MutableList<Recipe>) {
-        constructor(key: NamespacedKey, itemStack: ItemStack): this(key, itemStack, mutableListOf())
+        constructor(key: NamespacedKey, itemStack: ItemStack) : this(key, itemStack, mutableListOf())
         constructor(key: NamespacedKey, material: Material) : this(key, ItemStack(material))
         constructor(item: Item) : this(item.key, item.item, item.recipes.toMutableList())
+        constructor(builder: ItemBuilder) : this(builder.key, builder.result, builder.recipes)
 
         fun getMaterial() = result.type
         fun setMaterial(material: Material): ItemBuilder {
             result.type = material
             return this
         }
+
         fun getAmount() = result.amount
         fun setAmount(amount: Int): ItemBuilder {
             result.amount = amount
             return this
         }
-        fun setName(name: Component): ItemBuilder {
-            // Non-italic by default
-            var displayName: Component = if (name.hasDecoration(TextDecoration.ITALIC)) {
-                name
-            } else {
-                name.decoration(TextDecoration.ITALIC, false)
-            }
-            // White by default
-            if (displayName.color() == null) {
-                displayName = displayName.color(NamedTextColor.WHITE)
-            }
+
+        fun getName(): Component? {
+            return result.itemMeta.displayName()
+        }
+
+        fun setName(name: Component?): ItemBuilder {
             // Modify item
             val itemMeta = result.itemMeta
-            itemMeta.displayName(displayName)
+            itemMeta.displayName(formatName(name))
             result.itemMeta = itemMeta
             return this
         }
+
         fun setName(name: String): ItemBuilder {
             return setName(Component.text(name))
+        }
+
+        fun hasName(): Boolean {
+            return getName() != null
+        }
+
+        fun getLore(): List<Component>? {
+            return result.itemMeta.lore()
         }
 
         fun addLore(vararg lore: Component): ItemBuilder {
@@ -279,6 +300,24 @@ class Item (val key: NamespacedKey, val item: ItemStack, val recipes: List<Recip
             return this
         }
 
+        fun hasLore(): Boolean {
+            return getLore() != null
+        }
+
+        fun getEnchants(): Map<Enchantment, Int> {
+            return result.itemMeta.enchants
+        }
+
+        /**
+         * Checks for the level of the specified enchantment.
+         *
+         * @param enchantment The enchantment to check.
+         * @return The level the specified enchantment has, or 0 if none.
+         */
+        fun getEnchantLevel(enchantment: Enchantment): Int {
+            return result.itemMeta.getEnchantLevel(enchantment)
+        }
+
         fun addEnchant(enchantment: Enchantment, level: Int): ItemBuilder {
             val itemMeta = result.itemMeta
             itemMeta.addEnchant(enchantment, level, true)
@@ -318,6 +357,10 @@ class Item (val key: NamespacedKey, val item: ItemStack, val recipes: List<Recip
             return this
         }
 
+        fun getItemFlags(): Set<ItemFlag> {
+            return result.itemMeta.itemFlags
+        }
+
         fun addItemFlags(vararg itemFlags: ItemFlag): ItemBuilder {
             val itemMeta = result.itemMeta
             itemMeta.addItemFlags(*itemFlags)
@@ -332,11 +375,19 @@ class Item (val key: NamespacedKey, val item: ItemStack, val recipes: List<Recip
             return this
         }
 
+        fun getUnbreakable(): Boolean {
+            return result.itemMeta.isUnbreakable
+        }
+
         fun setUnbreakable(unbreakable: Boolean): ItemBuilder {
             val itemMeta = result.itemMeta
             itemMeta.isUnbreakable = unbreakable
             result.itemMeta = itemMeta
             return this
+        }
+
+        fun getRecipes(): List<Recipe> {
+            return recipes.toList()
         }
 
         fun addRecipe(recipe: Recipe): ItemBuilder {

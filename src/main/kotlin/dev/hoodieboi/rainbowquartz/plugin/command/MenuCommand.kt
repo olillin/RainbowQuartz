@@ -16,7 +16,7 @@ class MenuCommand(private val plugin: Plugin) : TabExecutor {
             return true
         }
 
-        MainMenu(sender, plugin)
+        MainMenu(sender, plugin).show()
         return true
     }
 

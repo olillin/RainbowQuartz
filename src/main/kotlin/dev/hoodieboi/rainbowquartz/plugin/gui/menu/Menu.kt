@@ -6,15 +6,20 @@ import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.format.TextDecoration
 import org.bukkit.Material
+import org.bukkit.Sound
+import org.bukkit.SoundCategory
+import org.bukkit.entity.HumanEntity
 import org.bukkit.event.inventory.InventoryEvent
 import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.ItemStack
 
 abstract class Menu {
+    abstract val viewer: HumanEntity
     abstract val inventory: Inventory
 
-    init {
+    open fun show() {
         RainbowQuartz.guiEventDispatcher.registerMenu(this)
+        viewer.openInventory(inventory)
     }
 
     fun inView(event: InventoryEvent): Boolean {
@@ -40,4 +45,8 @@ abstract class Menu {
             return result
         }
     }
+}
+
+fun HumanEntity.playSound(sound: Sound) {
+    playSound(net.kyori.adventure.sound.Sound.sound(sound, SoundCategory.MASTER, 1.0f, 1.0f))
 }

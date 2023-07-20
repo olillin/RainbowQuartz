@@ -4,6 +4,10 @@ import com.destroystokyo.paper.event.block.AnvilDamagedEvent
 import com.destroystokyo.paper.event.executor.MethodHandleEventExecutor
 import com.destroystokyo.paper.event.inventory.PrepareResultEvent
 import dev.hoodieboi.rainbowquartz.plugin.gui.menu.Menu
+import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.format.NamedTextColor
+import org.bukkit.Bukkit
+import org.bukkit.event.Cancellable
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
@@ -14,7 +18,7 @@ import org.bukkit.plugin.Plugin
 import java.lang.reflect.InvocationTargetException
 import java.lang.reflect.Method
 
-final class GuiEventDispatcher(val plugin: Plugin) : Listener {
+class GuiEventDispatcher(val plugin: Plugin) : Listener {
     val supportedEvents = setOf(
         AnvilDamagedEvent::class,
         CraftItemEvent::class,
@@ -44,7 +48,10 @@ final class GuiEventDispatcher(val plugin: Plugin) : Listener {
                 eventType.java,
                 this,
                 EventPriority.HIGH,
-                MethodHandleEventExecutor(eventType.java, GuiEventDispatcher::class.java.getMethod("onEvent", InventoryEvent::class.java)),
+                MethodHandleEventExecutor(
+                    eventType.java,
+                    GuiEventDispatcher::class.java.getMethod("onEvent", InventoryEvent::class.java)
+                ),
                 plugin
             )
         }
@@ -56,6 +63,19 @@ final class GuiEventDispatcher(val plugin: Plugin) : Listener {
 
     @EventHandler
     fun onEvent(event: InventoryEvent) {
+        if (event is InventoryClickEvent && !event.isCancelled
+            && event !is InventoryClickLinkEvent
+            && setOf(
+                ClickType.LEFT,
+                ClickType.SHIFT_LEFT,
+                ClickType.RIGHT,
+                ClickType.SHIFT_RIGHT,
+                ClickType.DOUBLE_CLICK
+            ).contains(event.click)) {
+            try {
+                onEvent(InventoryClickLinkEvent(event))
+            } catch (_: IllegalArgumentException) {}
+        }
         val iterator = menus.iterator()
         while (iterator.hasNext()) {
             val menu = iterator.next()
@@ -64,17 +84,19 @@ final class GuiEventDispatcher(val plugin: Plugin) : Listener {
                 if (event is InventoryCloseEvent) {
                     iterator.remove()
                 }
+                break
             }
         }
     }
 
     fun invokeEvent(event: InventoryEvent, menu: Menu) {
+        if (event is Cancellable && event.isCancelled) return
         // Filter
-        val menuMethods = menu.javaClass.methods.filter{method ->
+        val menuMethods = menu::class.java.methods.filter { method ->
             method.isAnnotationPresent(EventHandler::class.java)
-                && method.parameters.map{p -> p.type} == listOf(event.javaClass)
+                    && method.parameters.map { p -> p.type } == listOf(event.javaClass)
         }
-        // Order by priority
+        // Categorize by priority
         val prioritizedMethods = HashMap<EventPriority, MutableList<Method>>()
         for (method in menuMethods) {
             val annotation = method.getAnnotation(EventHandler::class.java)!!
@@ -85,16 +107,18 @@ final class GuiEventDispatcher(val plugin: Plugin) : Listener {
                 prioritizedMethods[priority] = mutableListOf(method)
             }
         }
-        val priorities = prioritizedMethods.keys.toList().sortedByDescending{priority -> priority.slot}
+        val methods = prioritizedMethods.toList()
+            .sortedByDescending { (key, _) -> key.slot }
+            .map { pair -> pair.second }
+            .flatten()
         // Invoke handlers
-        for (priority in priorities) {
-            prioritizedMethods[priority]!!.forEach{method ->
-                try {
-                    method.invoke(menu, event)
-                } catch(e: InvocationTargetException) {
-                    plugin.logger.severe("Error occurred while processing event ${event.javaClass.name}: ${e.targetException.message}")
-                }
+        for (method in methods) {
+            try {
+                method.invoke(menu, event)
+            } catch (e: InvocationTargetException) {
+                plugin.logger.severe("Error occurred while passing event of type ${event.javaClass.name} to event handler ${method}: ${e.targetException.message}")
             }
+            if (event is Cancellable && event.isCancelled) break
         }
     }
 }
