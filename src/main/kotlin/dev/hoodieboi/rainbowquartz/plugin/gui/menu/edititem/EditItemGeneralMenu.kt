@@ -1,6 +1,6 @@
 package dev.hoodieboi.rainbowquartz.plugin.gui.menu.edititem
 
-import dev.hoodieboi.rainbowquartz.item.Item
+import dev.hoodieboi.rainbowquartz.item.ItemBuilder
 import dev.hoodieboi.rainbowquartz.plugin.gui.InventoryClickLinkEvent
 import dev.hoodieboi.rainbowquartz.plugin.gui.LinkItem
 import dev.hoodieboi.rainbowquartz.plugin.gui.enchanted
@@ -12,7 +12,7 @@ import org.bukkit.entity.HumanEntity
 import org.bukkit.event.EventHandler
 import org.bukkit.plugin.Plugin
 
-class EditItemGeneralMenu(viewer: HumanEntity, plugin: Plugin, builder: Item.ItemBuilder) :
+class EditItemGeneralMenu(viewer: HumanEntity, plugin: Plugin, builder: ItemBuilder) :
     EditItemMenu(viewer, plugin, builder) {
 
     init {

@@ -4,7 +4,6 @@ import be.seeseemelk.mockbukkit.MockBukkit
 import be.seeseemelk.mockbukkit.ServerMock
 import dev.hoodieboi.rainbowquartz.RainbowQuartz
 import dev.hoodieboi.rainbowquartz.craft.ShapedRecipe
-import dev.hoodieboi.rainbowquartz.item.Item.ItemBuilder
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
 import org.junit.jupiter.api.AfterEach

@@ -1,12 +1,11 @@
 package dev.hoodieboi.rainbowquartz.plugin.gui.menu
 
 import dev.hoodieboi.rainbowquartz.RainbowQuartz
-import dev.hoodieboi.rainbowquartz.item.Item
+import dev.hoodieboi.rainbowquartz.item.ItemBuilder
 import dev.hoodieboi.rainbowquartz.plugin.gui.InventoryClickLinkEvent
 import dev.hoodieboi.rainbowquartz.plugin.gui.LinkItem
 import dev.hoodieboi.rainbowquartz.plugin.gui.menu.edititem.EditItemGeneralMenu
 import net.kyori.adventure.text.Component
-import net.kyori.adventure.text.TextComponent
 import net.kyori.adventure.text.format.NamedTextColor
 import org.bukkit.Bukkit
 import org.bukkit.Material
@@ -137,7 +136,7 @@ class ItemEditorMenu(override val viewer: HumanEntity, private val plugin: Plugi
         val rainbowQuartzItem = RainbowQuartz.itemManager.getItem(item) ?: return
         event.isCancelled = true
         viewer.playSound(Sound.BLOCK_WOODEN_BUTTON_CLICK_ON)
-        EditItemGeneralMenu(event.whoClicked, plugin, Item.ItemBuilder(rainbowQuartzItem)).show()
+        EditItemGeneralMenu(event.whoClicked, plugin, ItemBuilder(rainbowQuartzItem)).show()
     }
 
     @EventHandler

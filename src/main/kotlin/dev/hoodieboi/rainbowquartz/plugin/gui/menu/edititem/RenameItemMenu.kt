@@ -2,13 +2,13 @@ package dev.hoodieboi.rainbowquartz.plugin.gui.menu.edititem
 
 import dev.hoodieboi.rainbowquartz.RainbowQuartz
 import dev.hoodieboi.rainbowquartz.item.Item
+import dev.hoodieboi.rainbowquartz.item.ItemBuilder
 import dev.hoodieboi.rainbowquartz.item.rainbowQuartzId
 import dev.hoodieboi.rainbowquartz.plugin.gui.menu.ImmutableMenu
 import dev.hoodieboi.rainbowquartz.plugin.gui.menu.playSound
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer
-import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.Sound
 import org.bukkit.entity.HumanEntity
@@ -22,7 +22,7 @@ import org.bukkit.inventory.AnvilInventory
 import org.bukkit.inventory.ItemStack
 import org.bukkit.plugin.Plugin
 
-class RenameItemMenu(override val viewer: HumanEntity, val plugin: Plugin, private val builder: Item.ItemBuilder) :
+class RenameItemMenu(override val viewer: HumanEntity, val plugin: Plugin, private val builder: ItemBuilder) :
     ImmutableMenu() {
     override lateinit var inventory: AnvilInventory
 
@@ -32,7 +32,7 @@ class RenameItemMenu(override val viewer: HumanEntity, val plugin: Plugin, priva
         inventory = viewer.openInventory.topInventory as AnvilInventory
         // Set item in first slot
         inventory.firstItem = if (builder.hasName()) {
-            Item.ItemBuilder(builder)
+            ItemBuilder(builder)
                 .setName(serializer.serialize(unformatName(builder.getName()!!)))
                 .build().item
         } else builder.build().item

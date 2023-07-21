@@ -1,7 +1,7 @@
 package dev.hoodieboi.rainbowquartz.plugin.gui.menu.edititem
 
 import dev.hoodieboi.rainbowquartz.RainbowQuartz
-import dev.hoodieboi.rainbowquartz.item.Item
+import dev.hoodieboi.rainbowquartz.item.ItemBuilder
 import dev.hoodieboi.rainbowquartz.item.rainbowQuartzId
 import dev.hoodieboi.rainbowquartz.plugin.gui.InventoryClickLinkEvent
 import dev.hoodieboi.rainbowquartz.plugin.gui.LinkItem
@@ -24,7 +24,7 @@ import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.ItemStack
 import org.bukkit.plugin.Plugin
 
-abstract class EditItemMenu(final override val viewer: HumanEntity, protected val plugin: Plugin, protected val builder: Item.ItemBuilder) : ImmutableMenu() {
+abstract class EditItemMenu(final override val viewer: HumanEntity, protected val plugin: Plugin, protected val builder: ItemBuilder) : ImmutableMenu() {
     final override val inventory: Inventory
 
     companion object {
@@ -129,10 +129,10 @@ abstract class EditItemMenu(final override val viewer: HumanEntity, protected va
 fun Component.removeStyle(): Component {
     var component = this.style(Style.empty())
     if (component is TranslatableComponent) {
-        val args = component.args().map { c -> c.removeStyle() }
+        val args = component.args().map { it.removeStyle() }
         component = component.args(args)
     }
-    val children = component.children().map { c -> c.removeStyle() }
+    val children = component.children().map { it.removeStyle() }
     component = component.children(children)
     return component
 }

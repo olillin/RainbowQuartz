@@ -61,7 +61,7 @@ class ShapedRecipe(vararg val pattern: String) : Recipe() {
             "type" to suffix,
             "group" to group,
             "pattern" to pattern,
-            "ingredients" to ingredients.map {entry -> entry.key.toString() to entry.value}
+            "ingredients" to ingredients.map { it.key.toString() to it.value }
         )
     }
 }

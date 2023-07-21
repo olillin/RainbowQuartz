@@ -2,7 +2,7 @@ package dev.hoodieboi.rainbowquartz
 
 import dev.hoodieboi.rainbowquartz.craft.*
 import dev.hoodieboi.rainbowquartz.event.EventDispatcher
-import dev.hoodieboi.rainbowquartz.item.Item.ItemBuilder
+import dev.hoodieboi.rainbowquartz.item.ItemBuilder
 import dev.hoodieboi.rainbowquartz.item.ItemManager
 import dev.hoodieboi.rainbowquartz.plugin.command.GetItemCommand
 import dev.hoodieboi.rainbowquartz.plugin.command.MenuCommand

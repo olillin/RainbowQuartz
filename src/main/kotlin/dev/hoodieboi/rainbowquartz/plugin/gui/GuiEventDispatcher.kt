@@ -94,7 +94,7 @@ class GuiEventDispatcher(val plugin: Plugin) : Listener {
         // Filter
         val menuMethods = menu::class.java.methods.filter { method ->
             method.isAnnotationPresent(EventHandler::class.java)
-                    && method.parameters.map { p -> p.type } == listOf(event.javaClass)
+                    && method.parameters.map { it.type } == listOf(event.javaClass)
         }
         // Categorize by priority
         val prioritizedMethods = HashMap<EventPriority, MutableList<Method>>()
@@ -109,7 +109,7 @@ class GuiEventDispatcher(val plugin: Plugin) : Listener {
         }
         val methods = prioritizedMethods.toList()
             .sortedByDescending { (key, _) -> key.slot }
-            .map { pair -> pair.second }
+            .map { it.second }
             .flatten()
         // Invoke handlers
         for (method in methods) {

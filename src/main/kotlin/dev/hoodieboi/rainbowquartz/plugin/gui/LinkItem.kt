@@ -72,9 +72,8 @@ object LinkItem {
 
     private fun decorateLore(lore: List<Component>?): List<Component>? {
         if (lore == null) return null
-        return lore.map{component ->
-            component
-                .color(component.color() ?: NamedTextColor.GRAY)
+        return lore.map {
+            it.color(it.color() ?: NamedTextColor.GRAY)
                 .decorationIfAbsent(TextDecoration.ITALIC, TextDecoration.State.FALSE)
         }
     }

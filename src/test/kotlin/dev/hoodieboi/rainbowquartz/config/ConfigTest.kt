@@ -3,7 +3,7 @@ package dev.hoodieboi.rainbowquartz.config
 import be.seeseemelk.mockbukkit.MockBukkit
 import be.seeseemelk.mockbukkit.ServerMock
 import dev.hoodieboi.rainbowquartz.RainbowQuartz
-import dev.hoodieboi.rainbowquartz.item.Item
+import dev.hoodieboi.rainbowquartz.item.ItemBuilder
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
 import org.junit.jupiter.api.AfterEach
@@ -31,7 +31,7 @@ class ConfigTest {
 
     @Test
     fun serializeItem() {
-        val item = Item.ItemBuilder(key, Material.IRON_SWORD).build()
+        val item = ItemBuilder(key, Material.IRON_SWORD).build()
         assertDoesNotThrow {
             println(item.serialize())
         }
