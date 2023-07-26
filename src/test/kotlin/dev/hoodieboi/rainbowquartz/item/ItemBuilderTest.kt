@@ -38,50 +38,50 @@ class ItemBuilderTest {
 
     @Test
     fun createItemFromMaterial() {
-        val item = Item.ItemBuilder(key, Material.IRON_SWORD).build()
+        val item = ItemBuilder(key, Material.IRON_SWORD).build()
         assertEquals(Item(key, ItemStack(Material.IRON_SWORD, 1), ArrayList()), item)
     }
 
     @Test
     fun createItemFromItemStack() {
-        val item = Item.ItemBuilder(key, ItemStack(Material.POTATO, 8)).build()
+        val item = ItemBuilder(key, ItemStack(Material.POTATO, 8)).build()
         assertEquals(Item(key, ItemStack(Material.POTATO, 8), ArrayList()), item)
     }
 
     @Test
     fun setNameComponent() {
-        val item = Item.ItemBuilder(key, Material.IRON_SWORD)
+        val item = ItemBuilder(key, Material.IRON_SWORD)
                 .setName(Component.text("Quartz Sword"))
                 .build()
 
         val itemStack = ItemStack(Material.IRON_SWORD)
         val itemStackMeta = itemStack.itemMeta
-        itemStackMeta.displayName(Component.text("Quartz Sword").decoration(TextDecoration.ITALIC, false))
+        itemStackMeta.displayName(Component.text("Quartz Sword").color(NamedTextColor.WHITE).decoration(TextDecoration.ITALIC, false))
         itemStackMeta.rainbowQuartzId = key
         itemStack.itemMeta = itemStackMeta
 
-        assertEquals(itemStack, item.result)
+        assertEquals(itemStack, item.item)
     }
 
     @Test
     fun setNameComponentItalic() {
-        val item = Item.ItemBuilder(key, Material.LEATHER_LEGGINGS)
+        val item = ItemBuilder(key, Material.LEATHER_LEGGINGS)
             .setName(Component.text("Fancy Pants").decorate(TextDecoration.ITALIC))
             .build()
 
         val itemStack = ItemStack(Material.LEATHER_LEGGINGS)
         val itemStackMeta = itemStack.itemMeta
-        itemStackMeta.displayName(Component.text("Fancy Pants").decoration(TextDecoration.ITALIC, true))
+        itemStackMeta.displayName(Component.text("Fancy Pants").color(NamedTextColor.WHITE).decoration(TextDecoration.ITALIC, true))
         itemStackMeta.rainbowQuartzId = key
         itemStack.itemMeta = itemStackMeta
 
-        assertEquals(itemStack, item.result)
+        assertEquals(itemStack, item.item)
     }
 
     @Test
     fun setNameString() {
         val name = "Quartz Sword"
-        val item = Item.ItemBuilder(key, Material.IRON_SWORD)
+        val item = ItemBuilder(key, Material.IRON_SWORD)
             .setName(name)
             .build()
 
@@ -91,12 +91,12 @@ class ItemBuilderTest {
         itemStackMeta.rainbowQuartzId = key
         itemStack.itemMeta = itemStackMeta
 
-        assertEquals(itemStack, item.result)
+        assertEquals(itemStack, item.item)
     }
 
     @Test
     fun addEnchantDefaultLevel() {
-        val item = Item.ItemBuilder(key, Material.DIAMOND_SWORD)
+        val item = ItemBuilder(key, Material.DIAMOND_SWORD)
             .addEnchant(Enchantment.FIRE_ASPECT)
             .build()
 
@@ -106,12 +106,12 @@ class ItemBuilderTest {
         itemStackMeta.rainbowQuartzId = key
         itemStack.itemMeta = itemStackMeta
 
-        assertEquals(itemStack, item.result)
+        assertEquals(itemStack, item.item)
     }
 
     @Test
     fun addEnchantSuppliedLevel() {
-        val item = Item.ItemBuilder(key, Material.DIAMOND_SWORD)
+        val item = ItemBuilder(key, Material.DIAMOND_SWORD)
             .addEnchant(Enchantment.FIRE_ASPECT, 5)
             .build()
 
@@ -121,12 +121,12 @@ class ItemBuilderTest {
         itemStackMeta.rainbowQuartzId = key
         itemStack.itemMeta = itemStackMeta
 
-        assertEquals(itemStack, item.result)
+        assertEquals(itemStack, item.item)
     }
 
     @Test
     fun addEnchantUnsupportedItem() {
-        val item = Item.ItemBuilder(key, Material.STICK)
+        val item = ItemBuilder(key, Material.STICK)
             .addEnchant(Enchantment.KNOCKBACK, 5)
             .build()
 
@@ -136,12 +136,12 @@ class ItemBuilderTest {
         itemStackMeta.rainbowQuartzId = key
         itemStack.itemMeta = itemStackMeta
 
-        assertEquals(itemStack, item.result)
+        assertEquals(itemStack, item.item)
     }
 
     @Test
     fun removeEnchant() {
-        val item = Item.ItemBuilder(key, Material.DIAMOND_SWORD)
+        val item = ItemBuilder(key, Material.DIAMOND_SWORD)
             .addEnchant(Enchantment.FIRE_ASPECT)
             .addEnchant(Enchantment.DAMAGE_ALL, 2)
             .removeEnchant(Enchantment.FIRE_ASPECT)
@@ -153,13 +153,13 @@ class ItemBuilderTest {
         itemStackMeta.rainbowQuartzId = key
         itemStack.itemMeta = itemStackMeta
 
-        assertEquals(itemStack, item.result)
+        assertEquals(itemStack, item.item)
     }
 
     @Test
     fun addAttributeModifier() {
         val modifier = AttributeModifier(UUID.randomUUID().toString(), 2.0, AttributeModifier.Operation.ADD_NUMBER)
-        val item = Item.ItemBuilder(key, Material.GOLDEN_CHESTPLATE)
+        val item = ItemBuilder(key, Material.GOLDEN_CHESTPLATE)
             .addAttributeModifier(Attribute.GENERIC_KNOCKBACK_RESISTANCE, modifier)
             .build()
 
@@ -169,14 +169,14 @@ class ItemBuilderTest {
         itemStackMeta.rainbowQuartzId = key
         itemStack.itemMeta = itemStackMeta
 
-        assertEquals(itemStack, item.result)
+        assertEquals(itemStack, item.item)
     }
 
     @Test
     fun removeSpecificAttributeModifier() {
         val modifier1 = AttributeModifier(UUID.randomUUID().toString(), 2.0, AttributeModifier.Operation.ADD_NUMBER)
         val modifier2 = AttributeModifier(UUID.randomUUID().toString(), 3.0, AttributeModifier.Operation.ADD_NUMBER)
-        val item = Item.ItemBuilder(key, Material.NETHERITE_CHESTPLATE)
+        val item = ItemBuilder(key, Material.NETHERITE_CHESTPLATE)
             .addAttributeModifier(Attribute.GENERIC_ARMOR, modifier1)
             .addAttributeModifier(Attribute.GENERIC_ARMOR, modifier2)
             .removeAttributeModifier(Attribute.GENERIC_ARMOR, modifier1)
@@ -188,7 +188,7 @@ class ItemBuilderTest {
         itemStackMeta.rainbowQuartzId = key
         itemStack.itemMeta = itemStackMeta
 
-        assertEquals(itemStack, item.result)
+        assertEquals(itemStack, item.item)
     }
 
     @Test
@@ -196,7 +196,7 @@ class ItemBuilderTest {
         val modifier1 = AttributeModifier(UUID.randomUUID().toString(), 2.0, AttributeModifier.Operation.ADD_NUMBER)
         val modifier2 = AttributeModifier(UUID.randomUUID().toString(), 3.0, AttributeModifier.Operation.MULTIPLY_SCALAR_1)
         val modifier3 = AttributeModifier(UUID.randomUUID().toString(), 1.0, AttributeModifier.Operation.ADD_NUMBER)
-        val item = Item.ItemBuilder(key, Material.NETHERITE_CHESTPLATE)
+        val item = ItemBuilder(key, Material.NETHERITE_CHESTPLATE)
             .addAttributeModifier(Attribute.GENERIC_ARMOR, modifier1)
             .addAttributeModifier(Attribute.GENERIC_ARMOR, modifier2)
             .addAttributeModifier(Attribute.GENERIC_KNOCKBACK_RESISTANCE, modifier3)
@@ -209,12 +209,12 @@ class ItemBuilderTest {
         itemStackMeta.rainbowQuartzId = key
         itemStack.itemMeta = itemStackMeta
 
-        assertEquals(itemStack, item.result)
+        assertEquals(itemStack, item.item)
     }
 
     @Test
     fun addItemFlags() {
-        val item = Item.ItemBuilder(key, Material.GOLDEN_CHESTPLATE)
+        val item = ItemBuilder(key, Material.GOLDEN_CHESTPLATE)
             .addItemFlags(ItemFlag.HIDE_ENCHANTS, ItemFlag.HIDE_UNBREAKABLE)
             .build()
 
@@ -224,12 +224,12 @@ class ItemBuilderTest {
         itemStackMeta.rainbowQuartzId = key
         itemStack.itemMeta = itemStackMeta
 
-        assertEquals(itemStack, item.result)
+        assertEquals(itemStack, item.item)
     }
 
     @Test
     fun removeItemFlags() {
-        val item = Item.ItemBuilder(key, Material.GOLDEN_CHESTPLATE)
+        val item = ItemBuilder(key, Material.GOLDEN_CHESTPLATE)
             .addItemFlags(ItemFlag.HIDE_ENCHANTS, ItemFlag.HIDE_UNBREAKABLE)
             .removeItemFlags(ItemFlag.HIDE_ENCHANTS)
             .build()
@@ -241,12 +241,12 @@ class ItemBuilderTest {
         itemStackMeta.rainbowQuartzId = key
         itemStack.itemMeta = itemStackMeta
 
-        assertEquals(itemStack, item.result)
+        assertEquals(itemStack, item.item)
     }
 
     @Test
     fun makeUnbreakable() {
-        val item = Item.ItemBuilder(key, Material.GOLDEN_HOE)
+        val item = ItemBuilder(key, Material.GOLDEN_HOE)
             .setUnbreakable(true)
             .build()
 
@@ -256,12 +256,12 @@ class ItemBuilderTest {
         itemStackMeta.rainbowQuartzId = key
         itemStack.itemMeta = itemStackMeta
 
-        assertEquals(itemStack, item.result)
+        assertEquals(itemStack, item.item)
     }
 
     @Test
     fun makeBreakable() {
-        val item = Item.ItemBuilder(key, Material.GOLDEN_HOE)
+        val item = ItemBuilder(key, Material.GOLDEN_HOE)
             .setUnbreakable(true)
             .setUnbreakable(false)
             .build()
@@ -272,6 +272,6 @@ class ItemBuilderTest {
         itemStackMeta.rainbowQuartzId = key
         itemStack.itemMeta = itemStackMeta
 
-        assertEquals(itemStack, item.result)
+        assertEquals(itemStack, item.item)
     }
 }

@@ -15,7 +15,7 @@ import org.bukkit.command.CommandSender
 import org.bukkit.command.TabExecutor
 import org.bukkit.inventory.ItemStack
 
-class ViewItem : TabExecutor {
+class ViewItemCommand : TabExecutor {
     companion object {
         val completion: LiteralArgumentBuilder<String> = literal<String>("viewitem")
             .then(argument("item", word()))
@@ -37,7 +37,7 @@ class ViewItem : TabExecutor {
             return true
         }
 
-        val itemStack = ItemStack(item.result)
+        val itemStack = ItemStack(item.item)
         sender.sendMessage(text("Item Preview ").append(
                 itemStack.displayName()
                     .hoverEvent(itemStack)
@@ -51,9 +51,9 @@ class ViewItem : TabExecutor {
         command: Command,
         label: String,
         args: Array<out String>
-    ): MutableList<String>? {
+    ): MutableList<String> {
         return if (args.size == 1) {
-            RainbowQuartz.itemManager.itemKeys.map{i -> i.toString()}.toMutableList()
+            RainbowQuartz.itemManager.itemKeys.map { it.toString() }.toMutableList()
         } else {
             ArrayList()
         }

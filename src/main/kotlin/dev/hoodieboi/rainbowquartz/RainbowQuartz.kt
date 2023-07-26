@@ -3,10 +3,11 @@ package dev.hoodieboi.rainbowquartz
 import dev.hoodieboi.rainbowquartz.craft.*
 import dev.hoodieboi.rainbowquartz.event.EventDispatcher
 import dev.hoodieboi.rainbowquartz.event.handler.PotionEffectHandler
-import dev.hoodieboi.rainbowquartz.item.Item.ItemBuilder
+import dev.hoodieboi.rainbowquartz.item.ItemBuilder
 import dev.hoodieboi.rainbowquartz.item.ItemManager
-import dev.hoodieboi.rainbowquartz.plugin.command.GetItem
-import dev.hoodieboi.rainbowquartz.plugin.command.ViewItem
+import dev.hoodieboi.rainbowquartz.plugin.command.GetItemCommand
+import dev.hoodieboi.rainbowquartz.plugin.command.MenuCommand
+import dev.hoodieboi.rainbowquartz.plugin.command.ViewItemCommand
 import me.lucko.commodore.Commodore
 import me.lucko.commodore.CommodoreProvider
 import me.lucko.commodore.file.CommodoreFileReader
@@ -20,6 +21,7 @@ import org.bukkit.NamespacedKey
 import org.bukkit.attribute.Attribute
 import org.bukkit.attribute.AttributeModifier
 import org.bukkit.command.PluginCommand
+import org.bukkit.command.TabExecutor
 import org.bukkit.enchantments.Enchantment
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
@@ -38,10 +40,15 @@ open class RainbowQuartz : JavaPlugin(), Listener {
     companion object {
         val itemManager: ItemManager = ItemManager()
         lateinit var eventDispatcher: EventDispatcher
+        lateinit var guiEventDispatcher: GuiEventDispatcher
     }
 
     override fun onEnable() {
         eventDispatcher = EventDispatcher(server.pluginManager)
+        server.pluginManager.registerEvents(EventDispatcher(), this)
+        guiEventDispatcher = GuiEventDispatcher(this)
+        guiEventDispatcher.start()
+
         registerCommands()
 
         generateTestResources()
@@ -51,11 +58,19 @@ open class RainbowQuartz : JavaPlugin(), Listener {
     private fun registerCommands() {
 
         val getItemCommand = server.getPluginCommand("getitem")
-        getItemCommand!!.setExecutor(GetItem())
-        getItemCommand.tabCompleter = GetItem()
+        var executor: TabExecutor = GetItemCommand()
+        getItemCommand!!.setExecutor(executor)
+        getItemCommand.tabCompleter = executor
+
         val viewItemCommand = server.getPluginCommand("viewitem")
-        viewItemCommand!!.setExecutor(ViewItem())
-        viewItemCommand.tabCompleter = ViewItem()
+        executor = ViewItemCommand()
+        viewItemCommand!!.setExecutor(executor)
+        viewItemCommand.tabCompleter = executor
+
+        val menuCommand = server.getPluginCommand("rainbowquartz")
+        executor = MenuCommand(this)
+        menuCommand!!.setExecutor(executor)
+        menuCommand.tabCompleter = executor
 
         // check if brigadier is supported by server
         if (CommodoreProvider.isSupported()) {
@@ -69,9 +84,12 @@ open class RainbowQuartz : JavaPlugin(), Listener {
         }
     }
 
-    @Throws(IOException::class)
     private fun registerCompletionsFromFile(commodore: Commodore, command: PluginCommand) {
-        val file = getResource("commodore/${command.name}.commodore")
+        val uri = "commodore/${command.name}.commodore"
+        val file = getResource(uri)
+        if (file == null) {
+            logger.warning("Unable to register completions for command ${command.name}: Could not find file $uri")
+        }
         commodore.register(command, CommodoreFileReader.INSTANCE.parse<Any>(file))
     }
 
@@ -89,7 +107,7 @@ open class RainbowQuartz : JavaPlugin(), Listener {
                 .setIngredient('S', Material.STICK)
             ).build())
 
-        itemManager.registerItem(ItemBuilder(NamespacedKey.minecraft("super_potato"), Material.BAKED_POTATO, 4)
+        itemManager.registerItem(ItemBuilder(NamespacedKey.minecraft("super_potato"), Material.BAKED_POTATO)
             .setName(text("Super Potato").color(LIGHT_PURPLE).decoration(TextDecoration.ITALIC, false))
             .addRecipe(ShapedRecipe("PP", "PP")
                 .setIngredient('P', Material.POTATO)

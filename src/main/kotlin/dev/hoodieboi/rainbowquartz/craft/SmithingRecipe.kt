@@ -6,7 +6,8 @@ import org.bukkit.inventory.RecipeChoice
 import org.bukkit.inventory.RecipeChoice.MaterialChoice
 import org.bukkit.inventory.RecipeChoice.ExactChoice
 
-abstract class SmithingRecipe(var base: RecipeChoice, var addition: RecipeChoice) : Recipe {
+abstract class SmithingRecipe(var base: RecipeChoice, var addition: RecipeChoice) : Recipe() {
+    override val suffix = "smithing"
     var group: String = ""
 
     fun setBase(base: RecipeChoice): SmithingRecipe {

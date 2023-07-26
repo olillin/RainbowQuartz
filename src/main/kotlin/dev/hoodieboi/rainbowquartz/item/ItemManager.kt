@@ -17,7 +17,7 @@ class ItemManager {
     @Throws(ItemAlreadyRegisteredException::class)
     fun registerItem(item: Item) {
         if (items.containsKey(item.key)) {
-            throw ItemAlreadyRegisteredException(item)
+            throw ItemAlreadyRegisteredException("${item.key} is already registered.")
         }
 
         items[item.key] = item
@@ -25,6 +25,14 @@ class ItemManager {
         for (recipe in item.recipes) {
             Bukkit.addRecipe(recipe.toBukkitRecipe(item))
         }
+    }
+
+    fun unregisterItem(key: NamespacedKey) {
+        val item = items[key] ?: return
+        for (recipe in item.recipes) {
+            Bukkit.removeRecipe(recipe.key(item))
+        }
+        items.remove(key)
     }
 
     fun getItem(key: NamespacedKey): Item? {
@@ -44,5 +52,5 @@ class ItemManager {
         items.clear()
     }
 
-    class ItemAlreadyRegisteredException(item: Item) : Exception("Item ${item.key} has already been registered.")
+    class ItemAlreadyRegisteredException(message: String) : Exception(message)
 }

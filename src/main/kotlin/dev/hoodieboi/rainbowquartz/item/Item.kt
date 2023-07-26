@@ -14,6 +14,7 @@ import org.bukkit.Material
 import org.bukkit.NamespacedKey
 import org.bukkit.attribute.Attribute
 import org.bukkit.attribute.AttributeModifier
+import org.bukkit.configuration.serialization.ConfigurationSerializable
 import org.bukkit.enchantments.Enchantment
 import org.bukkit.event.Event
 import org.bukkit.event.EventPriority
@@ -27,14 +28,47 @@ import org.bukkit.plugin.*
 import java.lang.reflect.Method
 import java.util.function.Function
 
-class Item (val key: NamespacedKey, val result: ItemStack, val recipes: List<Recipe>) : Keyed {
-    val handlers : MutableMap<Class<out Event>, HandlerList> = HashMap()
+class Item(val key: NamespacedKey, val item: ItemStack, val recipes: List<Recipe>) : Keyed, ConfigurationSerializable {
+    val handlers: MutableMap<Class<out Event>, HandlerList> = HashMap()
 
     init {
         // Set id
-        val meta = result.itemMeta
+        val meta = item.itemMeta
         meta.rainbowQuartzId = key
-        result.itemMeta = meta
+        item.itemMeta = meta
+    }
+
+    companion object {
+        fun formatName(name: Component?): Component? {
+            return name
+                ?.color(name.color() ?: NamedTextColor.WHITE)
+                ?.decorationIfAbsent(TextDecoration.ITALIC, TextDecoration.State.FALSE)
+        }
+
+//        fun deserialize(args: Map<String, Any>): Item {
+//            val key = NamespacedKey.fromString(args["id"] as String)!!
+//            val itemStack = ItemStack.deserialize(args["item"] as Map<String, Any>)
+//            val builder = Item.ItemBuilder(key,  itemStack)
+//            for (recipeArgs in args["recipes"] as List<Map<String, Any>>) {
+//                val type = recipeArgs["type"]
+//                val recipeType = recipeTypes.first{ t -> t.suffix == type }
+//                val recipe = recipeType.deserialize()
+//                builder.addRecipe(recipe)
+//            }
+//            return builder.build()
+//        }
+
+        private val recipeTypes: List<Class<out Recipe>>
+            get() = listOf(
+                dev.hoodieboi.rainbowquartz.craft.BlastingRecipe::class.java,
+                dev.hoodieboi.rainbowquartz.craft.CampfireRecipe::class.java,
+                dev.hoodieboi.rainbowquartz.craft.FurnaceRecipe::class.java,
+                dev.hoodieboi.rainbowquartz.craft.ShapedRecipe::class.java,
+                dev.hoodieboi.rainbowquartz.craft.ShapelessRecipe::class.java,
+                dev.hoodieboi.rainbowquartz.craft.SmithingTransformRecipe::class.java,
+                dev.hoodieboi.rainbowquartz.craft.SmokingRecipe::class.java,
+                dev.hoodieboi.rainbowquartz.craft.StonecuttingRecipe::class.java
+            )
     }
 
     @Throws(IllegalPluginAccessException::class)
@@ -65,7 +99,15 @@ class Item (val key: NamespacedKey, val result: ItemStack, val recipes: List<Rec
         }
         val timedExecutor = TimedEventExecutor(executor, plugin, null, event) // Paper
 
-        getEventListeners(event).register(RegisteredListener(listener, timedExecutor, priority, plugin, ignoreCancelled))
+        getEventListeners(event).register(
+            RegisteredListener(
+                listener,
+                timedExecutor,
+                priority,
+                plugin,
+                ignoreCancelled
+            )
+        )
         return this
     }
 
@@ -86,8 +128,9 @@ class Item (val key: NamespacedKey, val result: ItemStack, val recipes: List<Rec
             return clazz
         } catch (e: NoSuchMethodException) {
             if (clazz.superclass != null
-                    && !clazz.superclass.equals(Event::javaClass)
-                    && Event::class.java.isAssignableFrom(clazz.superclass)) {
+                && !clazz.superclass.equals(Event::javaClass)
+                && Event::class.java.isAssignableFrom(clazz.superclass)
+            ) {
                 return getRegistrationClass(clazz.superclass.asSubclass(Event::class.java))
             } else {
                 throw IllegalPluginAccessException("Unable to find handler list for event ${clazz.getName()}. Static getHandlerList method required!")
@@ -100,14 +143,32 @@ class Item (val key: NamespacedKey, val result: ItemStack, val recipes: List<Rec
     }
 
     override fun toString(): String {
-        return "Item($key){material=${result.type}}"
+        return "Item($key){material=${item.type}}"
+    }
+
+    override fun serialize(): MutableMap<String, Any> {
+        val out = HashMap<String, Any>()
+
+        out["item"] = item
+
+        if (recipes.isNotEmpty()) {
+            val recipesMap = HashMap<String, Any>()
+
+            for (recipe in recipes) {
+                recipesMap[recipe.key(this).toString()] = recipe
+            }
+
+            out["recipes"] = recipesMap
+        }
+
+        return out
     }
 
     override fun equals(other: Any?): Boolean {
         if (other !is Item) return false
-        return key.equals(other.key)
-                && result.equals(other.result)
-                && recipes.equals(other.recipes)
+        return key == other.key
+                && item == other.item
+                && recipes == other.recipes
     }
 
     override fun hashCode(): Int {
@@ -115,126 +176,6 @@ class Item (val key: NamespacedKey, val result: ItemStack, val recipes: List<Rec
         result = 31 * result + result.hashCode()
         result = 31 * result + recipes.hashCode()
         return result
-    }
-
-    class ItemBuilder(val key: NamespacedKey, private val result: ItemStack) {
-        private val recipes: MutableList<Recipe>
-
-        constructor(key: NamespacedKey, material: Material, amount: Int): this(key, ItemStack(material, amount))
-        constructor(key: NamespacedKey, material: Material) : this(key, ItemStack(material))
-
-        fun getMaterial() = result.type
-        fun setMaterial(material: Material): ItemBuilder {
-            result.type = material
-            return this
-        }
-        fun getAmount() = result.amount
-        fun setAmount(amount: Int): ItemBuilder {
-            result.amount = amount
-            return this
-        }
-        fun setName(name: Component): ItemBuilder {
-            // Non-italic by default
-            val displayName: Component = if (name.hasDecoration(TextDecoration.ITALIC)) {
-                name
-            } else {
-                name.decoration(TextDecoration.ITALIC, false)
-            }
-            // Modify item
-            val itemMeta = result.itemMeta
-            itemMeta.displayName(displayName)
-            result.itemMeta = itemMeta
-            return this
-        }
-        fun setName(name: String): ItemBuilder {
-            return setName(Component.text(name).color(NamedTextColor.WHITE))
-        }
-
-        fun addEnchant(enchantment: Enchantment, level: Int): ItemBuilder {
-            val itemMeta = result.itemMeta
-            itemMeta.addEnchant(enchantment, level, true)
-            result.itemMeta = itemMeta
-            return this
-        }
-
-        fun addEnchant(enchantment: Enchantment): ItemBuilder {
-            return addEnchant(enchantment, 1)
-        }
-
-        fun removeEnchant(enchantment: Enchantment): ItemBuilder {
-            val itemMeta = result.itemMeta
-            itemMeta.removeEnchant(enchantment)
-            result.itemMeta = itemMeta
-            return this
-        }
-
-        fun addAttributeModifier(attribute: Attribute, modifier: AttributeModifier): ItemBuilder {
-            val itemMeta = result.itemMeta
-            itemMeta.addAttributeModifier(attribute, modifier)
-            result.itemMeta = itemMeta
-            return this
-        }
-
-        fun removeAttributeModifier(attribute: Attribute, modifier: AttributeModifier): ItemBuilder {
-            val itemMeta = result.itemMeta
-            itemMeta.removeAttributeModifier(attribute, modifier)
-            result.itemMeta = itemMeta
-            return this
-        }
-
-        fun removeAttributeModifier(attribute: Attribute): ItemBuilder {
-            val itemMeta = result.itemMeta
-            itemMeta.removeAttributeModifier(attribute)
-            result.itemMeta = itemMeta
-            return this
-        }
-
-        fun addItemFlags(vararg itemFlags: ItemFlag): ItemBuilder {
-            val itemMeta = result.itemMeta
-            itemMeta.addItemFlags(*itemFlags)
-            result.itemMeta = itemMeta
-            return this
-        }
-
-        fun removeItemFlags(vararg itemFlags: ItemFlag): ItemBuilder {
-            val itemMeta = result.itemMeta
-            itemMeta.removeItemFlags(*itemFlags)
-            result.itemMeta = itemMeta
-            return this
-        }
-
-        fun setUnbreakable(unbreakable: Boolean): ItemBuilder {
-            val itemMeta = result.itemMeta
-            itemMeta.isUnbreakable = unbreakable
-            result.itemMeta = itemMeta
-            return this
-        }
-
-        fun addRecipe(recipe: Recipe): ItemBuilder {
-            recipes.add(recipe)
-            return this
-        }
-
-        fun removeRecipe(recipeType: Class<out Recipe>): ItemBuilder {
-            val iterator = recipes.iterator()
-
-            while (iterator.hasNext()) {
-                val recipe = iterator.next()
-
-                if (recipeType.isAssignableFrom(recipe.javaClass)) {
-                    iterator.remove()
-                }
-            }
-
-            return this
-        }
-
-        init {
-            recipes = ArrayList()
-        }
-        fun build(): Item {
-            return Item(key, result, recipes)
-        }
     }
 }
 

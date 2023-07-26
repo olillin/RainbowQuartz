@@ -18,7 +18,7 @@ import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 import kotlin.math.min
 
-class GetItem : TabExecutor {
+class GetItemCommand : TabExecutor {
     companion object {
         val completion: LiteralArgumentBuilder<String> = literal<String>("getitem")
             .then(argument<String, String>("item", word())
@@ -46,7 +46,7 @@ class GetItem : TabExecutor {
             return true
         }
 
-        val itemStack = ItemStack(item.result)
+        val itemStack = ItemStack(item.item)
         var amount = 1
         if (args.size >= 2) {
             val parsed = args[1].toIntOrNull()
@@ -94,7 +94,7 @@ class GetItem : TabExecutor {
         args: Array<out String>
     ): MutableList<String> {
         return if (args.size == 1) {
-            RainbowQuartz.itemManager.itemKeys.map{i -> i.toString()}.toMutableList()
+            RainbowQuartz.itemManager.itemKeys.map { it.toString() }.toMutableList()
         } else {
             ArrayList()
         }

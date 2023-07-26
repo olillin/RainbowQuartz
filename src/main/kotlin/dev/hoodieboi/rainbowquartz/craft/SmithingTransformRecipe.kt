@@ -2,11 +2,10 @@ package dev.hoodieboi.rainbowquartz.craft
 
 import dev.hoodieboi.rainbowquartz.item.Item
 import org.bukkit.Material
-import org.bukkit.NamespacedKey
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.RecipeChoice
-import org.bukkit.inventory.RecipeChoice.MaterialChoice
 import org.bukkit.inventory.RecipeChoice.ExactChoice
+import org.bukkit.inventory.RecipeChoice.MaterialChoice
 
 class SmithingTransformRecipe(base: RecipeChoice, addition: RecipeChoice, var template: RecipeChoice) : SmithingRecipe(base, addition) {
 
@@ -39,8 +38,8 @@ class SmithingTransformRecipe(base: RecipeChoice, addition: RecipeChoice, var te
 
     override fun toBukkitRecipe(item: Item): org.bukkit.inventory.SmithingTransformRecipe {
         return org.bukkit.inventory.SmithingTransformRecipe(
-            NamespacedKey.fromString(item.key.toString() + ".smithing_transform")!!,
-            item.result,
+            key(item),
+            item.item,
             template,
             base,
             addition
@@ -58,5 +57,15 @@ class SmithingTransformRecipe(base: RecipeChoice, addition: RecipeChoice, var te
 
     fun setTemplate(template: ItemStack): SmithingRecipe {
         return setBase(ExactChoice(template))
+    }
+
+    override fun serialize(): MutableMap<String, Any> {
+        return mutableMapOf(
+            "type" to suffix,
+            "group" to group,
+            "base" to base,
+            "addition" to addition,
+            "template" to template
+        )
     }
 }
