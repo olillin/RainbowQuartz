@@ -1,35 +1,24 @@
 package dev.hoodieboi.rainbowquartz.item
 
-import co.aikar.timings.TimedEventExecutor
 import dev.hoodieboi.rainbowquartz.RainbowQuartz
 import dev.hoodieboi.rainbowquartz.craft.Recipe
-import dev.hoodieboi.rainbowquartz.event.EventContext
-import dev.hoodieboi.rainbowquartz.event.EventDispatcher
+import dev.hoodieboi.rainbowquartz.event.EventPredicate
+import dev.hoodieboi.rainbowquartz.event.PredicatedEventHandlerPair
+import dev.hoodieboi.rainbowquartz.event.handler.EventHandler
 import net.kyori.adventure.key.Key
 import net.kyori.adventure.key.Keyed
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.format.TextDecoration
-import org.bukkit.Material
 import org.bukkit.NamespacedKey
-import org.bukkit.attribute.Attribute
-import org.bukkit.attribute.AttributeModifier
 import org.bukkit.configuration.serialization.ConfigurationSerializable
-import org.bukkit.enchantments.Enchantment
 import org.bukkit.event.Event
-import org.bukkit.event.EventPriority
-import org.bukkit.event.HandlerList
-import org.bukkit.event.Listener
-import org.bukkit.inventory.ItemFlag
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.ItemMeta
 import org.bukkit.persistence.PersistentDataType
-import org.bukkit.plugin.*
-import java.lang.reflect.Method
-import java.util.function.Function
 
 class Item(val key: NamespacedKey, val item: ItemStack, val recipes: List<Recipe>) : Keyed, ConfigurationSerializable {
-    val handlers: MutableMap<Class<out Event>, HandlerList> = HashMap()
+    private val handlers: MutableMap<Class<out Event>, MutableSet<PredicatedEventHandlerPair<*>>> = HashMap()
 
     init {
         // Set id
@@ -71,71 +60,27 @@ class Item(val key: NamespacedKey, val item: ItemStack, val recipes: List<Recipe
             )
     }
 
-    @Throws(IllegalPluginAccessException::class)
-    fun <T: Event> listen(context: EventContext<T>, listener: Function<Event, Unit>) {
-        RainbowQuartz.eventDispatcher.startListening(TODO("EVENT_TYPE"))
-    }
-
     /**
-     * Registers the specified executor to the given event class
+     * Register an [EventHandler] to be executed when an [EventPredicate] is successful
      *
-     * @param event Event type to register
-     * @param listener Listener to register
-     * @param priority Priority to register this event at
-     * @param executor EventExecutor to register
-     * @param plugin Plugin to register
+     * @param eventType The event class
+     * @param predicate The predicate to check before calling the handler
+     * @param handler What should happen when the predicate is successful
      */
-    @Throws(IllegalPluginAccessException::class)
-    fun registerEvent(
-        event: Class<out Event?>,
-        listener: Listener,
-        priority: EventPriority,
-        executor: EventExecutor,
-        plugin: Plugin,
-        ignoreCancelled: Boolean
-    ): Item {
-        if (!plugin.isEnabled) {
-            throw IllegalPluginAccessException("Plugin attempted to register $event while not enabled")
+    fun <T : Event> listen(eventType: Class<T>, predicate: EventPredicate<T>, handler: EventHandler<T>) {
+        if (!eventType.isAssignableFrom(Event::class.java)) {
+            throw IllegalArgumentException()
         }
-        val timedExecutor = TimedEventExecutor(executor, plugin, null, event) // Paper
-
-        getEventListeners(event).register(
-            RegisteredListener(
-                listener,
-                timedExecutor,
-                priority,
-                plugin,
-                ignoreCancelled
-            )
-        )
-        return this
+        @Suppress("UNCHECKED_CAST")
+        RainbowQuartz.itemEventDispatcher.listen(eventType as Class<Event>)
+        if (!handlers.containsKey(eventType)) {
+            handlers[eventType] = mutableSetOf()
+        }
+        handlers[eventType]!!.add(PredicatedEventHandlerPair(predicate, handler))
     }
 
-    fun getEventListeners(type: Class<out Event>): HandlerList {
-        val handler = handlers[type]
-        if (handler != null) {
-            return handler
-        } else {
-            val newHandler = HandlerList()
-            handlers[type] = newHandler
-            return newHandler
-        }
-    }
-
-    private fun getRegistrationClass(clazz: Class<out Event>): Class<out Event> {
-        try {
-            clazz.getDeclaredMethod("getHandlerList")
-            return clazz
-        } catch (e: NoSuchMethodException) {
-            if (clazz.superclass != null
-                && !clazz.superclass.equals(Event::javaClass)
-                && Event::class.java.isAssignableFrom(clazz.superclass)
-            ) {
-                return getRegistrationClass(clazz.superclass.asSubclass(Event::class.java))
-            } else {
-                throw IllegalPluginAccessException("Unable to find handler list for event ${clazz.getName()}. Static getHandlerList method required!")
-            }
-        }
+    fun getHandlerPairs(eventType: Class<out Event>): Set<PredicatedEventHandlerPair<*>>? {
+        return handlers[eventType]
     }
 
     override fun key(): Key {

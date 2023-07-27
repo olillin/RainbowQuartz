@@ -1,13 +1,15 @@
 package dev.hoodieboi.rainbowquartz
 
 import dev.hoodieboi.rainbowquartz.craft.*
-import dev.hoodieboi.rainbowquartz.event.EventDispatcher
-import dev.hoodieboi.rainbowquartz.event.handler.PotionEffectHandler
+import dev.hoodieboi.rainbowquartz.event.ItemEventDispatcher
+import dev.hoodieboi.rainbowquartz.event.handler.PlayerPotionEffectEventHandler
 import dev.hoodieboi.rainbowquartz.item.ItemBuilder
 import dev.hoodieboi.rainbowquartz.item.ItemManager
+import dev.hoodieboi.rainbowquartz.item.rainbowQuartzId
 import dev.hoodieboi.rainbowquartz.plugin.command.GetItemCommand
 import dev.hoodieboi.rainbowquartz.plugin.command.MenuCommand
 import dev.hoodieboi.rainbowquartz.plugin.command.ViewItemCommand
+import dev.hoodieboi.rainbowquartz.plugin.gui.GuiEventDispatcher
 import me.lucko.commodore.Commodore
 import me.lucko.commodore.CommodoreProvider
 import me.lucko.commodore.file.CommodoreFileReader
@@ -39,21 +41,23 @@ open class RainbowQuartz : JavaPlugin(), Listener {
 
     companion object {
         val itemManager: ItemManager = ItemManager()
-        lateinit var eventDispatcher: EventDispatcher
+        lateinit var itemEventDispatcher: ItemEventDispatcher
         lateinit var guiEventDispatcher: GuiEventDispatcher
     }
 
     override fun onEnable() {
-        eventDispatcher = EventDispatcher(server.pluginManager)
-        server.pluginManager.registerEvents(EventDispatcher(), this)
+        // Initialize event dispatchers
+        itemEventDispatcher = ItemEventDispatcher(this)
         guiEventDispatcher = GuiEventDispatcher(this)
         guiEventDispatcher.start()
 
+        // Initialize commands
         registerCommands()
 
         generateTestResources()
     }
 
+    @Suppress("SpellCheckingInspection")
     @Throws(IOException::class)
     private fun registerCommands() {
 
@@ -107,15 +111,21 @@ open class RainbowQuartz : JavaPlugin(), Listener {
                 .setIngredient('S', Material.STICK)
             ).build())
 
-        itemManager.registerItem(ItemBuilder(NamespacedKey.minecraft("super_potato"), Material.BAKED_POTATO)
+        val superPotato = ItemBuilder(NamespacedKey.minecraft("super_potato"), Material.BAKED_POTATO)
             .setName(text("Super Potato").color(LIGHT_PURPLE).decoration(TextDecoration.ITALIC, false))
             .addRecipe(ShapedRecipe("PP", "PP")
-                .setIngredient('P', Material.POTATO)
+                    .setIngredient('P', Material.POTATO)
             ).build()
-            .listen<PlayerDropItemEvent>(
-                PlayerDropItemEventContext.DROPPED_ITEM,
-                PotionEffectHandler(PotionEffect(PotionEffectType.LEVITATION))
-            ))
+        superPotato.listen(
+            PlayerDropItemEvent::class.java,
+            {event ->
+                event.itemDrop.itemStack onlyIf { it.itemMeta.rainbowQuartzId == superPotato.key }
+            },
+            PlayerPotionEffectEventHandler(
+                    PotionEffect(PotionEffectType.LEVITATION, 10, 0)
+            )
+        )
+        itemManager.registerItem(superPotato)
 
         itemManager.registerItem(ItemBuilder(NamespacedKey(this, "coal_lump"), Material.CHARCOAL)
             .setName("Lump of Coal")

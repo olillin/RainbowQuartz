@@ -44,6 +44,10 @@ class ItemManager {
         return getItem(key)
     }
 
+    fun getItems(): Set<Item> {
+        return items.values.toSet()
+    }
+
     fun containsItem(key: NamespacedKey): Boolean {
         return getItem(key) != null
     }
