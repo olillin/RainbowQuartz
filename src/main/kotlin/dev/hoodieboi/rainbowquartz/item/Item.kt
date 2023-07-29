@@ -7,17 +7,14 @@ import net.kyori.adventure.key.Keyed
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.format.TextDecoration
-import org.bukkit.Material
+import org.bukkit.Bukkit
 import org.bukkit.NamespacedKey
-import org.bukkit.attribute.Attribute
-import org.bukkit.attribute.AttributeModifier
+import org.bukkit.configuration.MemoryConfiguration
 import org.bukkit.configuration.serialization.ConfigurationSerializable
-import org.bukkit.enchantments.Enchantment
 import org.bukkit.event.Event
 import org.bukkit.event.EventPriority
 import org.bukkit.event.HandlerList
 import org.bukkit.event.Listener
-import org.bukkit.inventory.ItemFlag
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.ItemMeta
 import org.bukkit.persistence.PersistentDataType
@@ -34,36 +31,48 @@ class Item(val key: NamespacedKey, val item: ItemStack, val recipes: List<Recipe
     }
 
     companion object {
+        @JvmStatic
         fun formatName(name: Component?): Component? {
             return name
                 ?.color(name.color() ?: NamedTextColor.WHITE)
                 ?.decorationIfAbsent(TextDecoration.ITALIC, TextDecoration.State.FALSE)
         }
 
-//        fun deserialize(args: Map<String, Any>): Item {
-//            val key = NamespacedKey.fromString(args["id"] as String)!!
-//            val itemStack = ItemStack.deserialize(args["item"] as Map<String, Any>)
-//            val builder = Item.ItemBuilder(key,  itemStack)
-//            for (recipeArgs in args["recipes"] as List<Map<String, Any>>) {
-//                val type = recipeArgs["type"]
-//                val recipeType = recipeTypes.first{ t -> t.suffix == type }
-//                val recipe = recipeType.deserialize()
-//                builder.addRecipe(recipe)
-//            }
-//            return builder.build()
-//        }
+        /**
+         * Required method for configuration serialization
+         *
+         * @param args map to deserialize
+         * @return deserialized item
+         * @see ConfigurationSerializable
+         */
+        @JvmStatic
+        fun deserialize(args: Map<String, Any>): Item {
 
-        private val recipeTypes: List<Class<out Recipe>>
-            get() = listOf(
-                dev.hoodieboi.rainbowquartz.craft.BlastingRecipe::class.java,
-                dev.hoodieboi.rainbowquartz.craft.CampfireRecipe::class.java,
-                dev.hoodieboi.rainbowquartz.craft.FurnaceRecipe::class.java,
-                dev.hoodieboi.rainbowquartz.craft.ShapedRecipe::class.java,
-                dev.hoodieboi.rainbowquartz.craft.ShapelessRecipe::class.java,
-                dev.hoodieboi.rainbowquartz.craft.SmithingTransformRecipe::class.java,
-                dev.hoodieboi.rainbowquartz.craft.SmokingRecipe::class.java,
-                dev.hoodieboi.rainbowquartz.craft.StonecuttingRecipe::class.java
-            )
+            val section = MemoryConfiguration()
+            section.addDefaults(args)
+
+            // Create key
+            val id = section.getString("id") ?: throw IllegalArgumentException("Missing required property 'id' of type String")
+            val key = NamespacedKey.fromString(id)!!
+
+            // Initialize builder
+            val itemStack = section.getItemStack("item") ?: throw IllegalArgumentException("Missing required property 'item' of type ItemStack")
+            val builder = ItemBuilder(key,  itemStack)
+
+            // Add recipes
+            val recipes: Any = section.get("recipes") ?: listOf<Recipe>()
+            if (recipes !is List<*>) {
+                throw IllegalArgumentException("Invalid property 'recipes'")
+            }
+            for (recipe in recipes) {
+                if (recipe !is Recipe) {
+                    Bukkit.getLogger().warning("Unable to register recipe for Rainbow Quartz item $key, invalid format")
+                    continue
+                }
+                builder.addRecipe(recipe)
+            }
+            return builder.build()
+        }
     }
 
     /**
@@ -176,21 +185,19 @@ class Item(val key: NamespacedKey, val item: ItemStack, val recipes: List<Recipe
     }
 
     override fun serialize(): MutableMap<String, Any> {
-        val out = HashMap<String, Any>()
+        val result = mutableMapOf<String, Any>(
+            "id" to key.toString()
+        )
 
-        out["item"] = item
+        val stack = ItemStack(item)
+        val meta = stack.itemMeta
+        meta.rainbowQuartzId = null
+        stack.setItemMeta(meta)
+        result["item"] = stack
 
-        if (recipes.isNotEmpty()) {
-            val recipesMap = HashMap<String, Any>()
+        result["recipes"] = recipes
 
-            for (recipe in recipes) {
-                recipesMap[recipe.key(this).toString()] = recipe
-            }
-
-            out["recipes"] = recipesMap
-        }
-
-        return out
+        return result
     }
 
     override fun equals(other: Any?): Boolean {

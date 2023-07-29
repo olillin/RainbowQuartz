@@ -49,6 +49,15 @@ class ItemBuilderTest {
     }
 
     @Test
+    fun rainbowQuartzKey() {
+        val item = ItemStack(Material.QUARTZ)
+        val meta = item.itemMeta
+        meta.rainbowQuartzId = key
+
+        assertEquals(key, meta.rainbowQuartzId)
+    }
+
+    @Test
     fun setNameComponent() {
         val item = ItemBuilder(key, Material.IRON_SWORD)
                 .setName(Component.text("Quartz Sword"))

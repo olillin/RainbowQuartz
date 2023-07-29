@@ -3,13 +3,13 @@ package dev.hoodieboi.rainbowquartz.craft
 import org.bukkit.Material
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.RecipeChoice
-import org.bukkit.inventory.RecipeChoice.MaterialChoice
 import org.bukkit.inventory.RecipeChoice.ExactChoice
+import org.bukkit.inventory.RecipeChoice.MaterialChoice
 
 abstract class CookingRecipe(var input: RecipeChoice) : Recipe() {
+    var group: String = ""
     var exp: Float = 0.0f
     var cookTime: Int = 200
-    var group: String = ""
 
     fun setInput(input: RecipeChoice): CookingRecipe {
         this.input = input
@@ -37,15 +37,5 @@ abstract class CookingRecipe(var input: RecipeChoice) : Recipe() {
     fun setGroup(group: String): CookingRecipe {
         this.group = group
         return this
-    }
-
-    override fun serialize(): MutableMap<String, Any> {
-        return mutableMapOf(
-            "type" to suffix,
-            "group" to group,
-            "input" to input,
-            "exp" to exp,
-            "cookTime" to cookTime
-        )
     }
 }

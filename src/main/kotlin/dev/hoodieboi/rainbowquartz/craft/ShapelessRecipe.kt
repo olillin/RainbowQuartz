@@ -2,16 +2,54 @@ package dev.hoodieboi.rainbowquartz.craft
 
 import dev.hoodieboi.rainbowquartz.item.Item
 import org.bukkit.Material
+import org.bukkit.configuration.MemoryConfiguration
+import org.bukkit.configuration.serialization.ConfigurationSerializable
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.RecipeChoice
 import org.bukkit.inventory.RecipeChoice.ExactChoice
 import org.bukkit.inventory.RecipeChoice.MaterialChoice
 
 class ShapelessRecipe : Recipe() {
-    override val suffix = "shapeless"
-    val ingredients: MutableList<RecipeChoice> = ArrayList()
     var group: String = ""
-    override fun toBukkitRecipe(item: Item): org.bukkit.inventory.ShapelessRecipe {
+    val ingredients: MutableList<RecipeChoice> = mutableListOf()
+    override val suffix: String
+        get() = id
+
+    companion object {
+        const val id = "shapeless"
+
+        /**
+         * Required method for configuration serialization
+         *
+         * @param args map to deserialize
+         * @return deserialized item stack
+         * @see ConfigurationSerializable
+         */
+        @JvmStatic
+        fun deserialize(args: Map<String, Any>): ShapelessRecipe {
+
+            val section = MemoryConfiguration()
+            section.addDefaults(args)
+
+            val recipe = ShapelessRecipe()
+
+            val ingredients = section.getList("ingredients") ?: throw IllegalArgumentException("Missing or invalid property 'ingredients'")
+            for (ingredient in ingredients) {
+                if (ingredient !is ItemStack) throw IllegalArgumentException("Invalid ingredient, expected ItemStack")
+
+                recipe.addIngredient(ingredient)
+            }
+
+            val group = section.getString("group")
+                ?: throw IllegalArgumentException("Invalid value for property 'group'")
+            recipe.setGroup(group)
+
+            return recipe
+        }
+
+    }
+
+    override fun asBukkitRecipe(item: Item): org.bukkit.inventory.ShapelessRecipe {
         val recipe = org.bukkit.inventory.ShapelessRecipe(
             key(item),
             item.item
@@ -85,9 +123,10 @@ class ShapelessRecipe : Recipe() {
 
     override fun serialize(): MutableMap<String, Any> {
         return mutableMapOf(
-            "type" to suffix,
             "group" to group,
-            "ingredients" to ingredients
+            "ingredients" to ingredients.map {
+                it.itemStack
+            }
         )
     }
 }

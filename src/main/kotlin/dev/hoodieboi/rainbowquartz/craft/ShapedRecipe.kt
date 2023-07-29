@@ -2,17 +2,77 @@ package dev.hoodieboi.rainbowquartz.craft
 
 import dev.hoodieboi.rainbowquartz.item.Item
 import org.bukkit.Material
+import org.bukkit.configuration.MemoryConfiguration
+import org.bukkit.configuration.serialization.ConfigurationSerializable
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.RecipeChoice
 import org.bukkit.inventory.RecipeChoice.ExactChoice
 import org.bukkit.inventory.RecipeChoice.MaterialChoice
 
 class ShapedRecipe(vararg val pattern: String) : Recipe() {
-    override val suffix = "shaped"
-    private val ingredients: MutableMap<Char, RecipeChoice> = HashMap()
     private var group: String = ""
+    private val ingredients: MutableMap<Char, RecipeChoice> = mutableMapOf()
 
-    override fun toBukkitRecipe(item: Item): org.bukkit.inventory.ShapedRecipe {
+    init {
+        if (pattern.size < 1 || pattern.size > 3) {
+            throw IllegalArgumentException("Expected pattern to be of size 1, 2 or 3, but got size ${pattern.size}")
+        }
+        val width = pattern[0].length
+        for (row in pattern) {
+            if (row.length != width) {
+                throw IllegalArgumentException("Inconsistent row lengths")
+            }
+            if (row.length < 1 || row.length > 3) {
+                throw IllegalArgumentException("Expected row to be of length 1, 2 or 3, but got size ${row.length}")
+            }
+        }
+    }
+
+    override val suffix: String
+        get() = id
+
+    companion object {
+        const val id = "shaped"
+
+        /**
+         * Required method for configuration serialization
+         *
+         * @param args map to deserialize
+         * @return deserialized item stack
+         * @see ConfigurationSerializable
+         */
+        @JvmStatic
+        fun deserialize(args: Map<String, Any>): ShapedRecipe {
+
+            val section = MemoryConfiguration()
+            section.addDefaults(args)
+
+            if (!section.isList("pattern")) {
+                throw IllegalArgumentException("Missing or invalid property 'pattern'")
+            }
+            val shape = section.getStringList("pattern").toTypedArray()
+            val recipe = ShapedRecipe(*shape)
+
+            val ingredients = section.get("ingredients") ?: throw IllegalArgumentException("Missing property 'ingredients'")
+            if (ingredients !is Map<*, *>) {
+                throw IllegalArgumentException("Invalid property 'ingredients'")
+            }
+            for (key in ingredients.keys) {
+                if (key !is String) throw IllegalArgumentException("Invalid key '$key', must be of type String")
+                if (key.length != 1) throw IllegalArgumentException("Invalid key '$key', must be of length 1")
+                val item: ItemStack = ingredients[key] as? ItemStack ?: throw IllegalArgumentException("Invalid ingredient for key '$key'")
+                recipe.setIngredient(key[0], item)
+            }
+
+            val group = section.getString("group")
+                ?: throw IllegalArgumentException("Invalid value for property 'group'")
+            recipe.setGroup(group)
+
+            return recipe
+        }
+    }
+
+    override fun asBukkitRecipe(item: Item): org.bukkit.inventory.ShapedRecipe {
         val recipe = org.bukkit.inventory.ShapedRecipe(
             key(item),
             item.item
@@ -58,10 +118,11 @@ class ShapedRecipe(vararg val pattern: String) : Recipe() {
 
     override fun serialize(): MutableMap<String, Any> {
         return mutableMapOf(
-            "type" to suffix,
             "group" to group,
             "pattern" to pattern,
-            "ingredients" to ingredients.map { it.key.toString() to it.value }
+            "ingredients" to ingredients.map {
+                it.key.toString() to it.value.itemStack
+            }.toMap().toMutableMap()
         )
     }
 }

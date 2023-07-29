@@ -22,6 +22,7 @@ import org.bukkit.attribute.Attribute
 import org.bukkit.attribute.AttributeModifier
 import org.bukkit.command.PluginCommand
 import org.bukkit.command.TabExecutor
+import org.bukkit.configuration.serialization.ConfigurationSerialization
 import org.bukkit.enchantments.Enchantment
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
@@ -38,7 +39,7 @@ import java.util.*
 open class RainbowQuartz : JavaPlugin(), Listener {
 
     companion object {
-        val itemManager: ItemManager = ItemManager()
+        lateinit var itemManager: ItemManager
         lateinit var guiEventDispatcher: GuiEventDispatcher
     }
 
@@ -48,7 +49,22 @@ open class RainbowQuartz : JavaPlugin(), Listener {
         guiEventDispatcher.start()
         registerCommands()
 
+        itemManager = ItemManager(this)
+        itemManager.reload()
+
         generateTestResources()
+    }
+
+    override fun onLoad() {
+        ConfigurationSerialization.registerClass(Recipe::class.java)
+        ConfigurationSerialization.registerClass(BlastingRecipe::class.java)
+        ConfigurationSerialization.registerClass(CampfireRecipe::class.java)
+        ConfigurationSerialization.registerClass(FurnaceRecipe::class.java)
+        ConfigurationSerialization.registerClass(ShapedRecipe::class.java)
+        ConfigurationSerialization.registerClass(ShapelessRecipe::class.java)
+        ConfigurationSerialization.registerClass(SmithingTransformRecipe::class.java)
+        ConfigurationSerialization.registerClass(SmokingRecipe::class.java)
+        ConfigurationSerialization.registerClass(StonecuttingRecipe::class.java)
     }
 
     @Throws(IOException::class)
@@ -90,13 +106,9 @@ open class RainbowQuartz : JavaPlugin(), Listener {
         commodore.register(command, CommodoreFileReader.INSTANCE.parse<Any>(file))
     }
 
-    override fun onDisable() {
-        itemManager.clear()
-    }
-
     private fun generateTestResources() {
         // Create temp item
-        itemManager.registerItem(ItemBuilder(NamespacedKey(this, "quartz_sword"), Material.IRON_SWORD)
+        itemManager.registerDefault(ItemBuilder(NamespacedKey(this, "quartz_sword"), Material.IRON_SWORD)
             .setName("Quartz Sword")
             .addEnchant(Enchantment.FIRE_ASPECT)
             .addRecipe(ShapedRecipe("Q", "Q", "S")
@@ -104,31 +116,31 @@ open class RainbowQuartz : JavaPlugin(), Listener {
                 .setIngredient('S', Material.STICK)
             ).build())
 
-        itemManager.registerItem(ItemBuilder(NamespacedKey.minecraft("super_potato"), Material.BAKED_POTATO)
+        itemManager.registerDefault(ItemBuilder(NamespacedKey.minecraft("super_potato"), Material.BAKED_POTATO)
             .setName(text("Super Potato").color(LIGHT_PURPLE).decoration(TextDecoration.ITALIC, false))
             .addRecipe(ShapedRecipe("PP", "PP")
                 .setIngredient('P', Material.POTATO)
             ).build().registerEvents(this, this))
 
-        itemManager.registerItem(ItemBuilder(NamespacedKey(this, "coal_lump"), Material.CHARCOAL)
+        itemManager.registerDefault(ItemBuilder(NamespacedKey(this, "coal_lump"), Material.CHARCOAL)
             .setName("Lump of Coal")
             .addRecipe(SmokingRecipe(Material.SPRUCE_LOG))
             .build())
 
-        itemManager.registerItem(ItemBuilder(NamespacedKey(this, "magic_diamond"), Material.DIAMOND)
+        itemManager.registerDefault(ItemBuilder(NamespacedKey(this, "magic_diamond"), Material.DIAMOND)
             .setName(text("Magic Diamond").color(TextColor.fromHexString("#b26ce9")))
             .addEnchant(Enchantment.KNOCKBACK, 100)
             .addItemFlags(ItemFlag.HIDE_ENCHANTS)
             .addRecipe(SmithingTransformRecipe(Material.DIAMOND, ItemStack(Material.GLASS, 4), Material.QUARTZ))
             .build())
 
-        itemManager.registerItem(ItemBuilder(NamespacedKey(this, "compressed_cobblestone"), Material.COBBLESTONE)
+        itemManager.registerDefault(ItemBuilder(NamespacedKey(this, "compressed_cobblestone"), Material.COBBLESTONE)
             .setName("Compressed Cobblestone")
             .addRecipe(ShapelessRecipe()
                 .addIngredient(ItemStack(Material.COBBLESTONE), 4)
             ).build())
 
-        itemManager.registerItem(ItemBuilder(NamespacedKey(this, "boots_of_the_chicken"), Material.GOLDEN_BOOTS)
+        itemManager.registerDefault(ItemBuilder(NamespacedKey(this, "boots_of_the_chicken"), Material.GOLDEN_BOOTS)
             .setName(text("Boots of the Chicken").color(YELLOW))
             .addRecipe(ShapedRecipe("F F", "L L")
                 .setIngredient('F', Material.FEATHER)
