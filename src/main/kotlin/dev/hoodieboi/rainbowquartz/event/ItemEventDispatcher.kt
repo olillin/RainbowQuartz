@@ -10,18 +10,20 @@ class ItemEventDispatcher(val plugin: Plugin) : Listener {
 
     fun listen(eventType: Class<Event>) {
         plugin.server.pluginManager.registerEvent(
-                eventType,
-                this,
-                EventPriority.HIGH,
-                { _: Listener, event: Event -> onEvent(event) },
-                plugin
+            eventType,
+            this,
+            EventPriority.HIGH,
+            { _: Listener, event: Event -> onEvent(event) },
+            plugin
         )
     }
 
     private fun onEvent(event: Event) {
         RainbowQuartz.itemManager.getItems().forEach { item ->
-            val handlerPairs = item.getHandlerPairs(event::class.java)
-            handlerPairs?.forEach { it.tryInvoke(event) }
+            val handlers: Set<PredicatedEventHandler<out Event>>? = item.getHandlerPairs(event::class.java)
+            handlers?.forEach {
+                it.tryInvoke(event)
+            }
         }
     }
 }

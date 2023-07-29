@@ -3,7 +3,7 @@ package dev.hoodieboi.rainbowquartz.item
 import dev.hoodieboi.rainbowquartz.RainbowQuartz
 import dev.hoodieboi.rainbowquartz.craft.Recipe
 import dev.hoodieboi.rainbowquartz.event.EventPredicate
-import dev.hoodieboi.rainbowquartz.event.PredicatedEventHandlerPair
+import dev.hoodieboi.rainbowquartz.event.PredicatedEventHandler
 import dev.hoodieboi.rainbowquartz.event.handler.EventHandler
 import net.kyori.adventure.key.Key
 import net.kyori.adventure.key.Keyed
@@ -18,7 +18,7 @@ import org.bukkit.inventory.meta.ItemMeta
 import org.bukkit.persistence.PersistentDataType
 
 class Item(val key: NamespacedKey, val item: ItemStack, val recipes: List<Recipe>) : Keyed, ConfigurationSerializable {
-    private val handlers: MutableMap<Class<out Event>, MutableSet<PredicatedEventHandlerPair<*>>> = HashMap()
+    private val handlers: MutableMap<Class<out Event>, MutableSet<PredicatedEventHandler<out Event>>> = HashMap()
 
     init {
         // Set id
@@ -67,8 +67,8 @@ class Item(val key: NamespacedKey, val item: ItemStack, val recipes: List<Recipe
      * @param predicate The predicate to check before calling the handler
      * @param handler What should happen when the predicate is successful
      */
-    fun <T : Event> listen(eventType: Class<T>, predicate: EventPredicate<T>, handler: EventHandler<T>) {
-        if (!eventType.isAssignableFrom(Event::class.java)) {
+    fun <E : Event> listen(eventType: Class<E>, predicate: EventPredicate<E>, handler: EventHandler<E>) {
+        if (!Event::class.java.isAssignableFrom(eventType)) {
             throw IllegalArgumentException()
         }
         @Suppress("UNCHECKED_CAST")
@@ -76,10 +76,10 @@ class Item(val key: NamespacedKey, val item: ItemStack, val recipes: List<Recipe
         if (!handlers.containsKey(eventType)) {
             handlers[eventType] = mutableSetOf()
         }
-        handlers[eventType]!!.add(PredicatedEventHandlerPair(predicate, handler))
+        handlers[eventType]!!.add(PredicatedEventHandler(predicate, handler))
     }
 
-    fun getHandlerPairs(eventType: Class<out Event>): Set<PredicatedEventHandlerPair<*>>? {
+    fun getHandlerPairs(eventType: Class<out Event>): Set<PredicatedEventHandler<out Event>>? {
         return handlers[eventType]
     }
 

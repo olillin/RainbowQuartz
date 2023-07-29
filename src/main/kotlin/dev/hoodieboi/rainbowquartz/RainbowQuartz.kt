@@ -111,7 +111,7 @@ open class RainbowQuartz : JavaPlugin(), Listener {
                 .setIngredient('S', Material.STICK)
             ).build())
 
-        val superPotato = ItemBuilder(NamespacedKey.minecraft("super_potato"), Material.BAKED_POTATO)
+        val superPotato = ItemBuilder(NamespacedKey.fromString("foo:super_potato")!!, Material.BAKED_POTATO)
             .setName(text("Super Potato").color(LIGHT_PURPLE).decoration(TextDecoration.ITALIC, false))
             .addRecipe(ShapedRecipe("PP", "PP")
                     .setIngredient('P', Material.POTATO)
@@ -122,7 +122,7 @@ open class RainbowQuartz : JavaPlugin(), Listener {
                 event.itemDrop.itemStack onlyIf { it.itemMeta.rainbowQuartzId == superPotato.key }
             },
             PlayerPotionEffectEventHandler(
-                    PotionEffect(PotionEffectType.LEVITATION, 10, 0)
+                    PotionEffect(PotionEffectType.LEVITATION, 200, 0)
             )
         )
         itemManager.registerItem(superPotato)
