@@ -4,9 +4,6 @@ import com.destroystokyo.paper.event.block.AnvilDamagedEvent
 import com.destroystokyo.paper.event.executor.MethodHandleEventExecutor
 import com.destroystokyo.paper.event.inventory.PrepareResultEvent
 import dev.hoodieboi.rainbowquartz.plugin.gui.menu.Menu
-import net.kyori.adventure.text.Component
-import net.kyori.adventure.text.format.NamedTextColor
-import org.bukkit.Bukkit
 import org.bukkit.event.Cancellable
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
@@ -67,10 +64,7 @@ class GuiEventDispatcher(val plugin: Plugin) : Listener {
             && event !is InventoryClickLinkEvent
             && setOf(
                 ClickType.LEFT,
-                ClickType.SHIFT_LEFT,
-                ClickType.RIGHT,
-                ClickType.SHIFT_RIGHT,
-                ClickType.DOUBLE_CLICK
+                ClickType.RIGHT
             ).contains(event.click)) {
             try {
                 onEvent(InventoryClickLinkEvent(event))
