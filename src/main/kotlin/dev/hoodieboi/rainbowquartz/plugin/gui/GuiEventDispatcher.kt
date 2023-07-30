@@ -62,13 +62,12 @@ class GuiEventDispatcher(val plugin: Plugin) : Listener {
     fun onEvent(event: InventoryEvent) {
         if (event is InventoryClickEvent && !event.isCancelled
             && event !is InventoryClickLinkEvent
-            && setOf(
-                ClickType.LEFT,
-                ClickType.RIGHT
-            ).contains(event.click)) {
+            && LinkItem.isMenuItemClick(event)) {
             try {
                 onEvent(InventoryClickLinkEvent(event))
-            } catch (_: IllegalArgumentException) {}
+            } catch (_: IllegalArgumentException) {
+                // Clicked item does not meet requirements
+            }
         }
         val iterator = menus.iterator()
         while (iterator.hasNext()) {

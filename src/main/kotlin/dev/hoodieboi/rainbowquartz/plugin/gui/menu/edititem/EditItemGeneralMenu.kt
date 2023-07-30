@@ -4,10 +4,12 @@ import dev.hoodieboi.rainbowquartz.item.ItemBuilder
 import dev.hoodieboi.rainbowquartz.plugin.gui.InventoryClickLinkEvent
 import dev.hoodieboi.rainbowquartz.plugin.gui.LinkItem
 import dev.hoodieboi.rainbowquartz.plugin.gui.enchanted
+import dev.hoodieboi.rainbowquartz.plugin.gui.menu.playSound
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.TranslatableComponent
 import net.kyori.adventure.text.format.NamedTextColor
 import org.bukkit.Material
+import org.bukkit.Sound
 import org.bukkit.entity.HumanEntity
 import org.bukkit.event.EventHandler
 import org.bukkit.plugin.Plugin
@@ -55,6 +57,7 @@ class EditItemGeneralMenu(viewer: HumanEntity, plugin: Plugin, builder: ItemBuil
     fun onLink(event: InventoryClickLinkEvent) {
         when (event.linkKey) {
             "rename" -> {
+                viewer.playSound(Sound.BLOCK_WOODEN_BUTTON_CLICK_ON)
                 RenameItemMenu(viewer, plugin, builder).show()
             }
         }

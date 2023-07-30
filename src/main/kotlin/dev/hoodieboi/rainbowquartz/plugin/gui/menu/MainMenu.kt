@@ -14,7 +14,7 @@ import org.bukkit.inventory.Inventory
 import org.bukkit.plugin.Plugin
 
 class MainMenu(override val viewer: HumanEntity, private val plugin: Plugin) : ImmutableMenu() {
-    override val inventory: Inventory = Bukkit.createInventory(viewer, 9, Component.text("RainbowQuartz Menu"))
+    override var inventory: Inventory = Bukkit.createInventory(viewer, 9, Component.text("RainbowQuartz Menu"))
 
     init {
         if (viewer.hasPermission("rainbowquartz.editor")) {
@@ -37,7 +37,7 @@ class MainMenu(override val viewer: HumanEntity, private val plugin: Plugin) : I
             viewer.playSound(Sound.BLOCK_WOODEN_BUTTON_CLICK_ON)
             ItemEditorMenu(event.whoClicked, plugin).show()
         } else if (key == "close") {
-            viewer.playSound(Sound.BLOCK_WOODEN_BUTTON_CLICK_ON)
+            viewer.playSound(Sound.BLOCK_WOODEN_BUTTON_CLICK_OFF)
             event.whoClicked.closeInventory(InventoryCloseEvent.Reason.PLAYER)
         }
     }

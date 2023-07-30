@@ -1,27 +1,28 @@
 package dev.hoodieboi.rainbowquartz.plugin.gui.menu
 
 import dev.hoodieboi.rainbowquartz.RainbowQuartz
+import dev.hoodieboi.rainbowquartz.item.Item
 import dev.hoodieboi.rainbowquartz.item.ItemBuilder
 import dev.hoodieboi.rainbowquartz.plugin.gui.InventoryClickLinkEvent
 import dev.hoodieboi.rainbowquartz.plugin.gui.LinkItem
 import dev.hoodieboi.rainbowquartz.plugin.gui.menu.edititem.EditItemGeneralMenu
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
+import net.kyori.adventure.text.format.TextDecoration
 import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.Sound
 import org.bukkit.entity.HumanEntity
 import org.bukkit.event.EventHandler
 import org.bukkit.event.inventory.InventoryClickEvent
-import org.bukkit.event.inventory.InventoryType
 import org.bukkit.inventory.Inventory
-import org.bukkit.inventory.PlayerInventory
+import org.bukkit.inventory.ItemStack
 import org.bukkit.plugin.Plugin
 
 class ItemEditorMenu(override val viewer: HumanEntity, private val plugin: Plugin, private var page: Int) : ImmutableMenu() {
     constructor(viewer: HumanEntity, plugin: Plugin) : this(viewer, plugin, 0)
 
-    override val inventory: Inventory = Bukkit.createInventory(viewer, 54, Component.text("Item Editor"))
+    override var inventory: Inventory = Bukkit.createInventory(viewer, 54, Component.text("Item Editor"))
 
     init {
         // Stationary icons
@@ -63,16 +64,7 @@ class ItemEditorMenu(override val viewer: HumanEntity, private val plugin: Plugi
 
     @EventHandler
     fun onClick(event: InventoryClickEvent) {
-        if (event.slotType == InventoryType.SlotType.OUTSIDE
-            || event.currentItem == null) return
-        // Ignore player inventory
-        if (event.clickedInventory is PlayerInventory) {
-            // Allow player inventory manipulation
-            if (!event.isShiftClick) {
-                event.isCancelled = false
-            }
-            return
-        }
+        if (!LinkItem.isMenuItemClick(event)) return
 
         val item = event.currentItem ?: return
         val rainbowQuartzItem = RainbowQuartz.itemManager.getItem(item) ?: return
@@ -85,7 +77,7 @@ class ItemEditorMenu(override val viewer: HumanEntity, private val plugin: Plugi
     fun onLink(event: InventoryClickLinkEvent) {
         when (event.linkKey) {
             "back" -> {
-                viewer.playSound(Sound.BLOCK_WOODEN_BUTTON_CLICK_ON)
+                viewer.playSound(Sound.BLOCK_WOODEN_BUTTON_CLICK_OFF)
                 MainMenu(event.whoClicked, plugin).show()
                 return
             }
@@ -113,5 +105,15 @@ class ItemEditorMenu(override val viewer: HumanEntity, private val plugin: Plugi
             2,
             0
         )
+    }
+
+    private fun listedItem(item: Item): ItemStack {
+        val result = ItemStack(item.item)
+        val meta = result.itemMeta
+        val lore = meta.lore() ?: ArrayList()
+        lore.add(0, Component.text(item.key.toString()).color(NamedTextColor.DARK_PURPLE).decoration(TextDecoration.ITALIC, false))
+        meta.lore(lore)
+        result.itemMeta = meta
+        return result
     }
 }

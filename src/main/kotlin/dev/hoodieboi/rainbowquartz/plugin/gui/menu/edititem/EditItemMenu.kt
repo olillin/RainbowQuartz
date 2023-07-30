@@ -25,7 +25,7 @@ import org.bukkit.inventory.ItemStack
 import org.bukkit.plugin.Plugin
 
 abstract class EditItemMenu(final override val viewer: HumanEntity, protected val plugin: Plugin, protected val builder: ItemBuilder) : ImmutableMenu() {
-    final override val inventory: Inventory
+    final override var inventory: Inventory
 
     companion object {
         const val GENERAL_SLOT = 1
@@ -93,7 +93,7 @@ abstract class EditItemMenu(final override val viewer: HumanEntity, protected va
     fun onLinkEditItem(event: InventoryClickLinkEvent) {
         when (event.linkKey) {
             "back" -> {
-                viewer.playSound(Sound.BLOCK_WOODEN_BUTTON_CLICK_ON)
+                viewer.playSound(Sound.BLOCK_WOODEN_BUTTON_CLICK_OFF)
                 applyChanges()
                 ItemEditorMenu(viewer, plugin).show()
             }
@@ -115,14 +115,21 @@ abstract class EditItemMenu(final override val viewer: HumanEntity, protected va
     private fun applyChanges() {
         if (RainbowQuartz.itemManager.containsItem(builder.key)) {
             RainbowQuartz.itemManager.unregisterItem(builder.key)
-            viewer.sendMessage(Component.text("Changes applied to item").color(NamedTextColor.GREEN))
-            RainbowQuartz.itemManager.registerItem(builder.build())
+            viewer.sendMessage(Component.empty().color(NamedTextColor.WHITE)
+                .append(Component.text("Successfully applied changes to ").color(NamedTextColor.GREEN))
+                .append(builder.getName() ?: Component.text("item").color(NamedTextColor.GREEN)))
+        } else {
+            viewer.sendMessage(Component.empty().color(NamedTextColor.WHITE)
+                .append(Component.text("Successfully created ").color(NamedTextColor.GREEN))
+                .append(builder.getName() ?: Component.text("item").color(NamedTextColor.GREEN)))
         }
+        RainbowQuartz.itemManager.registerItem(builder.build())
     }
 
     @EventHandler(priority = EventPriority.LOW)
     fun onCloseEditItem(event: InventoryCloseEvent) {
         if (event.reason == InventoryCloseEvent.Reason.OPEN_NEW) return
+        sendCancelledMessage(viewer)
     }
 }
 
