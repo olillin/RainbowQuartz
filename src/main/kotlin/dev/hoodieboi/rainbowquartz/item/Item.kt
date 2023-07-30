@@ -20,14 +20,20 @@ import org.bukkit.inventory.meta.ItemMeta
 import org.bukkit.persistence.PersistentDataType
 import org.bukkit.plugin.*
 
-class Item(val key: NamespacedKey, val item: ItemStack, val recipes: List<Recipe>) : Keyed, ConfigurationSerializable {
+class Item(val key: NamespacedKey, item: ItemStack, recipes: List<Recipe>) : Keyed, ConfigurationSerializable {
     val handlers: MutableMap<Class<out Event>, HandlerList> = HashMap()
+
+    val item: ItemStack
+    val recipes: List<Recipe>
 
     init {
         // Set id
-        val meta = item.itemMeta
+        this.item = ItemStack(item)
+        val meta = this.item.itemMeta
         meta.rainbowQuartzId = key
-        item.itemMeta = meta
+        this.item.itemMeta = meta
+        // Recipes
+        this.recipes = recipes.toList()
     }
 
     companion object {

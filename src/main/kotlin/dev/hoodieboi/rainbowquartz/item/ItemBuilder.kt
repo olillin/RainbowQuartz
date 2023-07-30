@@ -12,11 +12,19 @@ import org.bukkit.enchantments.Enchantment
 import org.bukkit.inventory.ItemFlag
 import org.bukkit.inventory.ItemStack
 
-open class ItemBuilder(val key: NamespacedKey, protected val result: ItemStack, protected val recipes: MutableList<Recipe>) {
+open class ItemBuilder(val key: NamespacedKey, result: ItemStack, recipes: List<Recipe>) {
     constructor(key: NamespacedKey, itemStack: ItemStack) : this(key, itemStack, mutableListOf())
     constructor(key: NamespacedKey, material: Material) : this(key, ItemStack(material))
-    constructor(item: Item) : this(item.key, item.item, item.recipes.toMutableList())
+    constructor(item: Item) : this(item.key, item.item, item.recipes)
     constructor(builder: ItemBuilder) : this(builder.key, builder.result, builder.recipes)
+
+    protected val result: ItemStack
+    protected val recipes: MutableList<Recipe>
+
+    init {
+        this.result = ItemStack(result)
+        this.recipes = recipes.toMutableList()
+    }
 
     fun getMaterial() = result.type
     fun setMaterial(material: Material): ItemBuilder {
