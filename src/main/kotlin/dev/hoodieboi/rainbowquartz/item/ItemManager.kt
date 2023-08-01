@@ -58,6 +58,10 @@ class ItemManager(private val plugin: Plugin) {
         return getItem(key)
     }
 
+    fun getItems(): Set<Item> {
+        return items.values.toSet()
+    }
+
     fun containsItem(key: NamespacedKey): Boolean {
         return getItem(key) != null
     }

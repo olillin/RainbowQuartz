@@ -1,9 +1,11 @@
 package dev.hoodieboi.rainbowquartz
 
 import dev.hoodieboi.rainbowquartz.craft.*
-import dev.hoodieboi.rainbowquartz.event.EventDispatcher
+import dev.hoodieboi.rainbowquartz.event.ItemEventDispatcher
+import dev.hoodieboi.rainbowquartz.event.handler.PlayerPotionEffectEventHandler
 import dev.hoodieboi.rainbowquartz.item.ItemBuilder
 import dev.hoodieboi.rainbowquartz.item.ItemManager
+import dev.hoodieboi.rainbowquartz.item.rainbowQuartzId
 import dev.hoodieboi.rainbowquartz.plugin.command.GetItemCommand
 import dev.hoodieboi.rainbowquartz.plugin.command.MenuCommand
 import dev.hoodieboi.rainbowquartz.plugin.command.ViewItemCommand
@@ -40,17 +42,21 @@ open class RainbowQuartz : JavaPlugin(), Listener {
 
     companion object {
         lateinit var itemManager: ItemManager
+        lateinit var itemEventDispatcher: ItemEventDispatcher
         lateinit var guiEventDispatcher: GuiEventDispatcher
     }
 
     override fun onEnable() {
-        server.pluginManager.registerEvents(EventDispatcher(), this)
+        // Initialize event dispatchers
+        itemEventDispatcher = ItemEventDispatcher(this)
         guiEventDispatcher = GuiEventDispatcher(this)
         guiEventDispatcher.start()
-        registerCommands()
 
         itemManager = ItemManager(this)
         itemManager.reload()
+
+        // Initialize commands
+        registerCommands()
 
         generateTestResources()
     }
@@ -67,6 +73,7 @@ open class RainbowQuartz : JavaPlugin(), Listener {
         ConfigurationSerialization.registerClass(StonecuttingRecipe::class.java)
     }
 
+    @Suppress("SpellCheckingInspection")
     @Throws(IOException::class)
     private fun registerCommands() {
 
@@ -106,6 +113,10 @@ open class RainbowQuartz : JavaPlugin(), Listener {
         commodore.register(command, CommodoreFileReader.INSTANCE.parse<Any>(file))
     }
 
+    override fun onDisable() {
+        itemManager.clear()
+    }
+
     private fun generateTestResources() {
         // Create temp item
         itemManager.registerDefault(ItemBuilder(NamespacedKey(this, "quartz_sword"), Material.IRON_SWORD)
@@ -116,11 +127,21 @@ open class RainbowQuartz : JavaPlugin(), Listener {
                 .setIngredient('S', Material.STICK)
             ).build())
 
-        itemManager.registerDefault(ItemBuilder(NamespacedKey.minecraft("super_potato"), Material.BAKED_POTATO)
+        val superPotato = ItemBuilder(NamespacedKey.fromString("foo:super_potato")!!, Material.BAKED_POTATO)
             .setName(text("Super Potato").color(LIGHT_PURPLE).decoration(TextDecoration.ITALIC, false))
             .addRecipe(ShapedRecipe("PP", "PP")
-                .setIngredient('P', Material.POTATO)
-            ).build().registerEvents(this, this))
+                    .setIngredient('P', Material.POTATO)
+            ).build()
+        superPotato.listen(
+            PlayerDropItemEvent::class.java,
+            { event ->
+                event.itemDrop.itemStack onlyIf { it.itemMeta.rainbowQuartzId == superPotato.key }
+            },
+            PlayerPotionEffectEventHandler(
+                    PotionEffect(PotionEffectType.LEVITATION, 200, 0)
+            )
+        )
+        itemManager.registerDefault(superPotato)
 
         itemManager.registerDefault(ItemBuilder(NamespacedKey(this, "coal_lump"), Material.CHARCOAL)
             .setName("Lump of Coal")
