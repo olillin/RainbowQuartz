@@ -2,6 +2,7 @@ package dev.hoodieboi.rainbowquartz.event
 
 import dev.hoodieboi.rainbowquartz.RainbowQuartz
 import org.bukkit.event.Event
+import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
 import org.bukkit.plugin.Plugin
@@ -13,14 +14,14 @@ class ItemEventDispatcher(val plugin: Plugin) : Listener {
             eventType,
             this,
             EventPriority.HIGH,
-            { _: Listener, event: Event -> onEvent(event) },
+            { _: Listener, event: Event -> callEvent(event) },
             plugin
         )
     }
 
-    private fun onEvent(event: Event) {
+    private fun <T : Event> callEvent(event: T) {
         RainbowQuartz.itemManager.getItems().forEach { item ->
-            val handlers: Set<PredicatedEventHandler<out Event>>? = item.getHandlerPairs(event::class.java)
+            val handlers: Set<PredicatedEventHandler<in T>>? = item.getHandlerPairs(event::class.java)
             handlers?.forEach {
                 it.tryInvoke(event)
             }

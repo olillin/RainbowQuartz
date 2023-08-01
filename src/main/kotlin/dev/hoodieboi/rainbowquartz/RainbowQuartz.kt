@@ -118,7 +118,7 @@ open class RainbowQuartz : JavaPlugin(), Listener {
             ).build()
         superPotato.listen(
             PlayerDropItemEvent::class.java,
-            {event ->
+            { event ->
                 event.itemDrop.itemStack onlyIf { it.itemMeta.rainbowQuartzId == superPotato.key }
             },
             PlayerPotionEffectEventHandler(

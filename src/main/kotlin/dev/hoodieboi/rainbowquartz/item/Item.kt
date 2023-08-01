@@ -18,7 +18,7 @@ import org.bukkit.inventory.meta.ItemMeta
 import org.bukkit.persistence.PersistentDataType
 
 class Item(val key: NamespacedKey, val item: ItemStack, val recipes: List<Recipe>) : Keyed, ConfigurationSerializable {
-    private val handlers: MutableMap<Class<out Event>, MutableSet<PredicatedEventHandler<out Event>>> = HashMap()
+    private val handlers: MutableMap<Class<out Event>, MutableSet<PredicatedEventHandler<*>>> = HashMap()
 
     init {
         // Set id
@@ -67,10 +67,7 @@ class Item(val key: NamespacedKey, val item: ItemStack, val recipes: List<Recipe
      * @param predicate The predicate to check before calling the handler
      * @param handler What should happen when the predicate is successful
      */
-    fun <E : Event> listen(eventType: Class<E>, predicate: EventPredicate<E>, handler: EventHandler<E>) {
-        if (!Event::class.java.isAssignableFrom(eventType)) {
-            throw IllegalArgumentException()
-        }
+    fun <T : Event> listen(eventType: Class<T>, predicate: EventPredicate<T>, handler: EventHandler<T>) {
         @Suppress("UNCHECKED_CAST")
         RainbowQuartz.itemEventDispatcher.listen(eventType as Class<Event>)
         if (!handlers.containsKey(eventType)) {
@@ -79,8 +76,15 @@ class Item(val key: NamespacedKey, val item: ItemStack, val recipes: List<Recipe
         handlers[eventType]!!.add(PredicatedEventHandler(predicate, handler))
     }
 
-    fun getHandlerPairs(eventType: Class<out Event>): Set<PredicatedEventHandler<out Event>>? {
-        return handlers[eventType]
+    fun <T : Event> getHandlerPairs(eventType: Class<out T>): Set<PredicatedEventHandler<in T>>? {
+        val result: MutableSet<PredicatedEventHandler<in T>> = mutableSetOf()
+        val handler: Set<PredicatedEventHandler<*>> = handlers[eventType]
+                ?: return null
+        handler.forEach {
+            @Suppress("UNCHECKED_CAST")
+            result.add(it as PredicatedEventHandler<T>)
+        }
+        return result
     }
 
     override fun key(): Key {
