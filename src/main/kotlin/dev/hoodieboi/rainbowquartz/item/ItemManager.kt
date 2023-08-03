@@ -1,6 +1,7 @@
 package dev.hoodieboi.rainbowquartz.item
 
 import dev.hoodieboi.rainbowquartz.ItemConfigManager
+import dev.hoodieboi.rainbowquartz.RainbowQuartz
 import org.bukkit.Bukkit
 import org.bukkit.NamespacedKey
 import org.bukkit.inventory.ItemStack
@@ -30,6 +31,11 @@ class ItemManager(private val plugin: Plugin) {
         for (recipe in item.recipes) {
             Bukkit.addRecipe(recipe.asBukkitRecipe(item))
         }
+        // Add event handlers
+        for (eventType in item.getEventTypes()) {
+            RainbowQuartz.itemEventDispatcher.listen(eventType)
+        }
+
         saveToConfig()
     }
 

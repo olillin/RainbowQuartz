@@ -127,21 +127,19 @@ open class RainbowQuartz : JavaPlugin(), Listener {
                 .setIngredient('S', Material.STICK)
             ).build())
 
-        val superPotato = ItemBuilder(NamespacedKey.fromString("foo:super_potato")!!, Material.BAKED_POTATO)
+        itemManager.registerDefault(ItemBuilder(NamespacedKey.fromString("foo:super_potato")!!, Material.BAKED_POTATO)
             .setName(text("Super Potato").color(LIGHT_PURPLE).decoration(TextDecoration.ITALIC, false))
             .addRecipe(ShapedRecipe("PP", "PP")
                     .setIngredient('P', Material.POTATO)
-            ).build()
-        superPotato.listen(
-            PlayerDropItemEvent::class.java,
-            { event ->
-                event.itemDrop.itemStack onlyIf { it.itemMeta.rainbowQuartzId == superPotato.key }
-            },
-            PlayerPotionEffectEventHandler(
-                    PotionEffect(PotionEffectType.LEVITATION, 200, 0)
-            )
-        )
-        itemManager.registerDefault(superPotato)
+            ).addEventHandler(
+                PlayerDropItemEvent::class.java,
+                { event ->
+                    event.itemDrop.itemStack onlyIf { it.itemMeta.rainbowQuartzId == NamespacedKey.fromString("foo:super_potato")!! }
+                },
+                PlayerPotionEffectEventHandler(
+                        PotionEffect(PotionEffectType.LEVITATION, 200, 0)
+                )
+            ).build())
 
         itemManager.registerDefault(ItemBuilder(NamespacedKey(this, "coal_lump"), Material.CHARCOAL)
             .setName("Lump of Coal")

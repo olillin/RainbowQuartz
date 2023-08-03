@@ -1,6 +1,5 @@
 package dev.hoodieboi.rainbowquartz.item
 
-import dev.hoodieboi.rainbowquartz.RainbowQuartz
 import dev.hoodieboi.rainbowquartz.craft.Recipe
 import dev.hoodieboi.rainbowquartz.event.EventPredicate
 import dev.hoodieboi.rainbowquartz.event.PredicatedEventHandler
@@ -18,13 +17,16 @@ import org.bukkit.event.Event
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.ItemMeta
 import org.bukkit.persistence.PersistentDataType
-import org.bukkit.plugin.*
 
-class Item(val key: NamespacedKey, item: ItemStack, recipes: List<Recipe>) : Keyed, ConfigurationSerializable {
-    private val handlers: MutableMap<Class<out Event>, MutableSet<PredicatedEventHandler<*>>> = HashMap()
+class Item(val key: NamespacedKey, item: ItemStack, recipes: List<Recipe>, handlers: Map<Class<out Event>, Set<PredicatedEventHandler<*>>>) : Keyed, ConfigurationSerializable {
+    protected val handlers: MutableMap<Class<out Event>, MutableSet<PredicatedEventHandler<*>>>
 
     val item: ItemStack
     val recipes: List<Recipe>
+
+    constructor(key: NamespacedKey, item: ItemStack) : this(key, item, listOf(), mutableMapOf())
+    constructor(key: NamespacedKey, item: ItemStack, recipes: List<Recipe>) : this(key, item, recipes, mutableMapOf())
+    constructor(key: NamespacedKey, item: ItemStack, handlers: Map<Class<out Event>, Set<PredicatedEventHandler<*>>>) : this(key, item, listOf(), handlers)
 
     init {
         // Set id
@@ -34,6 +36,10 @@ class Item(val key: NamespacedKey, item: ItemStack, recipes: List<Recipe>) : Key
         this.item.itemMeta = meta
         // Recipes
         this.recipes = recipes.toList()
+        // Eventhandler
+        this.handlers = handlers.map {
+            it.key to it.value.toMutableSet()
+        }.toMap().toMutableMap()
     }
 
     companion object {
@@ -88,9 +94,7 @@ class Item(val key: NamespacedKey, item: ItemStack, recipes: List<Recipe>) : Key
      * @param predicate The predicate to check before calling the handler
      * @param handler What should happen when the predicate is successful
      */
-    fun <T : Event> listen(eventType: Class<T>, predicate: EventPredicate<T>, handler: EventHandler<T>) {
-        @Suppress("UNCHECKED_CAST")
-        RainbowQuartz.itemEventDispatcher.listen(eventType as Class<Event>)
+    fun <T : Event> addEventHandler(eventType: Class<T>, predicate: EventPredicate<T>, handler: EventHandler<T>) {
         if (!handlers.containsKey(eventType)) {
             handlers[eventType] = mutableSetOf()
         }
@@ -106,6 +110,10 @@ class Item(val key: NamespacedKey, item: ItemStack, recipes: List<Recipe>) : Key
             result.add(it as PredicatedEventHandler<T>)
         }
         return result
+    }
+
+    fun getEventTypes(): Set<Class<out Event>> {
+        return handlers.keys
     }
 
     override fun key(): Key {

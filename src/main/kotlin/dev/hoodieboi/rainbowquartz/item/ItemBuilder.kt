@@ -1,6 +1,10 @@
 package dev.hoodieboi.rainbowquartz.item
 
+import dev.hoodieboi.rainbowquartz.RainbowQuartz
 import dev.hoodieboi.rainbowquartz.craft.Recipe
+import dev.hoodieboi.rainbowquartz.event.EventPredicate
+import dev.hoodieboi.rainbowquartz.event.PredicatedEventHandler
+import dev.hoodieboi.rainbowquartz.event.handler.EventHandler
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.format.TextDecoration
@@ -9,21 +13,30 @@ import org.bukkit.NamespacedKey
 import org.bukkit.attribute.Attribute
 import org.bukkit.attribute.AttributeModifier
 import org.bukkit.enchantments.Enchantment
+import org.bukkit.event.Event
 import org.bukkit.inventory.ItemFlag
 import org.bukkit.inventory.ItemStack
 
-open class ItemBuilder(val key: NamespacedKey, result: ItemStack, recipes: List<Recipe>) {
-    constructor(key: NamespacedKey, itemStack: ItemStack) : this(key, itemStack, mutableListOf())
+open class ItemBuilder(val key: NamespacedKey, result: ItemStack, recipes: List<Recipe>, handlers: MutableMap<Class<out Event>, MutableSet<PredicatedEventHandler<*>>>) {
+    constructor(key: NamespacedKey, itemStack: ItemStack) : this(key, itemStack, mutableListOf(), mutableMapOf())
     constructor(key: NamespacedKey, material: Material) : this(key, ItemStack(material))
+    constructor(key: NamespacedKey, itemStack: ItemStack, recipes: List<Recipe>) : this(key, itemStack, recipes, mutableMapOf())
+    constructor(key: NamespacedKey, material: Material, recipes: List<Recipe>) : this(key, ItemStack(material), recipes, mutableMapOf())
+    constructor(key: NamespacedKey, itemStack: ItemStack, handlers: MutableMap<Class<out Event>, MutableSet<PredicatedEventHandler<*>>>) : this(key, itemStack, mutableListOf(), handlers)
+    constructor(key: NamespacedKey, material: Material, handlers: MutableMap<Class<out Event>, MutableSet<PredicatedEventHandler<*>>>) : this(key, ItemStack(material), mutableListOf(), handlers)
     constructor(item: Item) : this(item.key, item.item, item.recipes)
     constructor(builder: ItemBuilder) : this(builder.key, builder.result, builder.recipes)
 
     protected val result: ItemStack
     protected val recipes: MutableList<Recipe>
+    protected val handlers: MutableMap<Class<out Event>, MutableSet<PredicatedEventHandler<*>>>
 
     init {
         this.result = ItemStack(result)
         this.recipes = recipes.toMutableList()
+        this.handlers = handlers.map {
+            it.key to it.value.toMutableSet()
+        }.toMap().toMutableMap()
     }
 
     fun getMaterial() = result.type
@@ -222,9 +235,36 @@ open class ItemBuilder(val key: NamespacedKey, result: ItemStack, recipes: List<
         return this
     }
 
-    fun build(): Item {
-        return Item(key, result, recipes)
+    /**
+     * Register an [EventHandler] to be executed when an [EventPredicate] is successful
+     *
+     * @param eventType The event class
+     * @param predicate The predicate to check before calling the handler
+     * @param handler What should happen when the predicate is successful
+     */
+    fun <T : Event> addEventHandler(eventType: Class<T>, predicate: EventPredicate<T>, handler: EventHandler<T>): ItemBuilder {
+        if (!handlers.containsKey(eventType)) {
+            handlers[eventType] = mutableSetOf()
+        }
+        handlers[eventType]!!.add(PredicatedEventHandler(predicate, handler))
+        return this
     }
+
+    /**
+     * Register an [EventHandler] to be executed when an [EventPredicate] is successful
+     *
+     * @param eventType The event class
+     * @param predicate The predicate to check before calling the handler
+     * @param handler What should happen when the predicate is successful
+     */
+    fun <T : Event> removeEventHandler(eventType: Class<T>, predicate: EventPredicate<T>, handler: EventHandler<T>) {
+        if (!handlers.containsKey(eventType)) {
+            handlers[eventType] = mutableSetOf()
+        }
+        handlers[eventType]!!.add(PredicatedEventHandler(predicate, handler))
+    }
+
+    fun build(): Item = Item(key, result, recipes, handlers)
 
     override fun equals(other: Any?): Boolean {
         if (other !is ItemBuilder) return false

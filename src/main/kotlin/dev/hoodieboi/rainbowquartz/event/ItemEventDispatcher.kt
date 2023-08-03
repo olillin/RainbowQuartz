@@ -2,14 +2,13 @@ package dev.hoodieboi.rainbowquartz.event
 
 import dev.hoodieboi.rainbowquartz.RainbowQuartz
 import org.bukkit.event.Event
-import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
 import org.bukkit.plugin.Plugin
 
 class ItemEventDispatcher(val plugin: Plugin) : Listener {
 
-    fun listen(eventType: Class<Event>) {
+    fun listen(eventType: Class<out Event>) {
         plugin.server.pluginManager.registerEvent(
             eventType,
             this,
