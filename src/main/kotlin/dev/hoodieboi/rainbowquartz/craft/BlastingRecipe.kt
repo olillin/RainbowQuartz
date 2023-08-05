@@ -19,6 +19,7 @@ class BlastingRecipe(input: RecipeChoice) : CookingRecipe(input) {
 
     companion object {
         const val id = "blasting"
+        val material = Material.BLAST_FURNACE
 
         /**
          * Required method for configuration serialization

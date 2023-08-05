@@ -15,6 +15,7 @@ class SmithingTransformRecipe(base: RecipeChoice, addition: RecipeChoice, var te
 
     companion object {
         const val id = "smithing_transform"
+        val material = Material.SMITHING_TABLE
 
         /**
          * Required method for configuration serialization
@@ -107,5 +108,27 @@ class SmithingTransformRecipe(base: RecipeChoice, addition: RecipeChoice, var te
             "addition" to addition.itemStack,
             "template" to template.itemStack
         )
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as SmithingTransformRecipe
+
+        if (group != other.group) return false
+        if (base != other.base) return false
+        if (addition != other.addition) return false
+        if (template != other.template) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = group.hashCode()
+        result = 31 * result + base.hashCode()
+        result = 31 * result + addition.hashCode()
+        result = 31 * result + template.hashCode()
+        return result
     }
 }

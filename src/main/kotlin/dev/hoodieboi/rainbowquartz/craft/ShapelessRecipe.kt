@@ -17,6 +17,7 @@ class ShapelessRecipe : Recipe() {
 
     companion object {
         const val id = "shapeless"
+        val material = Material.CRAFTING_TABLE
 
         /**
          * Required method for configuration serialization
@@ -128,5 +129,23 @@ class ShapelessRecipe : Recipe() {
                 it.itemStack
             }
         )
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as ShapelessRecipe
+
+        if (group != other.group) return false
+        if (ingredients != other.ingredients) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = group.hashCode()
+        result = 31 * result + ingredients.hashCode()
+        return result
     }
 }

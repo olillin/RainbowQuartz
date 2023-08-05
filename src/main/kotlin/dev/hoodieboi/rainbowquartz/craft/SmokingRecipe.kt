@@ -15,6 +15,7 @@ class SmokingRecipe(input: RecipeChoice) : CookingRecipe(input) {
 
     companion object {
         const val id = "smoking"
+        val material = Material.SMOKER
 
         /**
          * Required method for configuration serialization

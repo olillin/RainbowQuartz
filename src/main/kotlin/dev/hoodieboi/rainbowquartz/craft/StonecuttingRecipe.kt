@@ -16,6 +16,7 @@ class StonecuttingRecipe(var input: RecipeChoice) : Recipe() {
 
     companion object {
         const val id = "stonecutting"
+        val material = Material.STONECUTTER
 
         /**
          * Required method for configuration serialization
@@ -73,5 +74,23 @@ class StonecuttingRecipe(var input: RecipeChoice) : Recipe() {
         return mutableMapOf(
             "input" to input.itemStack
         )
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as StonecuttingRecipe
+
+        if (group != other.group) return false
+        if (input != other.input) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = group.hashCode()
+        result = 31 * result + input.hashCode()
+        return result
     }
 }

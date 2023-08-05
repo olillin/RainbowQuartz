@@ -15,6 +15,7 @@ class FurnaceRecipe(input: RecipeChoice) : CookingRecipe(input) {
 
     companion object {
         const val id = "furnace"
+        val material = Material.FURNACE
 
         /**
          * Required method for configuration serialization
