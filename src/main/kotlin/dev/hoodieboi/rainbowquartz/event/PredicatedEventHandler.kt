@@ -1,6 +1,5 @@
 package dev.hoodieboi.rainbowquartz.event
 
-import dev.hoodieboi.rainbowquartz.event.handler.EventHandler
 import org.bukkit.event.Event
 
 data class PredicatedEventHandler<T : Event>(val predicate: EventPredicate<T>, val handler: EventHandler<T>) {
