@@ -1,4 +1,4 @@
-package dev.hoodieboi.rainbowquartz.event.handler
+package dev.hoodieboi.rainbowquartz.event
 
 import org.bukkit.event.Event
 import org.bukkit.inventory.ItemStack

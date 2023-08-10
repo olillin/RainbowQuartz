@@ -3,7 +3,7 @@ package dev.hoodieboi.rainbowquartz.item
 import dev.hoodieboi.rainbowquartz.craft.Recipe
 import dev.hoodieboi.rainbowquartz.event.EventPredicate
 import dev.hoodieboi.rainbowquartz.event.PredicatedEventHandler
-import dev.hoodieboi.rainbowquartz.event.handler.EventHandler
+import dev.hoodieboi.rainbowquartz.event.EventHandler
 import net.kyori.adventure.key.Key
 import net.kyori.adventure.key.Keyed
 import net.kyori.adventure.text.Component
