@@ -221,6 +221,11 @@ open class ItemBuilder(val key: NamespacedKey, result: ItemStack, recipes: List<
         return this
     }
 
+    fun removeRecipe(recipe: Recipe): ItemBuilder {
+        recipes.remove(recipe)
+        return this
+    }
+
     fun removeRecipe(recipeType: Class<out Recipe>): ItemBuilder {
         val iterator = recipes.iterator()
 
@@ -232,6 +237,11 @@ open class ItemBuilder(val key: NamespacedKey, result: ItemStack, recipes: List<
             }
         }
 
+        return this
+    }
+
+    fun clearRecipes(): ItemBuilder {
+        recipes.clear()
         return this
     }
 

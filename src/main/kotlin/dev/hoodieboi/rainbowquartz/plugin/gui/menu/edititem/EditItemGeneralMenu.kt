@@ -4,6 +4,7 @@ import dev.hoodieboi.rainbowquartz.item.ItemBuilder
 import dev.hoodieboi.rainbowquartz.plugin.gui.InventoryClickLinkEvent
 import dev.hoodieboi.rainbowquartz.plugin.gui.LinkItem
 import dev.hoodieboi.rainbowquartz.plugin.gui.enchanted
+import dev.hoodieboi.rainbowquartz.plugin.gui.menu.Menu
 import dev.hoodieboi.rainbowquartz.plugin.gui.menu.playSound
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.TranslatableComponent
@@ -14,13 +15,12 @@ import org.bukkit.entity.HumanEntity
 import org.bukkit.event.EventHandler
 import org.bukkit.plugin.Plugin
 
-class EditItemGeneralMenu(viewer: HumanEntity, plugin: Plugin, builder: ItemBuilder) :
-    EditItemMenu(viewer, plugin, builder) {
+class EditItemGeneralMenu(viewer: HumanEntity, builder: ItemBuilder, override val previousMenu: Menu?) :
+    EditItemMenu(viewer, builder) {
 
     init {
         val itemName = (builder.build().item.displayName() as? TranslatableComponent)?.args()?.get(0)
             ?: Component.text("Name Unavailable").color(NamedTextColor.DARK_GRAY)
-
 
         // Items
         inventory.setItem(GENERAL_SLOT, inventory.getItem(GENERAL_SLOT)?.enchanted())
@@ -58,7 +58,7 @@ class EditItemGeneralMenu(viewer: HumanEntity, plugin: Plugin, builder: ItemBuil
         when (event.linkKey) {
             "rename" -> {
                 viewer.playSound(Sound.BLOCK_WOODEN_BUTTON_CLICK_ON)
-                RenameItemMenu(viewer, plugin, builder).show()
+                RenameItemMenu(viewer, builder, this).show()
             }
         }
     }

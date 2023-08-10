@@ -17,10 +17,15 @@ import org.bukkit.event.EventHandler
 import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.ItemStack
-import org.bukkit.plugin.Plugin
 
-class ItemEditorMenu(override val viewer: HumanEntity, private val plugin: Plugin, private var page: Int) : ImmutableMenu() {
-    constructor(viewer: HumanEntity, plugin: Plugin) : this(viewer, plugin, 0)
+/**
+ * @param viewer The viewer of the inventory
+ * @param page The 0-based
+ */
+class ItemEditorMenu(override val viewer: HumanEntity, private var page: Int,
+                     override val previousMenu: Menu?
+) : ImmutableMenu() {
+    constructor(viewer: HumanEntity, previousMenu: Menu?) : this(viewer, 0, previousMenu)
 
     override var inventory: Inventory = Bukkit.createInventory(viewer, 54, Component.text("Item Editor"))
 
@@ -70,7 +75,7 @@ class ItemEditorMenu(override val viewer: HumanEntity, private val plugin: Plugi
         val rainbowQuartzItem = RainbowQuartz.itemManager.getItem(item) ?: return
         event.isCancelled = true
         viewer.playSound(Sound.BLOCK_WOODEN_BUTTON_CLICK_ON)
-        EditItemGeneralMenu(event.whoClicked, plugin, ItemBuilder(rainbowQuartzItem)).show()
+        EditItemGeneralMenu(event.whoClicked, ItemBuilder(rainbowQuartzItem), this).show()
     }
 
     @EventHandler
@@ -78,7 +83,7 @@ class ItemEditorMenu(override val viewer: HumanEntity, private val plugin: Plugi
         when (event.linkKey) {
             "back" -> {
                 viewer.playSound(Sound.BLOCK_WOODEN_BUTTON_CLICK_OFF)
-                MainMenu(event.whoClicked, plugin).show()
+                back()
                 return
             }
             "next_page" -> {

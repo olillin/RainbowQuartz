@@ -5,6 +5,7 @@ import dev.hoodieboi.rainbowquartz.item.ItemBuilder
 import dev.hoodieboi.rainbowquartz.plugin.gui.InventoryClickLinkEvent
 import dev.hoodieboi.rainbowquartz.plugin.gui.LinkItem
 import dev.hoodieboi.rainbowquartz.plugin.gui.enchanted
+import dev.hoodieboi.rainbowquartz.plugin.gui.menu.Menu
 import dev.hoodieboi.rainbowquartz.plugin.gui.menu.Paginator
 import dev.hoodieboi.rainbowquartz.plugin.gui.menu.playSound
 import net.kyori.adventure.text.Component
@@ -18,12 +19,11 @@ import org.bukkit.event.EventHandler
 import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.inventory.ItemStack
 import org.bukkit.persistence.PersistentDataType
-import org.bukkit.plugin.Plugin
 
-class EditItemRecipesMenu(viewer: HumanEntity, plugin: Plugin, builder: ItemBuilder) : EditItemMenu(viewer, plugin, builder) {
+class EditItemRecipesMenu(viewer: HumanEntity, builder: ItemBuilder, override val previousMenu: Menu?) : EditItemMenu(viewer, builder) {
     var page = 0
     companion object {
-        val recipeKeyLocation: NamespacedKey = NamespacedKey.fromString("rainbowquartz_i:recipe_key")!!
+        val recipeKeyLocation: NamespacedKey = NamespacedKey.fromString("rainbowquartz:recipe_key")!!
     }
 
     init {
@@ -46,6 +46,10 @@ class EditItemRecipesMenu(viewer: HumanEntity, plugin: Plugin, builder: ItemBuil
     @EventHandler
     fun onLink(event: InventoryClickLinkEvent) {
         when (event.linkKey) {
+            "add_recipe" -> {
+                viewer.playSound(Sound.BLOCK_WOODEN_BUTTON_CLICK_ON)
+                SelectRecipeTypeMenu(viewer, builder, this).show()
+            }
             "previous_page" -> {
                 page--
                 renderPaginator()
@@ -55,10 +59,6 @@ class EditItemRecipesMenu(viewer: HumanEntity, plugin: Plugin, builder: ItemBuil
                 page++
                 renderPaginator()
                 viewer.playSound(Sound.ITEM_BOOK_PAGE_TURN)
-            }
-            "add_recipe" -> {
-                renderPaginator()
-                viewer.playSound(Sound.BLOCK_WOODEN_BUTTON_CLICK_ON)
             }
         }
     }

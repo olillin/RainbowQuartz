@@ -3,10 +3,10 @@ package dev.hoodieboi.rainbowquartz.plugin.gui.menu.edititem
 import dev.hoodieboi.rainbowquartz.RainbowQuartz
 import dev.hoodieboi.rainbowquartz.item.Item
 import dev.hoodieboi.rainbowquartz.item.ItemBuilder
-import dev.hoodieboi.rainbowquartz.item.rainbowQuartzId
 import dev.hoodieboi.rainbowquartz.plugin.gui.InventoryClickLinkEvent
 import dev.hoodieboi.rainbowquartz.plugin.gui.LinkItem
 import dev.hoodieboi.rainbowquartz.plugin.gui.menu.ImmutableMenu
+import dev.hoodieboi.rainbowquartz.plugin.gui.menu.Menu
 import dev.hoodieboi.rainbowquartz.plugin.gui.menu.playSound
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
@@ -24,10 +24,10 @@ import org.bukkit.event.inventory.PrepareAnvilEvent
 import org.bukkit.inventory.AnvilInventory
 import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.ItemStack
-import org.bukkit.plugin.Plugin
 
-class RenameItemMenu(override val viewer: HumanEntity, val plugin: Plugin, private val builder: ItemBuilder) :
-    ImmutableMenu() {
+class RenameItemMenu(
+    override val viewer: HumanEntity, private var builder: ItemBuilder, override val previousMenu: Menu?
+) : ImmutableMenu() {
     override var inventory: Inventory = Bukkit.createInventory(null, InventoryType.CHEST)
     override fun show() {
         RainbowQuartz.guiEventDispatcher.registerMenu(this)
@@ -62,7 +62,7 @@ class RenameItemMenu(override val viewer: HumanEntity, val plugin: Plugin, priva
 
     @EventHandler
     fun onClick(event: InventoryClickEvent) {
-        if (event.slotType == InventoryType.SlotType.RESULT && event.currentItem?.itemMeta?.rainbowQuartzId != null) {
+        if (event.slotType == InventoryType.SlotType.RESULT) {
             val anvilInventory = event.inventory as? AnvilInventory
             if (anvilInventory == null) {
                 event.whoClicked.sendMessage(
@@ -78,7 +78,8 @@ class RenameItemMenu(override val viewer: HumanEntity, val plugin: Plugin, priva
                 return
             }
             viewer.playSound(Sound.UI_CARTOGRAPHY_TABLE_TAKE_RESULT)
-            EditItemGeneralMenu(event.whoClicked, plugin, builder.setName(name)).show()
+            builder.setName(name)
+            back()
         }
     }
 
@@ -87,18 +88,18 @@ class RenameItemMenu(override val viewer: HumanEntity, val plugin: Plugin, priva
         when (event.linkKey) {
             "cancel" -> {
                 viewer.playSound(Sound.BLOCK_WOODEN_BUTTON_CLICK_OFF)
-                EditItemGeneralMenu(event.whoClicked, plugin, builder).show()
+                back()
             }
         }
     }
 
     @EventHandler
     fun onClose(event: InventoryCloseEvent) {
-        event.view.topInventory.clear() // Stop items from being refunded into player inventory
+        event.view.topInventory.clear() // Stop items from getting refunded into player inventory
         if (event.reason == Reason.OPEN_NEW) return
 
-        val task = Runnable { EditItemGeneralMenu(viewer, plugin, builder).show() }
-        Bukkit.getScheduler().runTaskLater(plugin, task, 1)
+        val task = Runnable { back() }
+        Bukkit.getScheduler().runTaskLater(RainbowQuartz.plugin, task, 1)
     }
 
     private fun parseName(inventory: AnvilInventory): Component? {

@@ -32,6 +32,7 @@ import org.bukkit.event.player.PlayerDropItemEvent
 import org.bukkit.inventory.EquipmentSlot
 import org.bukkit.inventory.ItemFlag
 import org.bukkit.inventory.ItemStack
+import org.bukkit.plugin.Plugin
 import org.bukkit.plugin.java.JavaPlugin
 import org.bukkit.potion.PotionEffect
 import org.bukkit.potion.PotionEffectType
@@ -44,9 +45,12 @@ open class RainbowQuartz : JavaPlugin(), Listener {
         lateinit var itemManager: ItemManager
         lateinit var itemEventDispatcher: ItemEventDispatcher
         lateinit var guiEventDispatcher: GuiEventDispatcher
+        lateinit var plugin: Plugin
     }
 
     override fun onEnable() {
+        plugin = this
+
         // Initialize event dispatchers
         itemEventDispatcher = ItemEventDispatcher(this)
         guiEventDispatcher = GuiEventDispatcher(this)

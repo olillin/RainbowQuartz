@@ -58,6 +58,10 @@ class GuiEventDispatcher(val plugin: Plugin) : Listener {
         menus.add(menu)
     }
 
+    fun unregisterMenu(menu: Menu) {
+        menus.remove(menu)
+    }
+
     @EventHandler
     fun onEvent(event: InventoryEvent) {
         if (event is InventoryClickEvent && !event.isCancelled
