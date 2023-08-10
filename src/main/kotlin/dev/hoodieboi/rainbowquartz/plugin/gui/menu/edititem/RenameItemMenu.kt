@@ -99,7 +99,7 @@ class RenameItemMenu(
         if (event.reason == Reason.OPEN_NEW) return
 
         val task = Runnable { back() }
-        Bukkit.getScheduler().runTaskLater(RainbowQuartz.plugin, task, 1)
+        Bukkit.getScheduler().runTaskLater(RainbowQuartz.instance, task, 1)
     }
 
     private fun parseName(inventory: AnvilInventory): Component? {

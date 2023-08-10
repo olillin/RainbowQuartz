@@ -18,12 +18,16 @@ import org.bukkit.plugin.java.JavaPlugin
 import java.io.IOException
 import java.util.*
 
-open class RainbowQuartz : JavaPlugin(), Listener {
-
+class RainbowQuartz : JavaPlugin(), Listener {
     companion object {
         lateinit var itemManager: ItemManager
         lateinit var itemEventDispatcher: ItemEventDispatcher
         lateinit var guiEventDispatcher: GuiEventDispatcher
+        internal lateinit var instance: RainbowQuartz
+    }
+
+    init {
+        instance = this
     }
 
     override fun onEnable() {
