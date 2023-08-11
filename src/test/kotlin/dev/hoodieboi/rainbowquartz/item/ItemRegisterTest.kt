@@ -41,13 +41,15 @@ class ItemRegisterTest {
 
     @Test
     fun registerRecipe() {
-        RainbowQuartz.itemManager.registerItem(ItemBuilder(key, Material.GOLDEN_SWORD)
-            .addRecipe(ShapedRecipe(" G ", "BGB", " R ")
+        val recipe = ShapedRecipe(" G ", "BGB", " R ")
                 .setIngredient('G', Material.GOLD_INGOT)
                 .setIngredient('B', Material.BLAZE_POWDER)
-                .setIngredient('R', Material.BLAZE_ROD))
-            .build())
+                .setIngredient('R', Material.BLAZE_ROD)
+        val item = ItemBuilder(key, Material.GOLDEN_SWORD)
+                .addRecipe(recipe)
+                .build()
+        RainbowQuartz.itemManager.registerItem(item)
 
-        assertNotNull(server.getRecipe(NamespacedKey.fromString("$key.shaped")!!))
+        assertNotNull(server.getRecipe(recipe.key(item)))
     }
 }

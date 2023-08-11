@@ -48,7 +48,7 @@ class EditItemRecipesMenu(viewer: HumanEntity, builder: ItemBuilder, override va
         when (event.linkKey) {
             "add_recipe" -> {
                 viewer.playSound(Sound.BLOCK_WOODEN_BUTTON_CLICK_ON)
-                SelectRecipeTypeMenu(viewer, builder, this).show()
+                SelectRecipeTypeMenu(viewer, builder, this).open()
             }
             "previous_page" -> {
                 page--

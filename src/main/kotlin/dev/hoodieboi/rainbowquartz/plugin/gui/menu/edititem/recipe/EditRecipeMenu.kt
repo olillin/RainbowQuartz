@@ -1,13 +1,10 @@
 package dev.hoodieboi.rainbowquartz.plugin.gui.menu.edititem.recipe
 
 import dev.hoodieboi.rainbowquartz.craft.Recipe
-import dev.hoodieboi.rainbowquartz.craft.ShapedRecipe
 import dev.hoodieboi.rainbowquartz.item.ItemBuilder
-import dev.hoodieboi.rainbowquartz.item.rainbowQuartzId
 import dev.hoodieboi.rainbowquartz.plugin.gui.InventoryClickLinkEvent
 import dev.hoodieboi.rainbowquartz.plugin.gui.LinkItem
 import dev.hoodieboi.rainbowquartz.plugin.gui.menu.ImmutableMenu
-import dev.hoodieboi.rainbowquartz.plugin.gui.menu.Menu
 import dev.hoodieboi.rainbowquartz.plugin.gui.menu.edititem.ConfirmationMenu
 import dev.hoodieboi.rainbowquartz.plugin.gui.menu.edititem.SelectRecipeTypeMenu
 import dev.hoodieboi.rainbowquartz.plugin.gui.menu.playSound
@@ -16,7 +13,6 @@ import net.kyori.adventure.text.format.NamedTextColor
 import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.Sound
-import org.bukkit.entity.HumanEntity
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 import org.bukkit.event.inventory.InventoryClickEvent
@@ -122,7 +118,7 @@ abstract class EditRecipeMenu : ImmutableMenu() {
 
             "back" -> {
                 viewer.playSound(Sound.BLOCK_WOODEN_BUTTON_CLICK_OFF)
-                previousMenu.show()
+                previousMenu.open()
             }
         }
     }

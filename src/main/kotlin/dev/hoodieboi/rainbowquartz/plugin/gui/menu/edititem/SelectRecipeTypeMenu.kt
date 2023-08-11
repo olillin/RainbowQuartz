@@ -36,11 +36,11 @@ class SelectRecipeTypeMenu(override val viewer: HumanEntity, private val builder
         when (event.linkKey) {
             "shaped" -> {
                 viewer.playSound(Sound.BLOCK_WOODEN_BUTTON_CLICK_ON)
-                ShapedRecipeMenu(viewer, builder, this).show()
+                ShapedRecipeMenu(viewer, builder, this).open()
             }
             "back" -> {
                 viewer.playSound(Sound.BLOCK_WOODEN_BUTTON_CLICK_OFF)
-                previousMenu.show()
+                previousMenu.open()
             }
         }
     }

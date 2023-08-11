@@ -76,7 +76,7 @@ class GuiEventDispatcher(val plugin: Plugin) : Listener {
         val iterator = menus.iterator()
         while (iterator.hasNext()) {
             val menu = iterator.next()
-            if (menu.inView(event)) {
+            if (menu.activeViewers() == event.viewers) {
                 invokeEvent(event, menu)
                 if (event is InventoryCloseEvent) {
                     iterator.remove()

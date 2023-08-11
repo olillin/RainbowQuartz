@@ -6,7 +6,6 @@ import dev.hoodieboi.rainbowquartz.item.rainbowQuartzId
 import dev.hoodieboi.rainbowquartz.plugin.gui.InventoryClickLinkEvent
 import dev.hoodieboi.rainbowquartz.plugin.gui.LinkItem
 import dev.hoodieboi.rainbowquartz.plugin.gui.menu.ImmutableMenu
-import dev.hoodieboi.rainbowquartz.plugin.gui.menu.ItemEditorMenu
 import dev.hoodieboi.rainbowquartz.plugin.gui.menu.playSound
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.TranslatableComponent
@@ -23,7 +22,6 @@ import org.bukkit.event.inventory.InventoryCloseEvent
 import org.bukkit.event.inventory.InventoryOpenEvent
 import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.ItemStack
-import org.bukkit.plugin.Plugin
 
 abstract class EditItemMenu(final override val viewer: HumanEntity, protected var builder: ItemBuilder) :
     ImmutableMenu() {
@@ -115,15 +113,15 @@ abstract class EditItemMenu(final override val viewer: HumanEntity, protected va
             }
             "general" -> {
                 viewer.playSound(Sound.BLOCK_WOODEN_BUTTON_CLICK_ON)
-                EditItemGeneralMenu(viewer, builder, previousMenu).show()
+                EditItemGeneralMenu(viewer, builder, previousMenu).open()
             }
             "recipes" -> {
                 viewer.playSound(Sound.BLOCK_WOODEN_BUTTON_CLICK_ON)
-                EditItemRecipesMenu(viewer, builder, previousMenu).show()
+                EditItemRecipesMenu(viewer, builder, previousMenu).open()
             }
             "actions" -> {
                 viewer.playSound(Sound.BLOCK_WOODEN_BUTTON_CLICK_ON)
-                EditItemActionsMenu(viewer, builder, previousMenu).show()
+                EditItemActionsMenu(viewer, builder, previousMenu).open()
             }
         }
     }

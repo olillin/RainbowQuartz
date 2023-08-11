@@ -5,7 +5,6 @@ import dev.hoodieboi.rainbowquartz.item.ItemBuilder
 import dev.hoodieboi.rainbowquartz.item.rainbowQuartzId
 import dev.hoodieboi.rainbowquartz.plugin.gui.InventoryClickLinkEvent
 import dev.hoodieboi.rainbowquartz.plugin.gui.LinkItem
-import dev.hoodieboi.rainbowquartz.plugin.gui.menu.ImmutableMenu
 import dev.hoodieboi.rainbowquartz.plugin.gui.menu.InsertMenu
 import dev.hoodieboi.rainbowquartz.plugin.gui.menu.edititem.SelectRecipeTypeMenu
 import dev.hoodieboi.rainbowquartz.plugin.gui.menu.playSound
@@ -18,12 +17,9 @@ import org.bukkit.Sound
 import org.bukkit.entity.HumanEntity
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
-import org.bukkit.event.inventory.InventoryClickEvent
-import org.bukkit.event.inventory.InventoryDragEvent
 import org.bukkit.event.inventory.InventoryEvent
 import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.ItemStack
-import org.bukkit.inventory.PlayerInventory
 
 class ShapedRecipeMenu(
     override val viewer: HumanEntity,
@@ -74,7 +70,7 @@ class ShapedRecipeMenu(
                 viewer.playSound(Sound.BLOCK_WOODEN_BUTTON_CLICK_ON)
                 val recipe = createRecipe()
                 builder.addRecipe(recipe)
-                previousMenu.previousMenu.show()
+                previousMenu.open()
             }
 
             "add_amount_1" -> {
@@ -119,7 +115,7 @@ class ShapedRecipeMenu(
 
             "back" -> {
                 viewer.playSound(Sound.BLOCK_WOODEN_BUTTON_CLICK_OFF)
-                previousMenu.show()
+                previousMenu.open()
             }
         }
     }

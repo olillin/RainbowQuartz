@@ -13,7 +13,6 @@ import org.bukkit.Material
 import org.bukkit.Sound
 import org.bukkit.entity.HumanEntity
 import org.bukkit.event.EventHandler
-import org.bukkit.plugin.Plugin
 
 class EditItemGeneralMenu(viewer: HumanEntity, builder: ItemBuilder, override val previousMenu: Menu?) :
     EditItemMenu(viewer, builder) {
@@ -58,7 +57,7 @@ class EditItemGeneralMenu(viewer: HumanEntity, builder: ItemBuilder, override va
         when (event.linkKey) {
             "rename" -> {
                 viewer.playSound(Sound.BLOCK_WOODEN_BUTTON_CLICK_ON)
-                RenameItemMenu(viewer, builder, this).show()
+                RenameItemMenu(viewer, builder, this).open()
             }
         }
     }

@@ -75,7 +75,7 @@ class ItemEditorMenu(override val viewer: HumanEntity, private var page: Int,
         val rainbowQuartzItem = RainbowQuartz.itemManager.getItem(item) ?: return
         event.isCancelled = true
         viewer.playSound(Sound.BLOCK_WOODEN_BUTTON_CLICK_ON)
-        EditItemGeneralMenu(event.whoClicked, ItemBuilder(rainbowQuartzItem), this).show()
+        EditItemGeneralMenu(event.whoClicked, ItemBuilder(rainbowQuartzItem), this).open()
     }
 
     @EventHandler

@@ -29,7 +29,7 @@ class RenameItemMenu(
     override val viewer: HumanEntity, private var builder: ItemBuilder, override val previousMenu: Menu?
 ) : ImmutableMenu() {
     override var inventory: Inventory = Bukkit.createInventory(null, InventoryType.CHEST)
-    override fun show() {
+    override fun open() {
         RainbowQuartz.guiEventDispatcher.registerMenu(this)
         viewer.openAnvil(null, true)
         inventory = viewer.openInventory.topInventory
