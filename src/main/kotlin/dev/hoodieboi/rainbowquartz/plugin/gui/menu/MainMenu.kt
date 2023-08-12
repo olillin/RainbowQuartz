@@ -29,7 +29,6 @@ class MainMenu(override val viewer: HumanEntity) : ImmutableMenu() {
     @EventHandler
     fun onLink(event: InventoryClickLinkEvent) {
         val key = event.linkKey
-        event.whoClicked.sendMessage(Component.text("ID: $key"))
 
         if (key == "editor") {
             viewer.playSound(Sound.BLOCK_WOODEN_BUTTON_CLICK_ON)
