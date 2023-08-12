@@ -11,12 +11,13 @@ import org.bukkit.event.Listener
 import org.bukkit.event.enchantment.EnchantItemEvent
 import org.bukkit.event.enchantment.PrepareItemEnchantEvent
 import org.bukkit.event.inventory.*
+import org.bukkit.inventory.Inventory
 import org.bukkit.plugin.Plugin
 import java.lang.reflect.InvocationTargetException
 import java.lang.reflect.Method
 
 class GuiEventDispatcher(val plugin: Plugin) : Listener {
-    val supportedEvents = setOf(
+    private val supportedEvents = setOf(
         AnvilDamagedEvent::class,
         CraftItemEvent::class,
         EnchantItemEvent::class,
@@ -37,7 +38,7 @@ class GuiEventDispatcher(val plugin: Plugin) : Listener {
     private val menus = mutableSetOf<Menu>()
 
     /**
-     * Start handling events
+     * Start handling events.
      */
     fun start() {
         for (eventType in supportedEvents) {
@@ -54,61 +55,76 @@ class GuiEventDispatcher(val plugin: Plugin) : Listener {
         }
     }
 
-    fun registerMenu(menu: Menu) {
-        menus.add(menu)
+    /**
+     * Register a menu to handle events for.
+     *
+     * @param menu The menu
+     * @return `true` if the menu has been registered, `false` if the element is already registered.
+     */
+    fun registerMenu(menu: Menu): Boolean {
+        return menus.add(menu)
     }
 
-    fun unregisterMenu(menu: Menu) {
-        menus.remove(menu)
+    /**
+     * Unregister a menu to no longer handle events for.
+     *
+     * @param menu The menu
+     * @return `true` if the menu has been unregistered; `false` if it was not registered.
+     */
+    fun unregisterMenu(menu: Menu): Boolean {
+        return menus.remove(menu)
     }
 
+    /**
+     * Called when any inventory event happens.
+     */
     @EventHandler
     fun onEvent(event: InventoryEvent) {
+        // Link events
         if (event is InventoryClickEvent && !event.isCancelled
             && event !is InventoryClickLinkEvent
             && LinkItem.isMenuItemClick(event)) {
             try {
                 onEvent(InventoryClickLinkEvent(event))
             } catch (_: IllegalArgumentException) {
-                // Clicked item does not meet requirements
+                // Clicked item is not a link item
             }
         }
-        val iterator = menus.iterator()
-        while (iterator.hasNext()) {
-            val menu = iterator.next()
-            if (menu.activeViewers() == event.viewers) {
-                invokeEvent(event, menu)
-                if (event is InventoryCloseEvent) {
-                    iterator.remove()
-                }
-                break
-            }
+
+        val menu: Menu = getMenu(event.view.topInventory) ?: return
+        invokeEvent(event, menu)
+        if (event is InventoryCloseEvent) {
+            unregisterMenu(menu)
         }
     }
 
+    /**
+     * Get the menu associated with an inventory.
+     *
+     * @param inventory The inventory
+     */
+    fun getMenu(inventory: Inventory): Menu? = menus.firstOrNull { it.activeViewers() == inventory.viewers }
+
+    /**
+     * Invoke the event handlers on a menu.
+     *
+     * @param event The event to use
+     * @param menu The menu to invoke the event handlers on
+     */
     fun invokeEvent(event: InventoryEvent, menu: Menu) {
         if (event is Cancellable && event.isCancelled) return
-        // Filter
-        val menuMethods = menu::class.java.methods.filter { method ->
+        // Filter and sort
+        val methods = menu::class.java.methods.filter { method ->
             method.isAnnotationPresent(EventHandler::class.java)
-                    && method.parameters.size == 1
-                    && method.parameters.any { it.type.isAssignableFrom(event.javaClass) }
-        }
-        // Categorize by priority
-        val prioritizedMethods = HashMap<EventPriority, MutableList<Method>>()
-        for (method in menuMethods) {
+                && method.parameters.size == 1
+                && method.parameters[0].type.isAssignableFrom(event.javaClass)
+        }.filterNot {method ->
+            event is Cancellable && event.isCancelled
+                && method.getAnnotation(EventHandler::class.java).ignoreCancelled
+        }.sortedByDescending { method ->
             val annotation = method.getAnnotation(EventHandler::class.java)!!
-            val priority = annotation.priority
-            if (prioritizedMethods.containsKey(priority)) {
-                prioritizedMethods[priority]!!.add(method)
-            } else {
-                prioritizedMethods[priority] = mutableListOf(method)
-            }
+            annotation.priority.slot
         }
-        val methods = prioritizedMethods.toList()
-            .sortedByDescending { (key, _) -> key.slot }
-            .map { it.second }
-            .flatten()
         // Invoke handlers
         for (method in methods) {
             try {
