@@ -8,6 +8,7 @@ infix fun <T> T?.onlyIf(condition: Boolean): T? {
     else null
 }
 
+
 infix fun <T> T?.onlyIf(condition: (T) -> Boolean): T? {
     this ?: return null
     return this.onlyIf(condition(this))

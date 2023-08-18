@@ -4,6 +4,7 @@ import dev.hoodieboi.rainbowquartz.RainbowQuartz
 import dev.hoodieboi.rainbowquartz.item.Item
 import dev.hoodieboi.rainbowquartz.item.ItemBuilder
 import dev.hoodieboi.rainbowquartz.plugin.gui.InventoryClickLinkEvent
+import dev.hoodieboi.rainbowquartz.plugin.gui.KeyMenu
 import dev.hoodieboi.rainbowquartz.plugin.gui.LinkItem
 import dev.hoodieboi.rainbowquartz.plugin.gui.menu.edititem.EditItemGeneralMenu
 import net.kyori.adventure.text.Component
@@ -22,6 +23,7 @@ import org.bukkit.inventory.ItemStack
  * @param viewer The viewer of the inventory
  * @param page The 0-based
  */
+@KeyMenu
 class ItemEditorMenu(override val viewer: HumanEntity, private var page: Int,
                      override val previousMenu: Menu?
 ) : ImmutableMenu() {
@@ -81,10 +83,8 @@ class ItemEditorMenu(override val viewer: HumanEntity, private var page: Int,
     @EventHandler
     fun onLink(event: InventoryClickLinkEvent) {
         when (event.linkKey) {
-            "back" -> {
-                viewer.playSound(Sound.BLOCK_WOODEN_BUTTON_CLICK_OFF)
-                back()
-                return
+            "create_item" -> {
+                NewItemMenu(viewer, this).open()
             }
             "next_page" -> {
                 viewer.playSound(Sound.ITEM_BOOK_PAGE_TURN)
@@ -95,6 +95,11 @@ class ItemEditorMenu(override val viewer: HumanEntity, private var page: Int,
                 viewer.playSound(Sound.ITEM_BOOK_PAGE_TURN)
                 page--
                 renderPaginator()
+            }
+            "back" -> {
+                viewer.playSound(Sound.BLOCK_WOODEN_BUTTON_CLICK_OFF)
+                back()
+                return
             }
         }
     }

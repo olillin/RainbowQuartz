@@ -1,6 +1,7 @@
 package dev.hoodieboi.rainbowquartz.plugin.gui.menu
 
 import dev.hoodieboi.rainbowquartz.plugin.gui.InventoryClickLinkEvent
+import dev.hoodieboi.rainbowquartz.plugin.gui.KeyMenu
 import dev.hoodieboi.rainbowquartz.plugin.gui.LinkItem
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
@@ -11,6 +12,7 @@ import org.bukkit.entity.HumanEntity
 import org.bukkit.event.EventHandler
 import org.bukkit.inventory.Inventory
 
+@KeyMenu
 class MainMenu(override val viewer: HumanEntity) : ImmutableMenu() {
     override var inventory: Inventory = Bukkit.createInventory(viewer, 9, Component.text("RainbowQuartz Menu"))
     override val previousMenu = null

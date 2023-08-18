@@ -107,9 +107,8 @@ abstract class EditItemMenu(final override val viewer: HumanEntity, protected va
     fun onLinkEditItem(event: InventoryClickLinkEvent) {
         when (event.linkKey) {
             "back" -> {
-                viewer.playSound(Sound.BLOCK_WOODEN_BUTTON_CLICK_OFF)
                 applyChanges()
-                back()
+                backToKey()
             }
             "general" -> {
                 viewer.playSound(Sound.BLOCK_WOODEN_BUTTON_CLICK_ON)
