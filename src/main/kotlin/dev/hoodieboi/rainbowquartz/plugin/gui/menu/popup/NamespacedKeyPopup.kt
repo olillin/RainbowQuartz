@@ -26,8 +26,9 @@ import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.ItemFlag
 import org.bukkit.inventory.ItemStack
 
+/** A [Popup] menu that provides a [NamespacedKey] */
 class NamespacedKeyPopup(
-    override val viewer: HumanEntity, private val placeholder: NamespacedKey?, override val previousMenu: Menu?, override val callback: (NamespacedKey) -> Unit
+        override val viewer: HumanEntity, private val placeholder: NamespacedKey? = null, private val defaultNamespace: String = "rainbowquartz", override val previousMenu: Menu?, override val callback: (NamespacedKey) -> Unit
 ) : ImmutableMenu(), Popup<NamespacedKey> {
     override var inventory: Inventory = Bukkit.createInventory(null, InventoryType.CHEST)
     override fun open() {
@@ -46,21 +47,10 @@ class NamespacedKeyPopup(
         stack.itemMeta = meta
         anvilInventory.firstItem = stack
         // Set item in second slot
-        anvilInventory.secondItem = LinkItem.makeLink(
-            "cancel",
-            Material.BARRIER,
-            Component.text("Cancel").color(RED)
-        )
+        anvilInventory.secondItem = LinkItem.CANCEL
         // Update GUI
         onPrepareAnvil(PrepareAnvilEvent(viewer.openInventory, null))
     }
-
-    /**
-     * Make a white, non-italicized [TextComponent] from a nullable string.
-     *
-     * @return the new text component.
-     */
-    private fun String?.toComponent(): TextComponent = Component.text(this ?: "").color(WHITE).decoration(ITALIC, false)
 
     @EventHandler
     fun onPrepareAnvil(event: PrepareAnvilEvent) {
@@ -123,12 +113,16 @@ class NamespacedKeyPopup(
     }
 
     private fun parseText(inventory: AnvilInventory): NamespacedKey? {
-        val text: String = (inventory.renameText?.trim() onlyIf { it.isNotEmpty() })
+        var text: String = (inventory.renameText?.trim() onlyIf { it.isNotEmpty() })
             ?: (placeholder?.toString() onlyIf { it.isNotEmpty() })
             ?: return null
         if (!text.matches(Regex("^([0-9a-z_.-]+:)?[0-9a-z_.-]+(/[0-9a-z_.-]+)*$"))) {
             // Invalid resource location
             return null
+        }
+        if (!text.contains(':')) {
+            // No namespace provided
+            text = "$defaultNamespace:$text"
         }
         return NamespacedKey.fromString(text)
     }
