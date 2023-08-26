@@ -34,7 +34,7 @@ class ShapedRecipeMenu(
         get() = gridSlots
 
     private val grid: List<ItemStack?>
-        get() = gridSlots.map { inventory.getItem(it) }
+        get() = gridSlots.map { untransformItem(inventory.getItem(it)) }
 
     companion object {
         private const val PREVIEW_SLOT = 15
