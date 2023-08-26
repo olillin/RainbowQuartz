@@ -5,6 +5,7 @@ import dev.hoodieboi.rainbowquartz.item.ItemBuilder
 import dev.hoodieboi.rainbowquartz.plugin.gui.InventoryClickLinkEvent
 import dev.hoodieboi.rainbowquartz.plugin.gui.LinkItem
 import dev.hoodieboi.rainbowquartz.plugin.gui.menu.edititem.EditItemGeneralMenu
+import dev.hoodieboi.rainbowquartz.plugin.gui.menu.popup.MaterialPopup
 import dev.hoodieboi.rainbowquartz.plugin.gui.menu.popup.NamespacedKeyPopup
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor.*
@@ -26,22 +27,34 @@ class NewItemMenu(override val viewer: HumanEntity, override val previousMenu: M
     fun onOpen(event: InventoryOpenEvent) {
         inventory.fill(EMPTY_PANEL)
 
+        var lore: MutableList<Component> = mutableListOf()
+        if (id == null) {
+            lore.add(Component.text("No id selected").color(RED))
+        } else {
+            lore.add(Component.text("Current id"))
+            lore.add(Component.text(" ")
+                .append(Component.text(id?.toString() ?: "").color(AQUA))
+            )
+        }
         inventory.setItem(11, LinkItem.makeLink("set_id",
             Material.NAME_TAG,
             Component.text("Set item id").color(LIGHT_PURPLE),
-            listOf(
-                Component.text("Current id"),
-                Component.text(" ").append(Component.text(id?.toString() ?: "").color(AQUA))
-            )
+            lore
         ))
 
+        lore = mutableListOf()
+        if (material == null) {
+            lore.add(Component.text("No material selected").color(RED))
+        } else {
+            lore.add(Component.text("Current material"))
+            lore.add(Component.text(" ")
+                .append(Component.translatable(material!!).color(YELLOW))
+            )
+        }
         inventory.setItem(12, LinkItem.makeLink("set_material",
             material ?: Material.IRON_INGOT,
             Component.text("Set material").color(LIGHT_PURPLE),
-            listOf(
-                Component.text("Current material"),
-                Component.text(" ").append(Component.text(material?.name ?: "").color(YELLOW))
-            )
+            lore
         ))
 
         inventory.setItem(17, invalidInputMessage(id, material)?.let{message -> LinkItem.makeLink(
@@ -60,14 +73,16 @@ class NewItemMenu(override val viewer: HumanEntity, override val previousMenu: M
     fun onLink(event: InventoryClickLinkEvent) {
         when (event.linkKey) {
             "set_id" -> {
-                NamespacedKeyPopup(viewer, id, this) {key ->
+                NamespacedKeyPopup(viewer, placeholder = id, previousMenu = this) {key ->
                     id = key
                 }.open()
             }
             "set_material" -> {
-                viewer.sendMessage("set_material")
+                MaterialPopup(viewer, material, previousMenu = this) {material ->
+                    this.material = material
+                }.open()
             }
-            "complete" -> {
+            "submit" -> {
                 // Check input
                 val key = id
                 val itemMaterial = material
@@ -97,7 +112,7 @@ class NewItemMenu(override val viewer: HumanEntity, override val previousMenu: M
      */
     private fun invalidInputMessage(key: NamespacedKey?, material: Material?): String? {
         return if (key == null) {
-            "No key has been chosen"
+            "No id has been chosen"
         } else if (material == null) {
             "No material has been chosen"
         } else if (!material.isItem) {
