@@ -95,7 +95,9 @@ object LinkItem {
 
     val BACK get() = makeLink("back", Material.ARROW, Component.text("Back").color(NamedTextColor.RED))
     val CLOSE get() = makeLink("close", Material.BARRIER, Component.text("Close menu").color(NamedTextColor.RED))
-    val SUBMIT get() = makeLink("submit", Material.LIME_TERRACOTTA, Component.text("Submit").color(NamedTextColor.GREEN))
+    val SUBMIT get() = makeLink("submit", Material.LIME_GLAZED_TERRACOTTA, Component.text("Submit").color(NamedTextColor.GREEN))
+    val CANCEL get() = makeLink("cancel", Material.BARRIER, Component.text("Cancel").color(NamedTextColor.RED)
+    )
 }
 
 fun ItemStack.enchanted(): ItemStack {

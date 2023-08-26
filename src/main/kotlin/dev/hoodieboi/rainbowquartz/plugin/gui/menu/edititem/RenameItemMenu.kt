@@ -41,11 +41,7 @@ class RenameItemMenu(
                 .build().item
         } else builder.build().item
         // Set item in second slot
-        anvilInventory.secondItem = LinkItem.makeLink(
-            "cancel",
-            Material.BARRIER,
-            Component.text("Cancel").color(NamedTextColor.RED)
-        )
+        anvilInventory.secondItem = LinkItem.CANCEL
     }
 
     private fun unformatName(name: Component): Component {
