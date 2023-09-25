@@ -7,6 +7,7 @@ import dev.hoodieboi.rainbowquartz.plugin.gui.LinkItem
 import dev.hoodieboi.rainbowquartz.plugin.gui.enchanted
 import dev.hoodieboi.rainbowquartz.plugin.gui.menu.Menu
 import dev.hoodieboi.rainbowquartz.plugin.gui.menu.playSound
+import dev.hoodieboi.rainbowquartz.plugin.gui.menu.popup.ItemNamePopup
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.TranslatableComponent
 import net.kyori.adventure.text.format.NamedTextColor
@@ -59,7 +60,9 @@ class EditItemGeneralMenu(viewer: HumanEntity, builder: ItemBuilder, override va
         when (event.linkKey) {
             "rename" -> {
                 viewer.playSound(Sound.BLOCK_WOODEN_BUTTON_CLICK_ON)
-                RenameItemMenu(viewer, builder, this).open()
+                ItemNamePopup(viewer, placeholder = builder.getName(), previousMenu = this) { name ->
+                    builder.setName(name)
+                }.open()
             }
         }
     }

@@ -17,6 +17,7 @@ import org.bukkit.event.Event
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.ItemMeta
 import org.bukkit.persistence.PersistentDataType
+import org.jetbrains.annotations.Contract
 
 class Item(val key: NamespacedKey, item: ItemStack, recipes: List<Recipe>, handlers: Map<Class<out Event>, Set<PredicatedEventHandler<*>>>) : Keyed, ConfigurationSerializable {
     protected val handlers: MutableMap<Class<out Event>, MutableSet<PredicatedEventHandler<*>>>
@@ -43,11 +44,30 @@ class Item(val key: NamespacedKey, item: ItemStack, recipes: List<Recipe>, handl
     }
 
     companion object {
+        /**
+         * Apply default formatting to an item [name].
+         *
+         * @see unformatName
+         */
         @JvmStatic
+        @Contract("_ -> this")
         fun formatName(name: Component?): Component? {
             return name
                 ?.color(name.color() ?: NamedTextColor.WHITE)
                 ?.decorationIfAbsent(TextDecoration.ITALIC, TextDecoration.State.FALSE)
+        }
+
+        /**
+         * Remove formatting from an item name.
+         *
+         * @see formatName
+         */
+        @JvmStatic
+        @Contract("_ -> this")
+        fun unformatName(name: Component?): Component? {
+            return name?.color(
+                name.color().takeUnless { it == NamedTextColor.WHITE }
+            )
         }
 
         /**
