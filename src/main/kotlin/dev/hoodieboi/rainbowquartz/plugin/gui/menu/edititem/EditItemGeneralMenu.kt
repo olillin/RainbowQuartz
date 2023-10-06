@@ -15,12 +15,14 @@ import org.bukkit.Material
 import org.bukkit.Sound
 import org.bukkit.entity.HumanEntity
 import org.bukkit.event.EventHandler
+import org.bukkit.event.inventory.InventoryOpenEvent
 
 @KeyMenu
 class EditItemGeneralMenu(viewer: HumanEntity, builder: ItemBuilder, override val previousMenu: Menu?) :
     EditItemMenu(viewer, builder) {
 
-    init {
+    @EventHandler
+    fun onOpen(event: InventoryOpenEvent) {
         val itemName = (builder.build().item.displayName() as? TranslatableComponent)?.args()?.get(0)
             ?: Component.text("Name Unavailable").color(NamedTextColor.DARK_GRAY)
 

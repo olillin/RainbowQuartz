@@ -11,6 +11,7 @@ import org.bukkit.Material
 import org.bukkit.entity.HumanEntity
 import org.bukkit.event.EventHandler
 import org.bukkit.event.inventory.InventoryCloseEvent
+import org.bukkit.event.inventory.InventoryOpenEvent
 import org.bukkit.inventory.Inventory
 
 class ConfirmationMenu(
@@ -21,7 +22,8 @@ class ConfirmationMenu(
 ) : ImmutableMenu() {
     override var inventory: Inventory = Bukkit.createInventory(viewer, 9, Component.text(message))
 
-    init {
+    @EventHandler
+    fun onOpen(event: InventoryOpenEvent) {
         inventory.setItem(4, LinkItem.makeLink(
             "yes",
             Material.LIME_CONCRETE,

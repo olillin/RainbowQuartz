@@ -7,6 +7,7 @@ import dev.hoodieboi.rainbowquartz.event.EventHandler
 import net.kyori.adventure.key.Key
 import net.kyori.adventure.key.Keyed
 import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.TranslatableComponent
 import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.format.TextDecoration
 import org.bukkit.Bukkit
@@ -172,6 +173,10 @@ class Item(val key: NamespacedKey, item: ItemStack, recipes: List<Recipe>, handl
         result = 31 * result + result.hashCode()
         result = 31 * result + recipes.hashCode()
         return result
+    }
+
+    fun displayNameComponent(): Component? {
+        return (item.displayName() as? TranslatableComponent)?.args()?.get(0)
     }
 }
 

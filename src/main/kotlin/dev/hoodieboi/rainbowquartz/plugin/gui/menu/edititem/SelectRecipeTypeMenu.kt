@@ -14,12 +14,14 @@ import org.bukkit.Bukkit
 import org.bukkit.Sound
 import org.bukkit.entity.HumanEntity
 import org.bukkit.event.EventHandler
+import org.bukkit.event.inventory.InventoryOpenEvent
 import org.bukkit.inventory.Inventory
 
 class SelectRecipeTypeMenu(override val viewer: HumanEntity, private val builder: ItemBuilder, override val previousMenu: EditItemMenu) : ImmutableMenu() {
     override var inventory: Inventory = Bukkit.createInventory(viewer, 18, Component.text("Select recipe type"))
 
-    init {
+    @EventHandler
+    fun onOpen(event: InventoryOpenEvent) {
         inventory.addItem(
             LinkItem.makeLink(
                 "shaped",

@@ -18,6 +18,7 @@ import org.bukkit.Sound
 import org.bukkit.entity.HumanEntity
 import org.bukkit.event.EventHandler
 import org.bukkit.event.inventory.InventoryClickEvent
+import org.bukkit.event.inventory.InventoryOpenEvent
 import org.bukkit.inventory.ItemStack
 import org.bukkit.persistence.PersistentDataType
 
@@ -28,7 +29,8 @@ class EditItemRecipesMenu(viewer: HumanEntity, builder: ItemBuilder, override va
         val recipeKeyLocation: NamespacedKey = NamespacedKey.fromString("rainbowquartz:recipe_key")!!
     }
 
-    init {
+    @EventHandler
+    fun onOpen(event: InventoryOpenEvent) {
         inventory.setItem(RECIPES_SLOT, inventory.getItem(RECIPES_SLOT)?.enchanted())
 
         inventory.setItem(8, LinkItem.makeLink(

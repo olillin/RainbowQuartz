@@ -70,13 +70,14 @@ class ItemNamePopup(
         return Item.formatName(legacySerializer.deserialize(input))!!
     }
 
+    @EventHandler
     override fun onClickTextPopup(event: InventoryClickEvent) {
         if (event.slotType != InventoryType.SlotType.RESULT) return
 
         val name: Component? = parseInput(inventory.renameText)
         if (name == null) {
             // Invalid input
-            viewer.sendMessage(Component.text("Name must be different from what it was").color(NamedTextColor.RED))
+            viewer.sendMessage(Component.text("Name must be different from old name").color(NamedTextColor.RED))
             viewer.playSound(Sound.BLOCK_ANVIL_PLACE)
             return
         }

@@ -18,6 +18,7 @@ import org.bukkit.entity.HumanEntity
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 import org.bukkit.event.inventory.InventoryEvent
+import org.bukkit.event.inventory.InventoryOpenEvent
 import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.ItemStack
 
@@ -36,20 +37,8 @@ class ShapedRecipeMenu(
     private val grid: List<ItemStack?>
         get() = gridSlots.map { untransformItem(inventory.getItem(it)) }
 
-    companion object {
-        private const val PREVIEW_SLOT = 15
-        private val gridSlots: List<Int>
-            = listOf(1, 2, 3, 10, 11, 12, 19, 20, 21)
-
-        private const val CREATE_SLOT = 17
-        private val CREATE_BUTTON = LinkItem.makeLink(
-            "submit",
-            Material.CRAFTING_TABLE,
-            Component.text("Create recipe").color(NamedTextColor.GREEN)
-        )
-    }
-
-    init {
+    @EventHandler
+    fun onOpen(event: InventoryOpenEvent) {
         inventory.setItem(0, EMPTY_PANEL)
         inventory.setItem(4, EMPTY_PANEL)
         inventory.setItem(13, EMPTY_PANEL)
@@ -201,6 +190,19 @@ class ShapedRecipeMenu(
             resultAmount,
             5,
             0
+        )
+    }
+
+    companion object {
+        private const val PREVIEW_SLOT = 15
+        private val gridSlots: List<Int>
+                = listOf(1, 2, 3, 10, 11, 12, 19, 20, 21)
+
+        private const val CREATE_SLOT = 17
+        private val CREATE_BUTTON = LinkItem.makeLink(
+            "submit",
+            Material.CRAFTING_TABLE,
+            Component.text("Create recipe").color(NamedTextColor.GREEN)
         )
     }
 }

@@ -1,22 +1,17 @@
 package dev.hoodieboi.rainbowquartz.plugin.gui.menu.popup
 
 import dev.hoodieboi.rainbowquartz.RainbowQuartz
-import dev.hoodieboi.rainbowquartz.onlyIf
 import dev.hoodieboi.rainbowquartz.plugin.gui.InventoryClickLinkEvent
 import dev.hoodieboi.rainbowquartz.plugin.gui.LinkItem
 import dev.hoodieboi.rainbowquartz.plugin.gui.menu.ImmutableMenu
 import dev.hoodieboi.rainbowquartz.plugin.gui.menu.Menu
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor.RED
-import org.bukkit.Bukkit
-import org.bukkit.Material
-import org.bukkit.NamespacedKey
 import org.bukkit.entity.HumanEntity
 import org.bukkit.event.EventHandler
 import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.event.inventory.InventoryCloseEvent
 import org.bukkit.event.inventory.InventoryCloseEvent.Reason
-import org.bukkit.event.inventory.InventoryType
 import org.bukkit.event.inventory.InventoryType.SlotType
 import org.bukkit.event.inventory.PrepareAnvilEvent
 import org.bukkit.inventory.AnvilInventory
@@ -26,7 +21,7 @@ import org.bukkit.inventory.ItemStack
 abstract class TextPopup<T>(
         override val viewer: HumanEntity, private val placeholder: T? = null, override val previousMenu: Menu?, override val callback: (T) -> Unit
 ) : ImmutableMenu(), Popup<T> {
-    override var inventory: AnvilInventory = Bukkit.createInventory(null, InventoryType.ANVIL) as AnvilInventory
+    override lateinit var inventory: AnvilInventory
     final override fun open() {
         inventory = viewer.openAnvil(null, true)!!.topInventory as AnvilInventory
         RainbowQuartz.guiEventDispatcher.registerMenu(this)

@@ -15,7 +15,9 @@ import org.bukkit.Material
 import org.bukkit.Sound
 import org.bukkit.entity.HumanEntity
 import org.bukkit.event.EventHandler
+import org.bukkit.event.EventPriority
 import org.bukkit.event.inventory.InventoryClickEvent
+import org.bukkit.event.inventory.InventoryOpenEvent
 import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.ItemStack
 
@@ -31,7 +33,8 @@ class ItemEditorMenu(override val viewer: HumanEntity, private var page: Int,
 
     override var inventory: Inventory = Bukkit.createInventory(viewer, 54, Component.text("Item Editor"))
 
-    init {
+    @EventHandler
+    fun onOpen(event: InventoryOpenEvent) {
         // Stationary icons
         inventory.setItem(0, LinkItem.makeLink(
             "create_item",

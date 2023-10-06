@@ -1,6 +1,7 @@
 package dev.hoodieboi.rainbowquartz.plugin.gui.menu.edititem
 
 import dev.hoodieboi.rainbowquartz.RainbowQuartz
+import dev.hoodieboi.rainbowquartz.item.Item
 import dev.hoodieboi.rainbowquartz.item.ItemBuilder
 import dev.hoodieboi.rainbowquartz.item.rainbowQuartzId
 import dev.hoodieboi.rainbowquartz.plugin.gui.InventoryClickLinkEvent
@@ -25,35 +26,22 @@ import org.bukkit.inventory.ItemStack
 
 abstract class EditItemMenu(final override val viewer: HumanEntity, protected var builder: ItemBuilder) :
     ImmutableMenu() {
-    final override var inventory: Inventory
+    final override var inventory: Inventory = Bukkit.createInventory(
+        viewer,
+        27,
+    )
 
-    companion object {
-        const val GENERAL_SLOT = 1
-        const val RECIPES_SLOT = 9
-        const val ACTIONS_SLOT = 10
-
-        fun sendCancelledMessage(recipient: HumanEntity) {
-            recipient.playSound(Sound.BLOCK_ANVIL_LAND)
-            recipient.sendMessage(
-                Component.text("Item editor was closed, no changes have been applied")
-                    .color(NamedTextColor.RED)
-            )
+    @EventHandler(priority = EventPriority.HIGHEST)
+    fun onOpenEditItemMenu(event: InventoryOpenEvent) {
+        // Update inventory title
+        val itemName: Component? = builder.build().item.itemMeta.displayName()
+        val title: Component = if (itemName != null) {
+            Component.text("Editing item: ").append(itemName.compact().color(null))
+        } else {
+            Component.text("Editing item")
         }
-    }
+        inventory = Bukkit.createInventory(viewer, 27, title)
 
-    init {
-        // Initialize inventory
-        val itemName = (builder.build().item.displayName() as? TranslatableComponent)?.args()?.get(0)
-            ?: Component.text("Name Unavailable").color(NamedTextColor.DARK_GRAY)
-        inventory = Bukkit.createInventory(
-            viewer,
-            27,
-            Component.text("Editing item: ").append(itemName.compact().removeStyle())
-        )
-    }
-
-    @EventHandler
-    fun onOpen(event: InventoryOpenEvent) {
         // Create preview panel
         val previewPanel = ItemStack(Material.PURPLE_STAINED_GLASS_PANE)
         var meta = previewPanel.itemMeta
@@ -126,21 +114,22 @@ abstract class EditItemMenu(final override val viewer: HumanEntity, protected va
     }
 
     private fun applyChanges() {
-        val item = builder.build()
+        val item: Item = builder.build()
         if (RainbowQuartz.itemManager.containsItem(builder.key)) {
             // No changes have been made
-            if (item.hashCode() == RainbowQuartz.itemManager.getItem(builder.key).hashCode()) {
+            if (item == RainbowQuartz.itemManager.getItem(builder.key)) {
+                viewer.sendMessage(Component.text("No changes have been made").color(NamedTextColor.RED))
                 return
             }
             // Re-register item
             RainbowQuartz.itemManager.unregisterItem(builder.key)
             viewer.sendMessage(Component.empty().color(NamedTextColor.WHITE)
                 .append(Component.text("Successfully applied changes to ").color(NamedTextColor.GREEN))
-                .append(builder.getName() ?: Component.text("item").color(NamedTextColor.GREEN)))
+                .append(item.displayNameComponent() ?: Component.text("item").color(NamedTextColor.GREEN)))
         } else {
             viewer.sendMessage(Component.empty().color(NamedTextColor.WHITE)
                 .append(Component.text("Successfully created ").color(NamedTextColor.GREEN))
-                .append(builder.getName() ?: Component.text("item").color(NamedTextColor.GREEN)))
+                .append(item.displayNameComponent() ?: Component.text("item").color(NamedTextColor.GREEN)))
         }
         RainbowQuartz.itemManager.registerItem(item)
     }
@@ -149,6 +138,20 @@ abstract class EditItemMenu(final override val viewer: HumanEntity, protected va
     fun onCloseEditItem(event: InventoryCloseEvent) {
         if (event.reason == InventoryCloseEvent.Reason.OPEN_NEW) return
         sendCancelledMessage(viewer)
+    }
+
+    companion object {
+        const val GENERAL_SLOT = 1
+        const val RECIPES_SLOT = 9
+        const val ACTIONS_SLOT = 10
+
+        fun sendCancelledMessage(recipient: HumanEntity) {
+            recipient.playSound(Sound.BLOCK_ANVIL_LAND)
+            recipient.sendMessage(
+                Component.text("Item editor was closed, no changes have been applied")
+                    .color(NamedTextColor.RED)
+            )
+        }
     }
 }
 
