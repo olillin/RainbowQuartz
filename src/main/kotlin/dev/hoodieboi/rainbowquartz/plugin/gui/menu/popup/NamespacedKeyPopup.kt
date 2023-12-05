@@ -11,6 +11,7 @@ import org.bukkit.Material
 import org.bukkit.NamespacedKey
 import org.bukkit.Sound
 import org.bukkit.entity.HumanEntity
+import org.bukkit.event.EventHandler
 import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.event.inventory.InventoryType
 import org.bukkit.inventory.ItemFlag
@@ -64,6 +65,7 @@ class NamespacedKeyPopup(
         return NamespacedKey.fromString(text)
     }
 
+    @EventHandler
     override fun onClickTextPopup(event: InventoryClickEvent) {
         if (event.slotType != InventoryType.SlotType.RESULT) return
 
