@@ -3,7 +3,6 @@ package dev.hoodieboi.rainbowquartz.plugin.gui.menu.edititem
 import dev.hoodieboi.rainbowquartz.craft.*
 import dev.hoodieboi.rainbowquartz.item.ItemBuilder
 import dev.hoodieboi.rainbowquartz.plugin.gui.InventoryClickLinkEvent
-import dev.hoodieboi.rainbowquartz.plugin.gui.KeyMenu
 import dev.hoodieboi.rainbowquartz.plugin.gui.LinkItem
 import dev.hoodieboi.rainbowquartz.plugin.gui.enchanted
 import dev.hoodieboi.rainbowquartz.plugin.gui.menu.Menu
@@ -22,7 +21,6 @@ import org.bukkit.event.inventory.InventoryOpenEvent
 import org.bukkit.inventory.ItemStack
 import org.bukkit.persistence.PersistentDataType
 
-@KeyMenu
 class EditItemRecipesMenu(viewer: HumanEntity, builder: ItemBuilder, override val previousMenu: Menu?) : EditItemMenu(viewer, builder) {
     var page = 0
     companion object {

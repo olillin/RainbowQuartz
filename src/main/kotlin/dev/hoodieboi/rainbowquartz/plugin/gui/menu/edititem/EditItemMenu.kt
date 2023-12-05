@@ -7,6 +7,7 @@ import dev.hoodieboi.rainbowquartz.item.rainbowQuartzId
 import dev.hoodieboi.rainbowquartz.plugin.gui.InventoryClickLinkEvent
 import dev.hoodieboi.rainbowquartz.plugin.gui.LinkItem
 import dev.hoodieboi.rainbowquartz.plugin.gui.menu.ImmutableMenu
+import dev.hoodieboi.rainbowquartz.plugin.gui.menu.ItemEditorMenu
 import dev.hoodieboi.rainbowquartz.plugin.gui.menu.playSound
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.TranslatableComponent
@@ -96,7 +97,7 @@ abstract class EditItemMenu(final override val viewer: HumanEntity, protected va
         when (event.linkKey) {
             "back" -> {
                 applyChanges()
-                backToKey()
+                backToPredicate(ItemEditorMenu(viewer, null)) { it is ItemEditorMenu }
             }
             "general" -> {
                 viewer.playSound(Sound.BLOCK_WOODEN_BUTTON_CLICK_ON)

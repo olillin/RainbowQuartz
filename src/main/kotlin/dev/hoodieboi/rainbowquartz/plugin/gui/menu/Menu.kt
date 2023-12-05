@@ -1,7 +1,6 @@
 package dev.hoodieboi.rainbowquartz.plugin.gui.menu
 
 import dev.hoodieboi.rainbowquartz.RainbowQuartz
-import dev.hoodieboi.rainbowquartz.plugin.gui.KeyMenu
 import net.kyori.adventure.text.Component
 import org.bukkit.Material
 import org.bukkit.Sound
@@ -46,21 +45,29 @@ abstract class Menu {
     }
 
     /**
-     * Make the viewer open the previous menu in the menu tree with the [KeyMenu] annotation.
+     * Goes back to the last menu that matches the predicate. If none is found
+     * and a [default] menu is specified that menu will be opened instead.
      *
+     * @param default The default menu to go to if no matches were found
      * @param sound An optional sound to play
+     * @param predicate The predicate to check against
+     * @return The opened menu, or `null` if none was found and there was no [default]
      */
-    fun backToKey(sound: Sound? = Sound.BLOCK_WOODEN_BUTTON_CLICK_OFF) {
+    fun backToPredicate(default: Menu? = null, sound: Sound? = Sound.BLOCK_WOODEN_BUTTON_CLICK_OFF, predicate: (Menu) -> Boolean): Menu? {
         sound?.let { viewer.playSound(it) }
         var prev: Menu? = previousMenu
-        while (prev != null) {
-            if (prev::class.java.isAnnotationPresent(KeyMenu::class.java)) {
+        for (i in 0 until MAX_BACK_ITERATION_DEPTH) {
+            if (prev == null) {
+                default?.open()
+                break
+            }
+            if (predicate(prev)) {
                 prev.open()
-                return
+                return prev
             }
             prev = prev.previousMenu
         }
-        viewer.closeInventory(InventoryCloseEvent.Reason.OPEN_NEW)
+        return null
     }
 
     /**
@@ -80,19 +87,18 @@ abstract class Menu {
         return this.inventory.viewers.toList()
     }
 
-    companion object {
-        val EMPTY_PANEL = ItemStack(Material.GRAY_STAINED_GLASS_PANE)
-
-        init {
-            val meta = EMPTY_PANEL.itemMeta
-            meta.displayName(Component.empty())
-            EMPTY_PANEL.itemMeta = meta
-        }
-    }
-
     @EventHandler
     fun onCloseMenu(event: InventoryCloseEvent) {
         RainbowQuartz.guiEventDispatcher.unregisterMenu(this)
+    }
+
+    companion object {
+        val EMPTY_PANEL = ItemStack(Material.GRAY_STAINED_GLASS_PANE).apply {
+            val meta = itemMeta
+            meta.displayName(Component.empty())
+            itemMeta = meta
+        }
+        const val MAX_BACK_ITERATION_DEPTH: Int = 25
     }
 }
 
