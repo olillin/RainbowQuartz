@@ -53,13 +53,15 @@ internal object Paginator {
 
         for (slotY in y until y + height) {
             for (slotX in x until x + itemWidth) {
-                if (!iterator.hasNext()) break
+                val item: ItemStack = if (iterator.hasNext()) {
+                    iterator.next()
+                } else {
+                    ItemStack(Material.AIR)
+                }
 
-                val item: ItemStack = iterator.next()
                 val slot = slotX + slotY * INVENTORY_WIDTH
                 inventory.setItem(slot, item)
             }
-            if (!iterator.hasNext()) break
         }
 
         inventory.setItem(x+itemWidth + y*INVENTORY_WIDTH,
