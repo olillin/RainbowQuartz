@@ -7,6 +7,7 @@ import dev.hoodieboi.rainbowquartz.plugin.gui.enchanted
 import dev.hoodieboi.rainbowquartz.plugin.gui.menu.Menu
 import dev.hoodieboi.rainbowquartz.plugin.gui.menu.playSound
 import dev.hoodieboi.rainbowquartz.plugin.gui.menu.popup.ComponentPopup
+import dev.hoodieboi.rainbowquartz.plugin.gui.menu.popup.MaterialPopup
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.TranslatableComponent
 import net.kyori.adventure.text.format.NamedTextColor
@@ -37,6 +38,15 @@ class EditItemGeneralMenu(viewer: HumanEntity, builder: ItemBuilder, override va
                 )
             )
         )
+        inventory.setItem(4, LinkItem.makeLink(
+                "change_material",
+                builder.getMaterial(),
+                Component.text("Change material").color(NamedTextColor.LIGHT_PURPLE),
+                listOf(
+                        Component.text("Current material"),
+                        Component.text(" ").color(NamedTextColor.WHITE).append(Component.translatable(builder.getMaterial()))
+                )
+        ))
         inventory.setItem(5, EMPTY_PANEL)
         inventory.setItem(6, EMPTY_PANEL)
         inventory.setItem(7, EMPTY_PANEL)
@@ -62,6 +72,12 @@ class EditItemGeneralMenu(viewer: HumanEntity, builder: ItemBuilder, override va
                 viewer.playSound(Sound.BLOCK_WOODEN_BUTTON_CLICK_ON)
                 ComponentPopup(viewer, placeholder = builder.getName(), previousMenu = this) { name ->
                     builder.setName(name)
+                }.open()
+            }
+            "change_material" -> {
+                viewer.playSound(Sound.BLOCK_WOODEN_BUTTON_CLICK_ON)
+                MaterialPopup(viewer, placeholder = builder.getMaterial(), previousMenu = this) { material ->
+                    builder.setMaterial(material)
                 }.open()
             }
         }
