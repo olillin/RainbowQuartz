@@ -1,6 +1,5 @@
 package dev.hoodieboi.rainbowquartz.plugin.gui.menu
 
-import dev.hoodieboi.rainbowquartz.onlyIf
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor.RED
 import net.kyori.adventure.text.format.TextDecoration.ITALIC
@@ -55,7 +54,7 @@ abstract class InsertMenu : ImmutableMenu() {
             } else if (event.currentItem != null) {
                 val slot: Int = (insertSlots.firstOrNull { slot ->
                     inventory.getItem(slot) == null
-                } onlyIf { it != -1 })
+                }.takeIf { it != -1 })
                     ?: insertSlots.lastOrNull()
                     ?: return
                 if (inventory.getItem(slot) == transformItem(event.currentItem)) return

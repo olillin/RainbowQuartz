@@ -1,6 +1,5 @@
 package dev.hoodieboi.rainbowquartz.plugin.gui.menu.popup
 
-import dev.hoodieboi.rainbowquartz.onlyIf
 import dev.hoodieboi.rainbowquartz.plugin.gui.LinkItem
 import dev.hoodieboi.rainbowquartz.plugin.gui.menu.Menu
 import dev.hoodieboi.rainbowquartz.plugin.gui.menu.playSound
@@ -51,8 +50,8 @@ class NamespacedKeyPopup(
     }
 
     override fun parseInput(input: String?): NamespacedKey? {
-        var text: String = (input?.trim() onlyIf { it.isNotEmpty() })
-                ?: (placeholder?.toString() onlyIf { it.isNotEmpty() })
+        var text: String = (input?.trim().takeIf { it?.isNotEmpty() == true })
+                ?: (placeholder?.toString().takeIf { it?.isNotEmpty() == true })
                 ?: return null
         if (!text.matches(Regex("^([0-9a-z_.-]+:)?[0-9a-z_.-]+(/[0-9a-z_.-]+)*$"))) {
             // Invalid resource location

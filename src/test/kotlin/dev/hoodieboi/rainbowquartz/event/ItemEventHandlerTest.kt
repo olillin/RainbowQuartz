@@ -5,7 +5,6 @@ import be.seeseemelk.mockbukkit.ServerMock
 import dev.hoodieboi.rainbowquartz.RainbowQuartz
 import dev.hoodieboi.rainbowquartz.item.ItemBuilder
 import dev.hoodieboi.rainbowquartz.item.rainbowQuartzId
-import dev.hoodieboi.rainbowquartz.onlyIf
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
 import org.bukkit.Material
@@ -44,7 +43,7 @@ class ItemEventHandlerTest {
         val item = itemBuilder.build()
         // Register handler
         val predicate = EventPredicate<PlayerItemBreakEvent> { event ->
-            event.brokenItem onlyIf { it.itemMeta.rainbowQuartzId == item.key }
+            event.brokenItem.takeIf { it.itemMeta.rainbowQuartzId == item.key }
         }
         var hasRun = false
         val handler = EventHandler<PlayerEvent> { _, _ ->
@@ -65,7 +64,7 @@ class ItemEventHandlerTest {
     fun breakItemTestWithBuilder() {
         // Register handler
         val predicate = EventPredicate<PlayerItemBreakEvent> { event ->
-            event.brokenItem onlyIf { it.itemMeta.rainbowQuartzId == itemBuilder.key }
+            event.brokenItem.takeIf { it.itemMeta.rainbowQuartzId == itemBuilder.key }
         }
         var hasRun = false
         val handler = EventHandler<PlayerEvent> { _, _ ->
