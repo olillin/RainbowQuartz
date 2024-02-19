@@ -4,6 +4,7 @@ import dev.hoodieboi.rainbowquartz.plugin.gui.LinkItem
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
 import org.bukkit.Material
+import org.bukkit.event.inventory.InventoryType
 import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.ItemStack
 import kotlin.math.ceil
@@ -11,6 +12,14 @@ import kotlin.math.min
 
 internal object Paginator {
     private const val INVENTORY_WIDTH = 9
+    private val supportedInventoryTypes: Set<InventoryType> = hashSetOf(
+            InventoryType.BARREL,
+            InventoryType.CHEST,
+            InventoryType.ENDER_CHEST,
+            InventoryType.PLAYER,
+            InventoryType.SHULKER_BOX,
+    )
+
     fun <T> render(
         inventory: Inventory,
         content: List<T>,
@@ -21,6 +30,9 @@ internal object Paginator {
         x: Int = 0,
         y: Int = 0
     ) {
+        if (!supportedInventoryTypes.contains(inventory.type)) {
+            throw IllegalArgumentException("Unsupported inventory type ${inventory.type}, inventory width must be 9")
+        }
         if (width < 2) throw IllegalArgumentException("Width must be at least 2")
         if (height < 3) throw IllegalArgumentException("Height must be at least 3")
         val inventoryHeight = inventory.size / INVENTORY_WIDTH
@@ -87,6 +99,4 @@ internal object Paginator {
             inventory.setItem(x+itemWidth + (y+dy)*INVENTORY_WIDTH, Menu.EMPTY_PANEL)
         }
     }
-
-    data class PaginatorContent(val page: Int, val start: Int, val end: Int, val shownItems: Int, val totalItems: Int)
 }
