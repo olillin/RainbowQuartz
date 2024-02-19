@@ -36,15 +36,15 @@ class NamespacedKeyPopup(
     override fun resultItem(input: String?): ItemStack {
         val key: NamespacedKey? = parseInput(input)
         return if (key != null) {
-            LinkItem.makeLink(
-                    "submit",
-                    Material.FILLED_MAP,
-                    Component.text("Submit").color(GREEN),
-                    listOf(
-                            Component.text("New id: ")
-                                    .append(Component.text(key.toString()).color(WHITE))
-                    )
-            )
+            ItemStack(Material.FILLED_MAP).apply {
+                itemMeta = itemMeta.apply {
+                    displayName(Component.text("Submit").color(GREEN))
+                    lore(listOf(
+                        Component.text("New id: ")
+                                .append(Component.text(key.toString()).color(WHITE))
+                    ))
+                }
+            }
         } else {
             INVALID_INPUT
         }
