@@ -27,22 +27,21 @@ import org.bukkit.inventory.ItemStack
 
 abstract class EditItemMenu(final override val viewer: HumanEntity, protected var builder: ItemBuilder) :
     ImmutableMenu() {
+    private val title: Component = builder.build().item.itemMeta.displayName().let { itemName ->
+        if (itemName != null) {
+            Component.text("Editing item: ").append(itemName.compact().removeStyle())
+        } else {
+            Component.text("Editing item")
+        }
+    }
     final override var inventory: Inventory = Bukkit.createInventory(
         viewer,
         27,
+        title,
     )
 
     @EventHandler(priority = EventPriority.HIGHEST)
     fun onOpenEditItemMenu(event: InventoryOpenEvent) {
-        // Update inventory title
-        val itemName: Component? = builder.build().item.itemMeta.displayName()
-        val title: Component = if (itemName != null) {
-            Component.text("Editing item: ").append(itemName.compact().color(null))
-        } else {
-            Component.text("Editing item")
-        }
-        inventory = Bukkit.createInventory(viewer, 27, title)
-
         // Create preview panel
         val previewPanel = ItemStack(Material.PURPLE_STAINED_GLASS_PANE)
         var meta = previewPanel.itemMeta
