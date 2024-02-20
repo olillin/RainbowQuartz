@@ -4,7 +4,7 @@ plugins {
     id 'jacoco'
 }
 
-group = 'dev.hoodieboi'
+group = 'com.olillin.rainbowquartz'
 version = '0.1.0'
 
 repositories {
@@ -42,7 +42,7 @@ shadowJar {
         exclude('kotlin/')
     }
 
-    relocate('me.lucko.commodore', 'dev.hoodieboi.rainbowquartz.commodore')
+    relocate('me.lucko.commodore', 'com.olillin.rainbowquartz.commodore')
 }
 
 def targetJavaVersion = 17
