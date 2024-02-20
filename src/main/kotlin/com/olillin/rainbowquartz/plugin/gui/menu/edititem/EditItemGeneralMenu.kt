@@ -24,7 +24,7 @@ class EditItemGeneralMenu(viewer: HumanEntity, builder: ItemBuilder, override va
     @EventHandler
     @Suppress("UNUSED_PARAMETER")
     fun onOpen(event: InventoryOpenEvent) {
-        val itemName = (builder.build().item.displayName() as? TranslatableComponent)?.args()?.get(0)
+        val itemName = (builder.build().getItem().displayName() as? TranslatableComponent)?.args()?.get(0)
             ?: Component.text("Name Unavailable").color(NamedTextColor.DARK_GRAY)
 
         // Items

@@ -58,7 +58,7 @@ class SmokingRecipe(input: RecipeChoice) : CookingRecipe(input) {
     override fun asBukkitRecipe(item: Item): org.bukkit.inventory.SmokingRecipe {
         val recipe = org.bukkit.inventory.SmokingRecipe(
             key(item),
-            item.item,
+            item.getItem(),
             input,
             exp,
             cookTime

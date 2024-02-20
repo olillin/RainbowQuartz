@@ -13,7 +13,6 @@ import org.bukkit.enchantments.Enchantment
 import org.bukkit.event.player.PlayerEvent
 import org.bukkit.event.player.PlayerItemBreakEvent
 import org.bukkit.inventory.ItemFlag
-import org.bukkit.inventory.ItemStack
 import org.bukkit.plugin.Plugin
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -54,7 +53,7 @@ class ItemEventHandlerTest {
 
         // Trigger event
         val player = server.addPlayer()
-        val event = PlayerItemBreakEvent(player, ItemStack(item.item))
+        val event = PlayerItemBreakEvent(player, item.getItem())
         server.pluginManager.callEvent(event)
 
         assert(hasRun)
@@ -76,7 +75,7 @@ class ItemEventHandlerTest {
 
         // Trigger event
         val player = server.addPlayer()
-        val event = PlayerItemBreakEvent(player, ItemStack(item.item))
+        val event = PlayerItemBreakEvent(player, item.getItem())
         server.pluginManager.callEvent(event)
 
         assert(hasRun)
@@ -99,7 +98,7 @@ class ItemEventHandlerTest {
 
         // Trigger event
         val player = server.addPlayer()
-        val event = PlayerItemBreakEvent(player, ItemStack(item.item))
+        val event = PlayerItemBreakEvent(player, item.getItem())
         server.pluginManager.callEvent(event)
 
         assert(hasNotRun)

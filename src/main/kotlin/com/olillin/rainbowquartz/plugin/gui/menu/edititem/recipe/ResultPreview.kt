@@ -1,8 +1,8 @@
 package com.olillin.rainbowquartz.plugin.gui.menu.edititem.recipe
 
-import com.olillin.rainbowquartz.item.Item
 import com.olillin.rainbowquartz.item.rainbowQuartzId
 import com.olillin.rainbowquartz.plugin.gui.LinkItem
+import com.olillin.rainbowquartz.plugin.gui.linkKey
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.format.TextDecoration
@@ -12,12 +12,12 @@ import org.bukkit.inventory.ItemStack
 
 object ResultPreview {
     private const val INVENTORY_WIDTH = 9
-    fun render(inventory: Inventory, item: Item, amount: Int, x: Int, y: Int) {
+    fun render(inventory: Inventory, result: ItemStack, amount: Int, x: Int, y: Int) {
         if (x < 0 || y < 0
             || x+3 > INVENTORY_WIDTH
             || y+3 > inventory.size / INVENTORY_WIDTH) throw IllegalArgumentException("Preview outside of inventory bounds")
 
-        val stack = ItemStack(item.item)
+        val stack = previewItem(result, amount)
         var meta = stack.itemMeta
         meta.rainbowQuartzId = null
         stack.itemMeta = meta
@@ -84,10 +84,11 @@ object ResultPreview {
         ))
     }
 
-    private fun previewItem(item: Item, amount: Int): ItemStack {
-        val stack = ItemStack(item.item)
+    private fun previewItem(item: ItemStack, amount: Int): ItemStack {
+        val stack = ItemStack(item)
         val meta = stack.itemMeta
         meta.rainbowQuartzId = null
+        meta.linkKey = null
         stack.itemMeta = meta
         stack.amount = amount
         return stack

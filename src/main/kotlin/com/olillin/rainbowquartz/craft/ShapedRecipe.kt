@@ -12,6 +12,7 @@ import org.bukkit.inventory.RecipeChoice.MaterialChoice
 class ShapedRecipe(vararg val pattern: String) : Recipe() {
     private var group: String = ""
     private val ingredients: MutableMap<Char, RecipeChoice> = mutableMapOf()
+    private var amount: Int = 1
 
     init {
         if (pattern.size < 1 || pattern.size > 3) {
@@ -30,6 +31,93 @@ class ShapedRecipe(vararg val pattern: String) : Recipe() {
 
     override val suffix: String
         get() = id
+
+    override fun asBukkitRecipe(item: Item): org.bukkit.inventory.ShapedRecipe {
+        val recipe = org.bukkit.inventory.ShapedRecipe(
+            key(item),
+            item.getItem().also {
+                it.amount = amount
+            }
+        )
+        recipe.group = group
+
+        val registeredIngredients = ingredients.keys
+        for (c: Char in pattern.joinToString("").toCharArray().filter{ c -> c != ' ' }) {
+            if (!registeredIngredients.contains(c)) {
+                throw IllegalStateException("Recipe does not contain a definition for ingredient '$c'")
+            }
+        }
+
+        recipe.shape(*pattern)
+        for (ingredient in ingredients) {
+            recipe.setIngredient(ingredient.key, ingredient.value)
+        }
+
+        return recipe
+    }
+
+    fun getPattern(): List<String> {
+        return pattern.toList()
+    }
+
+    fun getIngredient(key: Char): RecipeChoice? {
+        return ingredients[key]
+    }
+
+    fun setIngredient(key: Char, ingredient: RecipeChoice): ShapedRecipe {
+        ingredients[key] = ingredient
+        return this
+    }
+
+    fun setIngredient(key: Char, ingredient: Material): ShapedRecipe {
+        return setIngredient(key, MaterialChoice(ingredient))
+    }
+
+    fun setIngredient(key: Char, ingredient: ItemStack): ShapedRecipe {
+        return setIngredient(key, ExactChoice(ingredient))
+    }
+
+    fun setGroup(group: String): ShapedRecipe {
+        this.group = group
+        return this
+    }
+
+    fun setAmount(amount: Int): ShapedRecipe {
+        this.amount = amount
+        return this
+    }
+
+    fun getAmount(): Int = amount
+
+    override fun serialize(): MutableMap<String, Any> {
+        return mutableMapOf(
+            "group" to group,
+            "pattern" to pattern,
+            "ingredients" to ingredients.map {
+                it.key.toString() to it.value.itemStack
+            }.toMap().toMutableMap()
+        )
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as ShapedRecipe
+
+        if (group != other.group) return false
+        if (!pattern.contentEquals(other.pattern)) return false
+        if (ingredients != other.ingredients) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = group.hashCode()
+        result = 31 * result + pattern.contentHashCode()
+        result = 31 * result + ingredients.hashCode()
+        return result
+    }
 
     companion object {
         const val id = "shaped"
@@ -71,79 +159,5 @@ class ShapedRecipe(vararg val pattern: String) : Recipe() {
 
             return recipe
         }
-    }
-
-    override fun asBukkitRecipe(item: Item): org.bukkit.inventory.ShapedRecipe {
-        val recipe = org.bukkit.inventory.ShapedRecipe(
-            key(item),
-            item.item
-        )
-        recipe.group = group
-
-        val registeredIngredients = ingredients.keys
-        for (c: Char in pattern.joinToString("").toCharArray().filter{ c -> c != ' ' }) {
-            if (!registeredIngredients.contains(c)) {
-                throw IllegalStateException("Recipe does not contain a definition for ingredient '$c'")
-            }
-        }
-
-        recipe.shape(*pattern)
-        for (ingredient in ingredients) {
-            recipe.setIngredient(ingredient.key, ingredient.value)
-        }
-
-        return recipe
-    }
-
-    fun getIngredient(key: Char): RecipeChoice? {
-        return ingredients[key]
-    }
-
-    fun setIngredient(key: Char, ingredient: RecipeChoice): ShapedRecipe {
-        ingredients[key] = ingredient
-        return this
-    }
-
-    fun setIngredient(key: Char, ingredient: Material): ShapedRecipe {
-        return setIngredient(key, MaterialChoice(ingredient))
-    }
-
-    fun setIngredient(key: Char, ingredient: ItemStack): ShapedRecipe {
-        return setIngredient(key, ExactChoice(ingredient))
-    }
-
-    fun setGroup(group: String): ShapedRecipe {
-        this.group = group
-        return this
-    }
-
-    override fun serialize(): MutableMap<String, Any> {
-        return mutableMapOf(
-            "group" to group,
-            "pattern" to pattern,
-            "ingredients" to ingredients.map {
-                it.key.toString() to it.value.itemStack
-            }.toMap().toMutableMap()
-        )
-    }
-
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (javaClass != other?.javaClass) return false
-
-        other as ShapedRecipe
-
-        if (group != other.group) return false
-        if (!pattern.contentEquals(other.pattern)) return false
-        if (ingredients != other.ingredients) return false
-
-        return true
-    }
-
-    override fun hashCode(): Int {
-        var result = group.hashCode()
-        result = 31 * result + pattern.contentHashCode()
-        result = 31 * result + ingredients.hashCode()
-        return result
     }
 }

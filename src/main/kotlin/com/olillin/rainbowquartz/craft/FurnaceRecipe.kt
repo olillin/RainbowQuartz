@@ -55,7 +55,7 @@ class FurnaceRecipe(input: RecipeChoice) : CookingRecipe(input) {
     override fun asBukkitRecipe(item: Item): org.bukkit.inventory.FurnaceRecipe {
         val recipe = org.bukkit.inventory.FurnaceRecipe(
             key(item),
-            item.item,
+            item.getItem(),
             input,
             exp,
             cookTime

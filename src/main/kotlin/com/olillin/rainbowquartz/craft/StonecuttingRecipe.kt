@@ -49,7 +49,7 @@ class StonecuttingRecipe(var input: RecipeChoice) : Recipe() {
     override fun asBukkitRecipe(item: Item): org.bukkit.inventory.StonecuttingRecipe {
         return org.bukkit.inventory.StonecuttingRecipe(
             key(item),
-            item.item,
+            item.getItem(),
             input
         )
     }

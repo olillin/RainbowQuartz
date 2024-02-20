@@ -8,10 +8,11 @@ import org.bukkit.NamespacedKey
 import org.bukkit.enchantments.Enchantment
 import org.bukkit.inventory.ItemFlag
 import org.bukkit.inventory.ItemStack
+import org.bukkit.inventory.meta.ItemMeta
 import org.bukkit.persistence.PersistentDataType
 
 object LinkItem {
-    private val keyResourceLocation = NamespacedKey.fromString("rainbowquartz_i:gui_link")!!
+    internal val keyResourceLocation = NamespacedKey.fromString("rainbowquartz_i:gui_link")!!
 
     fun makeLink(
         key: String,
@@ -20,15 +21,15 @@ object LinkItem {
         name: Component?,
         lore: List<Component>?
     ): ItemStack {
-        val item = ItemStack(material, amount)
-        val meta = item.itemMeta
-        // Decorate item
-        meta.displayName(decorateName(name))
-        meta.lore(decorateLore(lore))
-        meta.addItemFlags(*ItemFlag.values())
-        item.itemMeta = meta
-
-        return setLinkKey(item, key)
+        val item = ItemStack(material, amount).apply {
+            itemMeta = itemMeta.apply {
+                displayName(decorateName(name))
+                lore(decorateLore(lore))
+                addItemFlags(*ItemFlag.values())
+                linkKey = key
+            }
+        }
+        return item
     }
 
     fun makeLink(key: String, material: Material, name: Component?, lore: List<Component>?): ItemStack {
@@ -44,23 +45,6 @@ object LinkItem {
 
     fun makeLink(key: String, material: Material, name: String): ItemStack {
         return makeLink(key, material, Component.text(name), null)
-    }
-
-    fun setLinkKey(stack: ItemStack, key: String?): ItemStack {
-        val item = ItemStack(stack)
-        val meta = item.itemMeta
-        if (key == null) {
-            meta.persistentDataContainer.remove(keyResourceLocation)
-        } else {
-            meta.persistentDataContainer.set(keyResourceLocation, PersistentDataType.STRING, key)
-        }
-        item.itemMeta = meta
-        return item
-    }
-
-    fun getLinkKey(stack: ItemStack): String? {
-        val container = stack.itemMeta?.persistentDataContainer ?: return null
-        return container.get(keyResourceLocation, PersistentDataType.STRING)
     }
 
     private fun decorateName(name: Component?): Component? {
@@ -83,6 +67,17 @@ object LinkItem {
     val SUBMIT get() = makeLink("submit", Material.LIME_GLAZED_TERRACOTTA, Component.text("Submit").color(NamedTextColor.GREEN))
     val CANCEL get() = makeLink("cancel", Material.BARRIER, Component.text("Cancel").color(NamedTextColor.RED), listOf(Component.text("Click to cancel")))
 }
+
+var ItemMeta.linkKey: String?
+    get() = persistentDataContainer.get(LinkItem.keyResourceLocation, PersistentDataType.STRING)
+    set(value) {
+        if (value == null) {
+            persistentDataContainer.remove(LinkItem.keyResourceLocation)
+        } else {
+            persistentDataContainer.set(LinkItem.keyResourceLocation, PersistentDataType.STRING, value)
+        }
+        return
+    }
 
 fun ItemStack.enchanted(): ItemStack {
     val item = ItemStack(this)

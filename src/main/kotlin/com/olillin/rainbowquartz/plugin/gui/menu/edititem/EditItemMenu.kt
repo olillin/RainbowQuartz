@@ -27,7 +27,7 @@ import org.bukkit.inventory.ItemStack
 
 abstract class EditItemMenu(final override val viewer: HumanEntity, protected var builder: ItemBuilder) :
     ImmutableMenu() {
-    private val title: Component = builder.build().item.itemMeta.displayName().let { itemName ->
+    private val title: Component = builder.build().getItem().itemMeta.displayName().let { itemName ->
         if (itemName != null) {
             Component.text("Editing item: ").append(itemName.compact().removeStyle())
         } else {
@@ -53,7 +53,7 @@ abstract class EditItemMenu(final override val viewer: HumanEntity, protected va
         previewPanel.itemMeta = meta
 
         // Create preview item
-        val previewItem = ItemStack(builder.build().item)
+        val previewItem = ItemStack(builder.build().getItem())
         meta = previewItem.itemMeta
         meta.rainbowQuartzId = null
         previewItem.itemMeta = meta

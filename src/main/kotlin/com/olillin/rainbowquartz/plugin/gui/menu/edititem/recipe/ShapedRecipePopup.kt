@@ -1,13 +1,13 @@
 package com.olillin.rainbowquartz.plugin.gui.menu.edititem.recipe
 
 import com.olillin.rainbowquartz.craft.ShapedRecipe
-import com.olillin.rainbowquartz.item.ItemBuilder
 import com.olillin.rainbowquartz.item.rainbowQuartzId
 import com.olillin.rainbowquartz.plugin.gui.InventoryClickLinkEvent
 import com.olillin.rainbowquartz.plugin.gui.LinkItem
 import com.olillin.rainbowquartz.plugin.gui.menu.InsertMenu
-import com.olillin.rainbowquartz.plugin.gui.menu.edititem.SelectRecipeTypeMenu
+import com.olillin.rainbowquartz.plugin.gui.menu.Menu
 import com.olillin.rainbowquartz.plugin.gui.menu.playSound
+import com.olillin.rainbowquartz.plugin.gui.menu.popup.Popup
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.format.TextDecoration
@@ -22,20 +22,50 @@ import org.bukkit.event.inventory.InventoryOpenEvent
 import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.ItemStack
 
-class ShapedRecipeMenu(
+class ShapedRecipePopup(
     override val viewer: HumanEntity,
-    private val builder: ItemBuilder,
-    override val previousMenu: SelectRecipeTypeMenu
-) : InsertMenu(), RecipeMenu<ShapedRecipe> {
-    override var inventory: Inventory = Bukkit.createInventory(viewer, 27, Component.text("New shaped recipe"))
+    private val placeholder: ShapedRecipe?,
+    private val result: ItemStack,
+    override val previousMenu: Menu,
+    override val callback: (ShapedRecipe?) -> Unit
+) : InsertMenu(), Popup<ShapedRecipe?> {
+    override var inventory: Inventory = Bukkit.createInventory(
+        viewer,
+        27,
+        Component.text(if (placeholder == null) "New shaped recipe" else "Edit shaped recipe")
+    )
 
     private var resultAmount = 1
 
     override val insertSlots: List<Int>
         get() = gridSlots
 
-    private val grid: List<ItemStack?>
-        get() = gridSlots.map { untransformItem(inventory.getItem(it)) }
+    private var grid: Array<ItemStack?>
+        get() = gridSlots.map { untransformItem(inventory.getItem(it)) }.toTypedArray()
+        set(value) {
+            if (value.size != 9) {
+                throw IllegalArgumentException("Invalid value, grid must be of length 9")
+            }
+            gridSlots.forEachIndexed { index, slot ->
+                inventory.setItem(slot, value[index])
+            }
+        }
+
+    init {
+        if (placeholder != null) {
+            val items = mutableListOf<ItemStack?>()
+            padPattern(placeholder.getPattern()).forEach { line ->
+                line.forEach { key ->
+                    items.add(placeholder.getIngredient(key)?.itemStack?.apply {
+                        amount = 1
+                    })
+                }
+            }
+            grid = items.toTypedArray()
+
+            resultAmount = placeholder.getAmount()
+        }
+    }
 
     @EventHandler
     fun onOpen(event: InventoryOpenEvent) {
@@ -44,10 +74,14 @@ class ShapedRecipeMenu(
         inventory.setItem(13, EMPTY_PANEL)
         inventory.setItem(22, EMPTY_PANEL)
         inventory.setItem(9, EMPTY_PANEL)
-        inventory.setItem(18, LinkItem.BACK)
+        inventory.setItem(18, LinkItem.CANCEL)
 
         inventory.setItem(8, EMPTY_PANEL)
-        inventory.setItem(26, EMPTY_PANEL)
+        inventory.setItem(26, LinkItem.makeLink(
+            "delete",
+            Material.CAULDRON,
+            Component.text("Delete recipe").color(NamedTextColor.RED)
+        ))
 
         updatePreview()
     }
@@ -58,8 +92,10 @@ class ShapedRecipeMenu(
             "submit" -> {
                 viewer.playSound(Sound.BLOCK_WOODEN_BUTTON_CLICK_ON)
                 val recipe = createRecipe()
-                builder.addRecipe(recipe)
-                previousMenu.open()
+                callback(recipe)
+                if (activeViewers().contains(viewer)) {
+                    previousMenu.open()
+                }
             }
 
             "add_amount_1" -> {
@@ -80,7 +116,7 @@ class ShapedRecipeMenu(
 
             "set_amount_max" -> {
                 viewer.playSound(Sound.BLOCK_WOODEN_BUTTON_CLICK_ON)
-                resultAmount = builder.getMaterial().maxStackSize
+                resultAmount = result.type.maxStackSize
                 updatePreview()
             }
 
@@ -102,9 +138,13 @@ class ShapedRecipeMenu(
                 updatePreview()
             }
 
-            "back" -> {
-                viewer.playSound(Sound.BLOCK_WOODEN_BUTTON_CLICK_OFF)
-                previousMenu.open()
+            "cancel" -> back()
+
+            "delete" -> {
+                viewer.playSound(Sound.ITEM_BUCKET_EMPTY)
+                callback(null)
+                if (activeViewers().contains(viewer))
+                    previousMenu.open()
             }
         }
     }
@@ -119,11 +159,13 @@ class ShapedRecipeMenu(
                     .color(NamedTextColor.RED)
                     .decoration(TextDecoration.ITALIC, false)
             )
-            meta.lore(listOf(
-                Component.text("Pattern cannot be empty")
-                    .color(NamedTextColor.GRAY)
-                    .decoration(TextDecoration.ITALIC, false)
-            ))
+            meta.lore(
+                listOf(
+                    Component.text("Pattern cannot be empty")
+                        .color(NamedTextColor.GRAY)
+                        .decoration(TextDecoration.ITALIC, false)
+                )
+            )
             item.itemMeta = meta
             inventory.setItem(CREATE_SLOT, item)
         } else {
@@ -131,8 +173,8 @@ class ShapedRecipeMenu(
         }
     }
 
-    override fun createRecipe(): ShapedRecipe {
-        val validCharacters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+    private fun createRecipe(): ShapedRecipe {
+        val validCharacters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".toCharArray()
         val ingredients: MutableMap<Char, ItemStack> = mutableMapOf()
 
         var shape = ""
@@ -157,36 +199,63 @@ class ShapedRecipeMenu(
             shape += key
         }
 
-        var chunkedShape: MutableList<String> = shape.chunked(3).toMutableList()
-        // Crop vertically
-        while (chunkedShape.first().isBlank()) {
-            chunkedShape.removeFirst()
-        }
-        while (chunkedShape.last().isBlank()) {
-            chunkedShape.removeLast()
-        }
-        // Crop horizontally
-        Bukkit.getLogger().info(chunkedShape.joinToString())
-        val width = chunkedShape.map { it.trim() }.maxOf { it.length }
-        chunkedShape = chunkedShape.map {
-            it.trimStart().padStart(width)
-        }.map {
-            it.trimEnd().padEnd(width)
-        }.toMutableList()
+        val chunkedShape: MutableList<String> = shape.chunked(3).toMutableList()
+        val pattern = trimPattern(chunkedShape)
 
-        val result = ShapedRecipe(*chunkedShape.toTypedArray())
+        val result = ShapedRecipe(*pattern.toTypedArray())
         for (i in ingredients.entries) {
             result.setIngredient(i.key, i.value)
         }
+        result.setAmount(resultAmount)
 
         return result
     }
 
+    /**
+     * Trim pattern to minimum size.
+     *
+     * @see padPattern
+     */
+    private fun trimPattern(pattern: List<String>): List<String> {
+        // Trim vertically
+        val trimmedVertically = pattern.toMutableList().apply {
+            while (first().isBlank()) {
+                removeFirst()
+            }
+            while (last().isBlank()) {
+                removeLast()
+            }
+        }
+        // Trim horizontally
+        val width = trimmedVertically.maxOf { it.trim().length }
+        return pattern.map {
+            it.trimStart().padStart(width)
+                .trimEnd().padEnd(width)
+        }.toMutableList()
+    }
+
+    /**
+     * Pad pattern to fill grid.
+     *
+     * @see trimPattern
+     */
+    private fun padPattern(pattern: List<String>, width: Int = 3, height: Int = width): List<String> {
+        return pattern.map {
+            // Pad horizontally
+            it.padEnd(width, ' ')
+        }.toMutableList().apply {
+            // Pad vertically
+            while (size < height) {
+                add(" ".repeat(width))
+            }
+        }
+    }
+
     private fun updatePreview() {
-        resultAmount = resultAmount.coerceIn(1, builder.getMaterial().maxStackSize)
+        resultAmount = resultAmount.coerceIn(1, result.type.maxStackSize)
         ResultPreview.render(
             inventory,
-            builder.build(),
+            result,
             resultAmount,
             5,
             0
@@ -194,9 +263,7 @@ class ShapedRecipeMenu(
     }
 
     companion object {
-        private const val PREVIEW_SLOT = 15
-        private val gridSlots: List<Int>
-                = listOf(1, 2, 3, 10, 11, 12, 19, 20, 21)
+        private val gridSlots = listOf(1, 2, 3, 10, 11, 12, 19, 20, 21)
 
         private const val CREATE_SLOT = 17
         private val CREATE_BUTTON = LinkItem.makeLink(

@@ -70,7 +70,7 @@ class ItemBuilderTest {
             }
         }
 
-        assertEquals(expected.itemMeta.displayName(), item.item.itemMeta.displayName())
+        assertEquals(expected.itemMeta.displayName(), item.getItem().itemMeta.displayName())
     }
 
     @Test
@@ -86,7 +86,7 @@ class ItemBuilderTest {
             }
         }
 
-        assertEquals(expected.itemMeta.displayName(), item.item.itemMeta.displayName())
+        assertEquals(expected.itemMeta.displayName(), item.getItem().itemMeta.displayName())
     }
 
     @Test
@@ -103,7 +103,7 @@ class ItemBuilderTest {
             }
         }
 
-        assertEquals(expected.itemMeta.displayName(), item.item.itemMeta.displayName())
+        assertEquals(expected.itemMeta.displayName(), item.getItem().itemMeta.displayName())
     }
 
     @Test
@@ -152,7 +152,7 @@ class ItemBuilderTest {
         itemStackMeta.rainbowQuartzId = key
         itemStack.itemMeta = itemStackMeta
 
-        assertEquals(itemStack, item.item)
+        assertEquals(itemStack, item.getItem())
     }
 
     @Test
@@ -167,7 +167,7 @@ class ItemBuilderTest {
         itemStackMeta.rainbowQuartzId = key
         itemStack.itemMeta = itemStackMeta
 
-        assertEquals(itemStack, item.item)
+        assertEquals(itemStack, item.getItem())
     }
 
     @Test
@@ -182,7 +182,7 @@ class ItemBuilderTest {
         itemStackMeta.rainbowQuartzId = key
         itemStack.itemMeta = itemStackMeta
 
-        assertEquals(itemStack, item.item)
+        assertEquals(itemStack, item.getItem())
     }
 
     @Test
@@ -199,7 +199,7 @@ class ItemBuilderTest {
         itemStackMeta.rainbowQuartzId = key
         itemStack.itemMeta = itemStackMeta
 
-        assertEquals(itemStack, item.item)
+        assertEquals(itemStack, item.getItem())
     }
 
     @Test
@@ -215,7 +215,7 @@ class ItemBuilderTest {
         itemStackMeta.rainbowQuartzId = key
         itemStack.itemMeta = itemStackMeta
 
-        assertEquals(itemStack, item.item)
+        assertEquals(itemStack, item.getItem())
     }
 
     @Test
@@ -234,7 +234,7 @@ class ItemBuilderTest {
         itemStackMeta.rainbowQuartzId = key
         itemStack.itemMeta = itemStackMeta
 
-        assertEquals(itemStack, item.item)
+        assertEquals(itemStack, item.getItem())
     }
 
     @Test
@@ -255,7 +255,7 @@ class ItemBuilderTest {
         itemStackMeta.rainbowQuartzId = key
         itemStack.itemMeta = itemStackMeta
 
-        assertEquals(itemStack, item.item)
+        assertEquals(itemStack, item.getItem())
     }
 
     @Test
@@ -270,7 +270,7 @@ class ItemBuilderTest {
         itemStackMeta.rainbowQuartzId = key
         itemStack.itemMeta = itemStackMeta
 
-        assertEquals(itemStack, item.item)
+        assertEquals(itemStack, item.getItem())
     }
 
     @Test
@@ -287,7 +287,7 @@ class ItemBuilderTest {
         itemStackMeta.rainbowQuartzId = key
         itemStack.itemMeta = itemStackMeta
 
-        assertEquals(itemStack, item.item)
+        assertEquals(itemStack, item.getItem())
     }
 
     @Test
@@ -302,7 +302,7 @@ class ItemBuilderTest {
         itemStackMeta.rainbowQuartzId = key
         itemStack.itemMeta = itemStackMeta
 
-        assertEquals(itemStack, item.item)
+        assertEquals(itemStack, item.getItem())
     }
 
     @Test
@@ -318,6 +318,6 @@ class ItemBuilderTest {
         itemStackMeta.rainbowQuartzId = key
         itemStack.itemMeta = itemStackMeta
 
-        assertEquals(itemStack, item.item)
+        assertEquals(itemStack, item.getItem())
     }
 }

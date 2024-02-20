@@ -17,29 +17,41 @@ import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.ItemMeta
 import org.bukkit.persistence.PersistentDataType
 
-class Item(val key: NamespacedKey, item: ItemStack, recipes: List<Recipe>, handlers: Map<Class<out Event>, Set<PredicatedEventHandler<*>>>) : Keyed, ConfigurationSerializable {
+class Item(
+    val key: NamespacedKey,
+    private val item: ItemStack,
+    recipes: List<Recipe>,
+    handlers: Map<Class<out Event>, Set<PredicatedEventHandler<*>>>
+) : Keyed, ConfigurationSerializable {
     protected val handlers: MutableMap<Class<out Event>, MutableSet<PredicatedEventHandler<*>>>
-
-    val item: ItemStack
     val recipes: List<Recipe>
 
     constructor(key: NamespacedKey, item: ItemStack) : this(key, item, listOf(), mutableMapOf())
     constructor(key: NamespacedKey, item: ItemStack, recipes: List<Recipe>) : this(key, item, recipes, mutableMapOf())
-    constructor(key: NamespacedKey, item: ItemStack, handlers: Map<Class<out Event>, Set<PredicatedEventHandler<*>>>) : this(key, item, listOf(), handlers)
+    constructor(
+        key: NamespacedKey,
+        item: ItemStack,
+        handlers: Map<Class<out Event>, Set<PredicatedEventHandler<*>>>
+    ) : this(key, item, listOf(), handlers)
 
     init {
         // Set id
-        this.item = ItemStack(item)
-        val meta = this.item.itemMeta
-        meta.rainbowQuartzId = key
-        this.item.itemMeta = meta
+        item.apply {
+            itemMeta = itemMeta.apply {
+                rainbowQuartzId = key
+            }
+        }
+
         // Recipes
         this.recipes = recipes.toList()
-        // Eventhandler
+
+        // Event handler
         this.handlers = handlers.map {
             it.key to it.value.toMutableSet()
         }.toMap().toMutableMap()
     }
+
+    fun getItem(): ItemStack = ItemStack(item)
 
     companion object {
         /**
@@ -56,12 +68,14 @@ class Item(val key: NamespacedKey, item: ItemStack, recipes: List<Recipe>, handl
             section.addDefaults(args)
 
             // Create key
-            val id = section.getString("id") ?: throw IllegalArgumentException("Missing required property 'id' of type String")
+            val id = section.getString("id")
+                ?: throw IllegalArgumentException("Missing required property 'id' of type String")
             val key = NamespacedKey.fromString(id)!!
 
             // Initialize builder
-            val itemStack = section.getItemStack("item") ?: throw IllegalArgumentException("Missing required property 'item' of type ItemStack")
-            val builder = ItemBuilder(key,  itemStack)
+            val itemStack = section.getItemStack("item")
+                ?: throw IllegalArgumentException("Missing required property 'item' of type ItemStack")
+            val builder = ItemBuilder(key, itemStack)
 
             // Add recipes
             val recipes: Any = section.get("recipes") ?: listOf<Recipe>()
@@ -96,7 +110,7 @@ class Item(val key: NamespacedKey, item: ItemStack, recipes: List<Recipe>, handl
     fun <T : Event> getHandlerPairs(eventType: Class<out T>): Set<PredicatedEventHandler<in T>>? {
         val result: MutableSet<PredicatedEventHandler<in T>> = mutableSetOf()
         val handler: Set<PredicatedEventHandler<*>> = handlers[eventType]
-                ?: return null
+            ?: return null
         handler.forEach {
             @Suppress("UNCHECKED_CAST")
             result.add(it as PredicatedEventHandler<T>)

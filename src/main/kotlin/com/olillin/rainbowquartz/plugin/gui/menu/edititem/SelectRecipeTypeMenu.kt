@@ -5,7 +5,7 @@ import com.olillin.rainbowquartz.item.ItemBuilder
 import com.olillin.rainbowquartz.plugin.gui.InventoryClickLinkEvent
 import com.olillin.rainbowquartz.plugin.gui.LinkItem
 import com.olillin.rainbowquartz.plugin.gui.menu.ImmutableMenu
-import com.olillin.rainbowquartz.plugin.gui.menu.edititem.recipe.ShapedRecipeMenu
+import com.olillin.rainbowquartz.plugin.gui.menu.edititem.recipe.ShapedRecipePopup
 import com.olillin.rainbowquartz.plugin.gui.menu.fill
 import com.olillin.rainbowquartz.plugin.gui.menu.playSound
 import net.kyori.adventure.text.Component
@@ -21,6 +21,7 @@ class SelectRecipeTypeMenu(override val viewer: HumanEntity, private val builder
     override var inventory: Inventory = Bukkit.createInventory(viewer, 18, Component.text("Select recipe type"))
 
     @EventHandler
+    @Suppress("UNUSED_PARAMETER")
     fun onOpen(event: InventoryOpenEvent) {
         inventory.addItem(
             LinkItem.makeLink(
@@ -38,7 +39,11 @@ class SelectRecipeTypeMenu(override val viewer: HumanEntity, private val builder
         when (event.linkKey) {
             "shaped" -> {
                 viewer.playSound(Sound.BLOCK_WOODEN_BUTTON_CLICK_ON)
-                ShapedRecipeMenu(viewer, builder, this).open()
+                ShapedRecipePopup(viewer, null, builder.build().getItem(), this) {
+                    if (it != null) {
+                        builder.addRecipe(it)
+                    }
+                }.open()
             }
             "back" -> {
                 viewer.playSound(Sound.BLOCK_WOODEN_BUTTON_CLICK_OFF)

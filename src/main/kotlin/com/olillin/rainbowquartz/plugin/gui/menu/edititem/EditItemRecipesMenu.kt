@@ -7,6 +7,7 @@ import com.olillin.rainbowquartz.plugin.gui.LinkItem
 import com.olillin.rainbowquartz.plugin.gui.enchanted
 import com.olillin.rainbowquartz.plugin.gui.menu.Menu
 import com.olillin.rainbowquartz.plugin.gui.menu.Paginator
+import com.olillin.rainbowquartz.plugin.gui.menu.edititem.recipe.ShapedRecipePopup
 import com.olillin.rainbowquartz.plugin.gui.menu.playSound
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
@@ -16,6 +17,7 @@ import org.bukkit.NamespacedKey
 import org.bukkit.Sound
 import org.bukkit.entity.HumanEntity
 import org.bukkit.event.EventHandler
+import org.bukkit.event.inventory.ClickType
 import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.event.inventory.InventoryOpenEvent
 import org.bukkit.inventory.ItemStack
@@ -23,9 +25,6 @@ import org.bukkit.persistence.PersistentDataType
 
 class EditItemRecipesMenu(viewer: HumanEntity, builder: ItemBuilder, override val previousMenu: Menu?) : EditItemMenu(viewer, builder) {
     var page = 0
-    companion object {
-        val recipeKeyLocation: NamespacedKey = NamespacedKey.fromString("rainbowquartz:recipe_key")!!
-    }
 
     @EventHandler
     @Suppress("UNUSED_PARAMETER")
@@ -70,9 +69,27 @@ class EditItemRecipesMenu(viewer: HumanEntity, builder: ItemBuilder, override va
     fun onClick(event: InventoryClickEvent) {
         if (!InventoryClickLinkEvent.isLinkClick(event)) return
 
-        val recipeKey: String = event.currentItem!!.itemMeta.persistentDataContainer
+        val recipeKeyString: String = event.currentItem!!.itemMeta.persistentDataContainer
             .get(recipeKeyLocation, PersistentDataType.STRING) ?: return
-        event.whoClicked.sendMessage(recipeKey)
+        val (namespace, value) = recipeKeyString.split(':').toTypedArray()
+        val recipeKey = NamespacedKey(namespace, value)
+        val recipe = builder.getRecipe(recipeKey)
+        if (event.click == ClickType.LEFT) {
+            when (recipe) {
+                is ShapedRecipe -> ShapedRecipePopup(viewer, recipe, builder.build().getItem(), this) {
+                    if (it == null) {
+                        builder.removeRecipe(recipe)
+                    } else {
+                        builder.removeRecipe(recipe)
+                        builder.addRecipe(it)
+                    }
+                    renderPaginator()
+                }.open()
+            }
+        } else if (event.click == ClickType.RIGHT) {
+            viewer.playSound(Sound.BLOCK_WOODEN_BUTTON_CLICK_OFF)
+            builder.removeRecipe(recipe)
+        }
     }
 
     private fun recipeItem(recipe: Recipe): ItemStack {
@@ -86,30 +103,37 @@ class EditItemRecipesMenu(viewer: HumanEntity, builder: ItemBuilder, override va
             is StonecuttingRecipe -> Material.STONECUTTER
             else -> Material.BEDROCK
         }
-        val item = ItemStack(material, 1)
+        val item = ItemStack(material, 1).apply {
+            itemMeta = itemMeta.apply {
+                val key: String = recipe.key(builder.key).toString()
+                // Name and lore
+                displayName(
+                    Component.text(recipe::class.simpleName!!)
+                        .color(NamedTextColor.GOLD)
+                        .decoration(TextDecoration.ITALIC, false)
+                )
+                lore(listOf(
+                    Component.text(key)
+                        .color(NamedTextColor.DARK_PURPLE)
+                        .decoration(TextDecoration.ITALIC, false),
+                    Component.translatable("key.mouse.left")
+                        .color(NamedTextColor.GRAY)
+                        .decoration(TextDecoration.ITALIC, false)
+                        .append(Component.text(" to edit")),
+                    Component.translatable("key.mouse.right")
+                        .color(NamedTextColor.GRAY)
+                        .decoration(TextDecoration.ITALIC, false)
+                        .append(Component.text(" to delete"))
+                ))
 
-        // Name and lore
-        val meta = item.itemMeta
-        meta.displayName(
-            Component.text(recipe::class.simpleName!!)
-                .color(NamedTextColor.GOLD)
-                .decoration(TextDecoration.ITALIC, false)
-        )
-        val key: String = recipe.key(builder.key).toString()
-        meta.lore(listOf(
-            Component.text(key)
-                .color(NamedTextColor.GRAY)
-                .decoration(TextDecoration.ITALIC, false)
-        ))
-
-        // Recipe key
-        meta.persistentDataContainer.set(
-            recipeKeyLocation,
-            PersistentDataType.STRING,
-            key
-        )
-
-        item.itemMeta = meta
+                // Recipe key
+                persistentDataContainer.set(
+                    recipeKeyLocation,
+                    PersistentDataType.STRING,
+                    key
+                )
+            }
+        }
         return item
     }
 
@@ -124,5 +148,9 @@ class EditItemRecipesMenu(viewer: HumanEntity, builder: ItemBuilder, override va
             3,
             0
         )
+    }
+
+    companion object {
+        val recipeKeyLocation: NamespacedKey = NamespacedKey.fromString("rainbowquartz:recipe_key")!!
     }
 }

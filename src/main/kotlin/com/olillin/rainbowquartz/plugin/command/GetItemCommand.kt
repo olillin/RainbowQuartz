@@ -15,7 +15,6 @@ import org.bukkit.command.Command
 import org.bukkit.command.CommandSender
 import org.bukkit.command.TabExecutor
 import org.bukkit.entity.Player
-import org.bukkit.inventory.ItemStack
 import kotlin.math.min
 
 class GetItemCommand : TabExecutor {
@@ -46,7 +45,7 @@ class GetItemCommand : TabExecutor {
             return true
         }
 
-        val itemStack = ItemStack(item.item)
+        val itemStack = item.getItem()
         var amount = 1
         if (args.size >= 2) {
             val parsed = args[1].toIntOrNull()

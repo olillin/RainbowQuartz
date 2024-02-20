@@ -58,7 +58,7 @@ class BlastingRecipe(input: RecipeChoice) : CookingRecipe(input) {
     override fun asBukkitRecipe(item: Item): org.bukkit.inventory.BlastingRecipe {
         val recipe = org.bukkit.inventory.BlastingRecipe(
             key(item),
-            item.item,
+            item.getItem(),
             input,
             exp,
             cookTime

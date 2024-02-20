@@ -53,7 +53,7 @@ class ShapelessRecipe : Recipe() {
     override fun asBukkitRecipe(item: Item): org.bukkit.inventory.ShapelessRecipe {
         val recipe = org.bukkit.inventory.ShapelessRecipe(
             key(item),
-            item.item
+            item.getItem()
         )
         recipe.group = group
 

@@ -119,7 +119,7 @@ class ItemEditorMenu(override val viewer: HumanEntity, private var page: Int,
     }
 
     private fun listedItem(item: Item): ItemStack {
-        val result = ItemStack(item.item)
+        val result = item.getItem()
         val meta = result.itemMeta
         val lore = meta.lore() ?: ArrayList()
         lore.add(0, Component.text(item.key.toString()).color(NamedTextColor.DARK_PURPLE).decoration(TextDecoration.ITALIC, false))

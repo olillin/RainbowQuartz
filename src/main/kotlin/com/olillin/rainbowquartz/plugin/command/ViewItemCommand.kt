@@ -13,7 +13,6 @@ import org.bukkit.NamespacedKey
 import org.bukkit.command.Command
 import org.bukkit.command.CommandSender
 import org.bukkit.command.TabExecutor
-import org.bukkit.inventory.ItemStack
 
 class ViewItemCommand : TabExecutor {
     companion object {
@@ -37,7 +36,7 @@ class ViewItemCommand : TabExecutor {
             return true
         }
 
-        val itemStack = ItemStack(item.item)
+        val itemStack = item.getItem()
         sender.sendMessage(text("Item Preview ").append(
                 itemStack.displayName()
                     .hoverEvent(itemStack)

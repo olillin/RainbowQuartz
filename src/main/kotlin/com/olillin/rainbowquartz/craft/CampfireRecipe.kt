@@ -58,7 +58,7 @@ class CampfireRecipe(input: RecipeChoice) : CookingRecipe(input) {
     override fun asBukkitRecipe(item: Item): org.bukkit.inventory.CampfireRecipe {
         return org.bukkit.inventory.CampfireRecipe(
             key(item),
-            item.item,
+            item.getItem(),
             input,
             exp,
             cookTime

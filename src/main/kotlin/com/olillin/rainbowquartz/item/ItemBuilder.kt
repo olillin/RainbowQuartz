@@ -25,7 +25,7 @@ open class ItemBuilder(val key: NamespacedKey, result: ItemStack, recipes: List<
     constructor(key: NamespacedKey, material: Material, recipes: List<Recipe>) : this(key, ItemStack(material), recipes, mutableMapOf())
     constructor(key: NamespacedKey, itemStack: ItemStack, handlers: MutableMap<Class<out Event>, MutableSet<PredicatedEventHandler<*>>>) : this(key, itemStack, mutableListOf(), handlers)
     constructor(key: NamespacedKey, material: Material, handlers: MutableMap<Class<out Event>, MutableSet<PredicatedEventHandler<*>>>) : this(key, ItemStack(material), mutableListOf(), handlers)
-    constructor(item: Item) : this(item.key, item.item, item.recipes)
+    constructor(item: Item) : this(item.key, item.getItem(), item.recipes)
     constructor(builder: ItemBuilder) : this(builder.key, builder.result, builder.recipes)
 
     protected val result: ItemStack
@@ -217,6 +217,10 @@ open class ItemBuilder(val key: NamespacedKey, result: ItemStack, recipes: List<
     fun addRecipe(recipe: Recipe): ItemBuilder {
         recipes.add(recipe)
         return this
+    }
+
+    fun getRecipe(key: NamespacedKey): Recipe {
+        return recipes.first { it.key(build()) == key }
     }
 
     fun removeRecipe(recipe: Recipe): ItemBuilder {

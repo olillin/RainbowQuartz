@@ -9,6 +9,7 @@ import org.bukkit.inventory.RecipeChoice
 import org.bukkit.inventory.RecipeChoice.ExactChoice
 import org.bukkit.inventory.RecipeChoice.MaterialChoice
 
+@Suppress("UNUSED")
 class SmithingTransformRecipe(base: RecipeChoice, addition: RecipeChoice, var template: RecipeChoice) : SmithingRecipe(base, addition) {
     override val suffix: String
         get() = id
@@ -81,7 +82,7 @@ class SmithingTransformRecipe(base: RecipeChoice, addition: RecipeChoice, var te
     override fun asBukkitRecipe(item: Item): org.bukkit.inventory.SmithingTransformRecipe {
         return org.bukkit.inventory.SmithingTransformRecipe(
             key(item),
-            item.item,
+            item.getItem(),
             template,
             base,
             addition
