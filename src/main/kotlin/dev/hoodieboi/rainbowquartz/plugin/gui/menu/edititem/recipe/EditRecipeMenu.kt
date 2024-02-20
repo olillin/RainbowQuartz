@@ -125,7 +125,7 @@ abstract class EditRecipeMenu : ImmutableMenu() {
 
     @EventHandler
     fun onClick(event: InventoryClickEvent) {
-        if (!LinkItem.isMenuItemClick(event)) return
+        if (!InventoryClickLinkEvent.isLinkClick(event)) return
 
         event.currentItem
     }

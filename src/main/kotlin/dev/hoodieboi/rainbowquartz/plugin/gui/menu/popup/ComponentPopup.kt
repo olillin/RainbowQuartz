@@ -1,6 +1,6 @@
 package dev.hoodieboi.rainbowquartz.plugin.gui.menu.popup
 
-import dev.hoodieboi.rainbowquartz.item.Item
+import dev.hoodieboi.rainbowquartz.item.ItemBuilder
 import dev.hoodieboi.rainbowquartz.plugin.gui.menu.Menu
 import dev.hoodieboi.rainbowquartz.plugin.gui.menu.playSound
 import net.kyori.adventure.text.Component
@@ -17,7 +17,7 @@ import org.bukkit.event.inventory.InventoryType
 import org.bukkit.inventory.ItemStack
 
 class ComponentPopup(
-        override val viewer: HumanEntity, private val placeholder: Component? = null, override val previousMenu: Menu?, override val callback: (Component) -> Unit
+        override val viewer: HumanEntity, placeholder: Component? = null, override val previousMenu: Menu?, override val callback: (Component) -> Unit
 ) : TextPopup<Component>(viewer, placeholder, previousMenu, callback) {
     override fun firstItem(placeholder: Component?): ItemStack {
         return ItemStack(Material.NAME_TAG).apply {
@@ -52,12 +52,12 @@ class ComponentPopup(
     }
 
     private fun serializeName(name: Component): String {
-        return legacySerializer.serialize(Item.unformatName(name)!!)
+        return legacySerializer.serialize(ItemBuilder.unformatName(name)!!)
     }
 
     override fun parseInput(input: String?): Component? {
         input ?: return null
-        return Item.formatName(legacySerializer.deserialize(input))!!
+        return ItemBuilder.formatName(legacySerializer.deserialize(input))!!
     }
 
     @EventHandler

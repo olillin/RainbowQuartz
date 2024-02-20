@@ -14,7 +14,6 @@ import org.bukkit.event.inventory.*
 import org.bukkit.inventory.Inventory
 import org.bukkit.plugin.Plugin
 import java.lang.reflect.InvocationTargetException
-import java.lang.reflect.Method
 
 class GuiEventDispatcher(val plugin: Plugin) : Listener {
     private val supportedEvents = setOf(
@@ -83,7 +82,7 @@ class GuiEventDispatcher(val plugin: Plugin) : Listener {
         // Link events
         if (event is InventoryClickEvent && !event.isCancelled
             && event !is InventoryClickLinkEvent
-            && LinkItem.isMenuItemClick(event)) {
+            && InventoryClickLinkEvent.isLinkClick(event)) {
             try {
                 onEvent(InventoryClickLinkEvent(event))
             } catch (_: IllegalArgumentException) {

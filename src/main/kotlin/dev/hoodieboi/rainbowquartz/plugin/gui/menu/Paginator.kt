@@ -8,6 +8,7 @@ import org.bukkit.event.inventory.InventoryType
 import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.ItemStack
 import kotlin.math.ceil
+import kotlin.math.max
 import kotlin.math.min
 
 internal object Paginator {
@@ -80,7 +81,7 @@ internal object Paginator {
         inventory.setItem(x+itemWidth + (y+1)*INVENTORY_WIDTH,
             LinkItem.makeLink("page_indicator",
                 Material.PAPER,
-                Component.text("Page ${page+1}/$pages").color(NamedTextColor.YELLOW),
+                Component.text("Page ${page+1}/${max(pages,1)}").color(NamedTextColor.YELLOW),
                 listOf(
                     Component.text("Showing ${shownItems}/${content.size} items")
             )

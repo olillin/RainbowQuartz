@@ -7,6 +7,7 @@ import dev.hoodieboi.rainbowquartz.plugin.gui.enchanted
 import dev.hoodieboi.rainbowquartz.plugin.gui.menu.Menu
 import dev.hoodieboi.rainbowquartz.plugin.gui.menu.playSound
 import dev.hoodieboi.rainbowquartz.plugin.gui.menu.popup.ComponentPopup
+import dev.hoodieboi.rainbowquartz.plugin.gui.menu.popup.LorePopup
 import dev.hoodieboi.rainbowquartz.plugin.gui.menu.popup.MaterialPopup
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.TranslatableComponent
@@ -21,6 +22,7 @@ class EditItemGeneralMenu(viewer: HumanEntity, builder: ItemBuilder, override va
     EditItemMenu(viewer, builder) {
 
     @EventHandler
+    @Suppress("UNUSED_PARAMETER")
     fun onOpen(event: InventoryOpenEvent) {
         val itemName = (builder.build().item.displayName() as? TranslatableComponent)?.args()?.get(0)
             ?: Component.text("Name Unavailable").color(NamedTextColor.DARK_GRAY)
@@ -47,7 +49,12 @@ class EditItemGeneralMenu(viewer: HumanEntity, builder: ItemBuilder, override va
                         Component.text(" ").color(NamedTextColor.WHITE).append(Component.translatable(builder.getMaterial()))
                 )
         ))
-        inventory.setItem(5, EMPTY_PANEL)
+        inventory.setItem(5, LinkItem.makeLink(
+                "lore",
+                Material.WRITABLE_BOOK,
+                Component.text("Edit lore").color(NamedTextColor.LIGHT_PURPLE),
+                builder.getLore()
+        ))
         inventory.setItem(6, EMPTY_PANEL)
         inventory.setItem(7, EMPTY_PANEL)
         inventory.setItem(8, EMPTY_PANEL)
@@ -78,6 +85,12 @@ class EditItemGeneralMenu(viewer: HumanEntity, builder: ItemBuilder, override va
                 viewer.playSound(Sound.BLOCK_WOODEN_BUTTON_CLICK_ON)
                 MaterialPopup(viewer, placeholder = builder.getMaterial(), previousMenu = this) { material ->
                     builder.setMaterial(material)
+                }.open()
+            }
+            "lore" -> {
+                viewer.playSound(Sound.BLOCK_WOODEN_BUTTON_CLICK_ON)
+                LorePopup(viewer, placeholder = builder.getLore(), previousMenu = this) { lore ->
+                    builder.setLore(lore)
                 }.open()
             }
         }

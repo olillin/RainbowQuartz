@@ -31,6 +31,7 @@ class ItemEditorMenu(override val viewer: HumanEntity, private var page: Int,
     override var inventory: Inventory = Bukkit.createInventory(viewer, 54, Component.text("Item Editor"))
 
     @EventHandler
+    @Suppress("UNUSED_PARAMETER")
     fun onOpen(event: InventoryOpenEvent) {
         // Stationary icons
         inventory.setItem(0, LinkItem.makeLink(
@@ -71,7 +72,7 @@ class ItemEditorMenu(override val viewer: HumanEntity, private var page: Int,
 
     @EventHandler
     fun onClick(event: InventoryClickEvent) {
-        if (!LinkItem.isMenuItemClick(event)) return
+        if (!InventoryClickLinkEvent.isLinkClick(event)) return
 
         val item = event.currentItem ?: return
         val rainbowQuartzItem = RainbowQuartz.itemManager.getItem(item) ?: return

@@ -1,15 +1,13 @@
 package dev.hoodieboi.rainbowquartz.item
 
 import dev.hoodieboi.rainbowquartz.craft.Recipe
+import dev.hoodieboi.rainbowquartz.event.EventHandler
 import dev.hoodieboi.rainbowquartz.event.EventPredicate
 import dev.hoodieboi.rainbowquartz.event.PredicatedEventHandler
-import dev.hoodieboi.rainbowquartz.event.EventHandler
 import net.kyori.adventure.key.Key
 import net.kyori.adventure.key.Keyed
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.TranslatableComponent
-import net.kyori.adventure.text.format.NamedTextColor
-import net.kyori.adventure.text.format.TextDecoration
 import org.bukkit.Bukkit
 import org.bukkit.NamespacedKey
 import org.bukkit.configuration.MemoryConfiguration
@@ -18,7 +16,6 @@ import org.bukkit.event.Event
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.ItemMeta
 import org.bukkit.persistence.PersistentDataType
-import org.jetbrains.annotations.Contract
 
 class Item(val key: NamespacedKey, item: ItemStack, recipes: List<Recipe>, handlers: Map<Class<out Event>, Set<PredicatedEventHandler<*>>>) : Keyed, ConfigurationSerializable {
     protected val handlers: MutableMap<Class<out Event>, MutableSet<PredicatedEventHandler<*>>>
@@ -45,32 +42,6 @@ class Item(val key: NamespacedKey, item: ItemStack, recipes: List<Recipe>, handl
     }
 
     companion object {
-        /**
-         * Apply default formatting to an item [name].
-         *
-         * @see unformatName
-         */
-        @JvmStatic
-        @Contract("_ -> this")
-        fun formatName(name: Component?): Component? {
-            return name
-                ?.color(name.color() ?: NamedTextColor.WHITE)
-                ?.decorationIfAbsent(TextDecoration.ITALIC, TextDecoration.State.FALSE)
-        }
-
-        /**
-         * Remove formatting from an item name.
-         *
-         * @see formatName
-         */
-        @JvmStatic
-        @Contract("_ -> this")
-        fun unformatName(name: Component?): Component? {
-            return name?.color(
-                name.color().takeUnless { it == NamedTextColor.WHITE }
-            )
-        }
-
         /**
          * Required method for configuration serialization
          *

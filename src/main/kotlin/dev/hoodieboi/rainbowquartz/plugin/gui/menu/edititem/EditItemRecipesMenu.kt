@@ -28,6 +28,7 @@ class EditItemRecipesMenu(viewer: HumanEntity, builder: ItemBuilder, override va
     }
 
     @EventHandler
+    @Suppress("UNUSED_PARAMETER")
     fun onOpen(event: InventoryOpenEvent) {
         inventory.setItem(RECIPES_SLOT, inventory.getItem(RECIPES_SLOT)?.enchanted())
 
@@ -67,7 +68,7 @@ class EditItemRecipesMenu(viewer: HumanEntity, builder: ItemBuilder, override va
 
     @EventHandler
     fun onClick(event: InventoryClickEvent) {
-        if (!LinkItem.isMenuItemClick(event)) return
+        if (!InventoryClickLinkEvent.isLinkClick(event)) return
 
         val recipeKey: String = event.currentItem!!.itemMeta.persistentDataContainer
             .get(recipeKeyLocation, PersistentDataType.STRING) ?: return

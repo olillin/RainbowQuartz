@@ -1,9 +1,9 @@
 package dev.hoodieboi.rainbowquartz.item
 
 import dev.hoodieboi.rainbowquartz.craft.Recipe
+import dev.hoodieboi.rainbowquartz.event.EventHandler
 import dev.hoodieboi.rainbowquartz.event.EventPredicate
 import dev.hoodieboi.rainbowquartz.event.PredicatedEventHandler
-import dev.hoodieboi.rainbowquartz.event.EventHandler
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.format.TextDecoration
@@ -15,7 +15,9 @@ import org.bukkit.enchantments.Enchantment
 import org.bukkit.event.Event
 import org.bukkit.inventory.ItemFlag
 import org.bukkit.inventory.ItemStack
+import org.jetbrains.annotations.Contract
 
+@Suppress("UNUSED")
 open class ItemBuilder(val key: NamespacedKey, result: ItemStack, recipes: List<Recipe>, handlers: MutableMap<Class<out Event>, MutableSet<PredicatedEventHandler<*>>>) {
     constructor(key: NamespacedKey, itemStack: ItemStack) : this(key, itemStack, mutableListOf(), mutableMapOf())
     constructor(key: NamespacedKey, material: Material) : this(key, ItemStack(material))
@@ -57,7 +59,7 @@ open class ItemBuilder(val key: NamespacedKey, result: ItemStack, recipes: List<
     fun setName(name: Component?): ItemBuilder {
         // Modify item
         val itemMeta = result.itemMeta
-        itemMeta.displayName(Item.formatName(name))
+        itemMeta.displayName(formatName(name))
         result.itemMeta = itemMeta
         return this
     }
@@ -74,27 +76,27 @@ open class ItemBuilder(val key: NamespacedKey, result: ItemStack, recipes: List<
         return result.itemMeta.lore()
     }
 
+    fun setLore(lore: List<Component>?): ItemBuilder {
+        result.itemMeta = result.itemMeta.apply {
+            lore(lore?.map { formatLore(it) })
+        }
+        return this
+    }
+
     fun addLore(vararg lore: Component): ItemBuilder {
-        val itemMeta = result.itemMeta
-        if (!itemMeta.hasLore()) {
-            itemMeta.lore(ArrayList())
-        }
-        val metaLore = itemMeta.lore()!!
-        val iterator = lore.iterator()
-        while (iterator.hasNext()) {
-            var component = iterator.next()
-            // Non-italic by default
-            if (!component.hasDecoration(TextDecoration.ITALIC)) {
-                component = component.decoration(TextDecoration.ITALIC, false)
+        result.itemMeta = result.itemMeta.apply {
+            val currentLore: MutableList<Component> = if (hasLore()) {
+                lore()!!
+            } else {
+                mutableListOf()
             }
-            // Gray by default
-            if (component.color() == null) {
-                component = component.color(NamedTextColor.GRAY)
+            val iterator = lore.iterator()
+            while (iterator.hasNext()) {
+                val component = iterator.next()
+                currentLore.add(formatLore(component)!!)
             }
-            metaLore.add(component)
+            lore(currentLore)
         }
-        itemMeta.lore(metaLore)
-        result.itemMeta = itemMeta
         return this
     }
 
@@ -102,28 +104,25 @@ open class ItemBuilder(val key: NamespacedKey, result: ItemStack, recipes: List<
         return addLore(Component.text(lore).color(NamedTextColor.GRAY))
     }
 
-    fun insertLore(index: Int, lore: Component): ItemBuilder {
-        val itemMeta = result.itemMeta
-        if (!itemMeta.hasLore()) {
-            itemMeta.lore(ArrayList())
+    fun addLore(index: Int, lore: Component): ItemBuilder {
+        result.itemMeta = result.itemMeta.apply {
+
+            val currentLore: MutableList<Component> = if (hasLore()) {
+                lore()!!
+            } else {
+                mutableListOf()
+            }
+            currentLore.add(index, formatLore(lore)!!)
+            lore(currentLore)
         }
-        val metaLore = itemMeta.lore()!!
-        metaLore.add(index, lore)
-        itemMeta.lore(metaLore)
-        result.itemMeta = itemMeta
         return this
     }
 
-    fun insertLore(index: Int, lore: String): ItemBuilder {
-        return insertLore(index, Component.text(lore))
+    fun addLore(index: Int, lore: String): ItemBuilder {
+        return addLore(index, Component.text(lore))
     }
 
-    fun removeLore(): ItemBuilder {
-        val itemMeta = result.itemMeta
-        itemMeta.lore(null)
-        result.itemMeta = itemMeta
-        return this
-    }
+    fun removeLore(): ItemBuilder = setLore(null)
 
     fun hasLore(): Boolean {
         return getLore() != null
@@ -285,5 +284,77 @@ open class ItemBuilder(val key: NamespacedKey, result: ItemStack, recipes: List<
         result = 31 * result + result.hashCode()
         result = 31 * result + recipes.hashCode()
         return result
+    }
+
+    companion object {
+        /**
+         * Apply default formatting to an item [name].
+         *
+         * @see unformatName
+         */
+        @JvmStatic
+        @Contract("!null -> !null, null -> null")
+        fun formatName(name: Component?): Component? {
+            return name?.color(
+                    name.color() ?: NamedTextColor.WHITE
+            )?.decorationIfAbsent(
+                    TextDecoration.ITALIC, TextDecoration.State.FALSE
+            )
+        }
+
+        /**
+         * Remove default formatting to an item [name].
+         *
+         * @see formatName
+         */
+        @JvmStatic
+        @Contract("!null -> !null, null -> null")
+        fun unformatName(name: Component?): Component? {
+            return name?.color (
+                    name.color().takeIf { it != NamedTextColor.WHITE}
+            )?.decoration(
+                    TextDecoration.ITALIC,
+                    if (name.decoration(TextDecoration.ITALIC) == TextDecoration.State.TRUE) {
+                        TextDecoration.State.TRUE
+                    } else {
+                        TextDecoration.State.NOT_SET
+                    }
+            )
+        }
+
+        /**
+         * Apply default formatting to a line of [lore]
+         *
+         * @see unformatLore
+         */
+        @JvmStatic
+        @Contract("!null -> !null, null -> null")
+        fun formatLore(lore: Component?): Component? {
+            return lore?.color(
+                    lore.color() ?: NamedTextColor.GRAY
+            )?.decorationIfAbsent(
+                    TextDecoration.ITALIC, TextDecoration.State.FALSE
+            )
+        }
+
+        /**
+         * Remove default formatting to a line of [lore].
+         *
+         * @see formatLore
+         */
+        @JvmStatic
+        @Contract("!null -> !null, null -> null")
+        fun unformatLore(lore: Component?): Component? {
+            return lore?.color (
+                    lore.color().takeIf { it != NamedTextColor.GRAY}
+            )?.decoration(
+                    TextDecoration.ITALIC,
+                    if (lore.decoration(TextDecoration.ITALIC) == TextDecoration.State.TRUE) {
+                        TextDecoration.State.TRUE
+                    } else {
+                        TextDecoration.State.NOT_SET
+                    }
+            )
+        }
     }
 }

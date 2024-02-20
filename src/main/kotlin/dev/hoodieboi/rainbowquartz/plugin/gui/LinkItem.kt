@@ -6,12 +6,8 @@ import net.kyori.adventure.text.format.TextDecoration
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
 import org.bukkit.enchantments.Enchantment
-import org.bukkit.event.inventory.ClickType
-import org.bukkit.event.inventory.InventoryClickEvent
-import org.bukkit.event.inventory.InventoryType
 import org.bukkit.inventory.ItemFlag
 import org.bukkit.inventory.ItemStack
-import org.bukkit.inventory.PlayerInventory
 import org.bukkit.persistence.PersistentDataType
 
 object LinkItem {
@@ -79,17 +75,6 @@ object LinkItem {
         return lore.map {
             it.color(it.color() ?: NamedTextColor.GRAY)
                 .decorationIfAbsent(TextDecoration.ITALIC, TextDecoration.State.FALSE)
-        }
-    }
-
-    fun isMenuItemClick(clickEvent: InventoryClickEvent): Boolean {
-        if (clickEvent.slotType == InventoryType.SlotType.OUTSIDE
-            || clickEvent.currentItem == null
-            || clickEvent.clickedInventory is PlayerInventory) return false
-        // Only normal left and right click allowed
-        return when (clickEvent.click) {
-            ClickType.LEFT, ClickType.RIGHT -> true
-            else -> false
         }
     }
 

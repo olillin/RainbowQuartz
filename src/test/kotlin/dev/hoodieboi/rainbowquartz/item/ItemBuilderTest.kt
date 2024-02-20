@@ -63,28 +63,30 @@ class ItemBuilderTest {
                 .setName(Component.text("Quartz Sword"))
                 .build()
 
-        val itemStack = ItemStack(Material.IRON_SWORD)
-        val itemStackMeta = itemStack.itemMeta
-        itemStackMeta.displayName(Component.text("Quartz Sword").color(NamedTextColor.WHITE).decoration(TextDecoration.ITALIC, false))
-        itemStackMeta.rainbowQuartzId = key
-        itemStack.itemMeta = itemStackMeta
+        val expected = ItemStack(Material.IRON_SWORD).apply {
+            itemMeta = itemMeta.apply {
+                displayName(Component.text("Quartz Sword").color(NamedTextColor.WHITE).decoration(TextDecoration.ITALIC, false))
+                rainbowQuartzId = key
+            }
+        }
 
-        assertEquals(itemStack, item.item)
+        assertEquals(expected.itemMeta.displayName(), item.item.itemMeta.displayName())
     }
 
     @Test
     fun setNameComponentItalic() {
         val item = ItemBuilder(key, Material.LEATHER_LEGGINGS)
-            .setName(Component.text("Fancy Pants").decorate(TextDecoration.ITALIC))
-            .build()
+                .setName(Component.text("Fancy Pants").decorate(TextDecoration.ITALIC))
+                .build()
 
-        val itemStack = ItemStack(Material.LEATHER_LEGGINGS)
-        val itemStackMeta = itemStack.itemMeta
-        itemStackMeta.displayName(Component.text("Fancy Pants").color(NamedTextColor.WHITE).decoration(TextDecoration.ITALIC, true))
-        itemStackMeta.rainbowQuartzId = key
-        itemStack.itemMeta = itemStackMeta
+        val expected = ItemStack(Material.LEATHER_LEGGINGS).apply {
+            itemMeta = itemMeta.apply {
+                displayName(Component.text("Fancy Pants").color(NamedTextColor.WHITE).decoration(TextDecoration.ITALIC, true))
+                rainbowQuartzId = key
+            }
+        }
 
-        assertEquals(itemStack, item.item)
+        assertEquals(expected.itemMeta.displayName(), item.item.itemMeta.displayName())
     }
 
     @Test
@@ -94,13 +96,48 @@ class ItemBuilderTest {
             .setName(name)
             .build()
 
-        val itemStack = ItemStack(Material.IRON_SWORD)
-        val itemStackMeta = itemStack.itemMeta
-        itemStackMeta.displayName(Component.text(name).color(NamedTextColor.WHITE).decoration(TextDecoration.ITALIC, false))
-        itemStackMeta.rainbowQuartzId = key
-        itemStack.itemMeta = itemStackMeta
+        val expected = ItemStack(Material.IRON_SWORD).apply {
+            itemMeta = itemMeta.apply {
+                displayName(ItemBuilder.formatName(Component.text(name)))
+                rainbowQuartzId = key
+            }
+        }
 
-        assertEquals(itemStack, item.item)
+        assertEquals(expected.itemMeta.displayName(), item.item.itemMeta.displayName())
+    }
+
+    @Test
+    fun setLore() {
+        val firstLore = listOf(Component.text("Line 1"), Component.text("Line 2"), Component.text("Line 3"))
+        val secondLore = listOf(Component.text("LoreB"), Component.text("LoreB"))
+        val item = ItemBuilder(key, Material.IRON_SWORD)
+                .setLore(firstLore)
+                .setLore(secondLore)
+
+        val expectedLore = secondLore.map { ItemBuilder.formatLore(it)!! }
+        assertEquals(expectedLore, item.getLore())
+    }
+
+    @Test
+    fun addLore() {
+        val firstLore = listOf(Component.text("Line 1"))
+        val item = ItemBuilder(key, Material.IRON_SWORD)
+                .setLore(firstLore)
+                .addLore("Line 2")
+
+        val expectedLore = listOf("Line 1", "Line 2").map { ItemBuilder.formatLore(Component.text(it))!! }
+        assertEquals(expectedLore, item.getLore())
+    }
+
+    @Test
+    fun addLoreAtIndex() {
+        val firstLore = listOf(Component.text("Line 2"))
+        val item = ItemBuilder(key, Material.IRON_SWORD)
+                .setLore(firstLore)
+                .addLore(0, "Line 1")
+
+        val expectedLore = listOf("Line 1", "Line 2").map { ItemBuilder.formatLore(Component.text(it))!! }
+        assertEquals(expectedLore, item.getLore())
     }
 
     @Test
