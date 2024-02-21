@@ -24,6 +24,7 @@ class NewItemMenu(override val viewer: HumanEntity, override val previousMenu: M
     private var material: Material? = null
 
     @EventHandler
+    @Suppress("UNUSED_PARAMETER")
     fun onOpen(event: InventoryOpenEvent) {
         inventory.fill(EMPTY_PANEL)
 

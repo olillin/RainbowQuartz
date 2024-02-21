@@ -46,11 +46,12 @@ class ShapedRecipePopup(
             }
             grid = items.toTypedArray()
 
-            resultAmount = placeholder.getAmount()
+            resultAmount = placeholder.amount
         }
     }
 
     @EventHandler
+    @Suppress("UNUSED_PARAMETER")
     fun onOpen(event: InventoryOpenEvent) {
         inventory.setItem(4, EMPTY_PANEL)
         inventory.setItem(13, EMPTY_PANEL)

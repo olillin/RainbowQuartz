@@ -12,8 +12,8 @@ import org.bukkit.inventory.RecipeChoice.MaterialChoice
 @Suppress("UNUSED")
 class ShapedRecipe(vararg val pattern: String) : Recipe() {
     private val ingredients: MutableMap<Char, RecipeChoice> = mutableMapOf()
-    private var group: String = ""
-    private var amount: Int = 1
+    var group: String = ""
+    var amount: Int = 1
 
     override val suffix: String
         get() = id
@@ -83,14 +83,10 @@ class ShapedRecipe(vararg val pattern: String) : Recipe() {
         return this
     }
 
-    fun getGroup(): String = group
-
     fun setAmount(amount: Int): ShapedRecipe {
         this.amount = amount
         return this
     }
-
-    fun getAmount(): Int = amount
 
     override fun serialize(): MutableMap<String, Any> {
         return mutableMapOf(

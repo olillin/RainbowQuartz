@@ -35,7 +35,7 @@ class ShapelessRecipePopup(
         if (placeholder != null) {
             val placeholderGrid: MutableList<ItemStack?> = placeholder.getIngredients()
                 .map { it.itemStack.apply { amount = 1 } }.toMutableList()
-            resultAmount = placeholder.getAmount()
+            resultAmount = placeholder.amount
             while (placeholderGrid.size < 9) {
                 placeholderGrid.add(null)
             }

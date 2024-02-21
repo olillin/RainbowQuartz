@@ -12,8 +12,8 @@ import org.bukkit.inventory.RecipeChoice.MaterialChoice
 @Suppress("UNUSED")
 class ShapelessRecipe : Recipe() {
     private val ingredients: MutableList<RecipeChoice> = mutableListOf()
-    private var group: String = ""
-    private var amount: Int = 1
+    var group: String = ""
+    var amount: Int = 1
     override val suffix: String
         get() = id
 
@@ -95,14 +95,10 @@ class ShapelessRecipe : Recipe() {
         return this
     }
 
-    fun getGroup(): String = group
-
     fun setAmount(amount: Int): ShapelessRecipe {
         this.amount = amount
         return this
     }
-
-    fun getAmount(): Int = amount
 
     override fun serialize(): MutableMap<String, Any> {
         return mutableMapOf(

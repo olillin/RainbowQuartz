@@ -7,11 +7,11 @@ import org.bukkit.inventory.RecipeChoice.ExactChoice
 import org.bukkit.inventory.RecipeChoice.MaterialChoice
 
 @Suppress("UNUSED")
-abstract class CookingRecipe(protected var input: RecipeChoice) : Recipe() {
+abstract class CookingRecipe(var input: RecipeChoice) : Recipe() {
     protected var exp: Float = 0.0f
     protected var cookTime: Int = 200
-    protected var group: String = ""
-    protected var amount: Int = 1
+    var group: String = ""
+    var amount: Int = 1
 
     fun setInput(input: RecipeChoice): CookingRecipe {
         this.input = input
@@ -25,8 +25,6 @@ abstract class CookingRecipe(protected var input: RecipeChoice) : Recipe() {
     fun setInput(input: ItemStack): CookingRecipe {
         return setInput(ExactChoice(input))
     }
-
-    fun getInput(): RecipeChoice = input
 
     fun setExp(exp: Float): CookingRecipe {
         this.exp = exp
@@ -43,14 +41,10 @@ abstract class CookingRecipe(protected var input: RecipeChoice) : Recipe() {
         return this
     }
 
-    fun getGroup(): String = group
-
     fun setAmount(amount: Int): CookingRecipe {
         this.amount = amount
         return this
     }
-
-    fun getAmount(): Int = amount
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

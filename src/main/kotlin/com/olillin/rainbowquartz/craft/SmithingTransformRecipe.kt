@@ -11,7 +11,7 @@ import org.bukkit.inventory.RecipeChoice.MaterialChoice
 
 @Suppress("UNUSED")
 class SmithingTransformRecipe(base: RecipeChoice, addition: RecipeChoice, var template: RecipeChoice) : SmithingRecipe(base, addition) {
-    private var amount: Int = 1
+    var amount: Int = 1
     override val suffix: String
         get() = id
 
@@ -78,8 +78,6 @@ class SmithingTransformRecipe(base: RecipeChoice, addition: RecipeChoice, var te
         this.amount = amount
         return this
     }
-
-    fun getAmount(): Int = amount
 
     override fun serialize(): MutableMap<String, Any> {
         return mutableMapOf(
