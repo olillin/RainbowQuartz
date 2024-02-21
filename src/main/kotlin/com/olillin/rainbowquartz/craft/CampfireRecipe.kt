@@ -9,9 +9,36 @@ import org.bukkit.inventory.RecipeChoice
 import org.bukkit.inventory.RecipeChoice.ExactChoice
 import org.bukkit.inventory.RecipeChoice.MaterialChoice
 
+@Suppress("UNUSED")
 class CampfireRecipe(input: RecipeChoice) : CookingRecipe(input) {
     override val suffix: String
         get() = id
+
+    init {
+        cookTime = 600
+    }
+
+    constructor(input: Material) : this(MaterialChoice(input))
+    constructor(input: ItemStack) : this(ExactChoice(input))
+
+    override fun asBukkitRecipe(item: Item): org.bukkit.inventory.CampfireRecipe {
+        return org.bukkit.inventory.CampfireRecipe(
+            key(item),
+            item.getItem(),
+            input,
+            exp,
+            cookTime
+        )
+    }
+
+    override fun serialize(): MutableMap<String, Any> {
+        return mutableMapOf(
+            "group" to group,
+            "input" to input.itemStack,
+            "exp" to exp,
+            "cookTime" to cookTime
+        )
+    }
 
     companion object {
         const val id = "campfire"
@@ -46,31 +73,5 @@ class CampfireRecipe(input: RecipeChoice) : CookingRecipe(input) {
 
             return recipe
         }
-    }
-
-    init {
-        cookTime = 600
-    }
-
-    constructor(input: Material) : this(MaterialChoice(input))
-    constructor(input: ItemStack) : this(ExactChoice(input))
-
-    override fun asBukkitRecipe(item: Item): org.bukkit.inventory.CampfireRecipe {
-        return org.bukkit.inventory.CampfireRecipe(
-            key(item),
-            item.getItem(),
-            input,
-            exp,
-            cookTime
-        )
-    }
-
-    override fun serialize(): MutableMap<String, Any> {
-        return mutableMapOf(
-            "group" to group,
-            "input" to input.itemStack,
-            "exp" to exp,
-            "cookTime" to cookTime
-        )
     }
 }

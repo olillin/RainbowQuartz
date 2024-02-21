@@ -11,38 +11,10 @@ import org.bukkit.inventory.RecipeChoice.MaterialChoice
 
 @Suppress("UNUSED")
 class SmithingTransformRecipe(base: RecipeChoice, addition: RecipeChoice, var template: RecipeChoice) : SmithingRecipe(base, addition) {
+    private var amount: Int = 1
     override val suffix: String
         get() = id
 
-    companion object {
-        const val id = "smithing_transform"
-        val material = Material.SMITHING_TABLE
-
-        /**
-         * Required method for configuration serialization
-         *
-         * @param args map to deserialize
-         * @return deserialized item stack
-         * @see ConfigurationSerializable
-         */
-        @JvmStatic
-        fun deserialize(args: Map<String, Any>): SmithingTransformRecipe {
-
-            val section = MemoryConfiguration()
-            section.addDefaults(args)
-
-            val base: ItemStack = section.getItemStack("base") ?: throw IllegalArgumentException("Invalid or missing property 'base'")
-            val addition: ItemStack = section.getItemStack("addition") ?: throw IllegalArgumentException("Invalid or missing property 'addition'")
-            val template: ItemStack = section.getItemStack("template") ?: throw IllegalArgumentException("Invalid or missing property 'template'")
-            val recipe = SmithingTransformRecipe(base, addition, template)
-
-            val group = section.getString("group")
-                ?: throw IllegalArgumentException("Invalid value for property 'group'")
-            recipe.setGroup(group)
-
-            return recipe
-        }
-    }
 
     constructor(base: Material, addition: RecipeChoice) : this(MaterialChoice(base), addition, Material.AIR)
     constructor(base: ItemStack, addition: RecipeChoice) : this(ExactChoice(base), addition, Material.AIR)
@@ -102,9 +74,15 @@ class SmithingTransformRecipe(base: RecipeChoice, addition: RecipeChoice, var te
         return setBase(ExactChoice(template))
     }
 
+    fun setAmount(amount: Int): SmithingTransformRecipe {
+        this.amount = amount
+        return this
+    }
+
+    fun getAmount(): Int = amount
+
     override fun serialize(): MutableMap<String, Any> {
         return mutableMapOf(
-            "group" to group,
             "base" to base.itemStack,
             "addition" to addition.itemStack,
             "template" to template.itemStack
@@ -117,7 +95,6 @@ class SmithingTransformRecipe(base: RecipeChoice, addition: RecipeChoice, var te
 
         other as SmithingTransformRecipe
 
-        if (group != other.group) return false
         if (base != other.base) return false
         if (addition != other.addition) return false
         if (template != other.template) return false
@@ -126,10 +103,35 @@ class SmithingTransformRecipe(base: RecipeChoice, addition: RecipeChoice, var te
     }
 
     override fun hashCode(): Int {
-        var result = group.hashCode()
-        result = 31 * result + base.hashCode()
+        var result = base.hashCode()
         result = 31 * result + addition.hashCode()
         result = 31 * result + template.hashCode()
         return result
+    }
+
+    companion object {
+        const val id = "smithing_transform"
+        val material = Material.SMITHING_TABLE
+
+        /**
+         * Required method for configuration serialization
+         *
+         * @param args map to deserialize
+         * @return deserialized item stack
+         * @see ConfigurationSerializable
+         */
+        @JvmStatic
+        fun deserialize(args: Map<String, Any>): SmithingTransformRecipe {
+
+            val section = MemoryConfiguration()
+            section.addDefaults(args)
+
+            val base: ItemStack = section.getItemStack("base") ?: throw IllegalArgumentException("Invalid or missing property 'base'")
+            val addition: ItemStack = section.getItemStack("addition") ?: throw IllegalArgumentException("Invalid or missing property 'addition'")
+            val template: ItemStack = section.getItemStack("template") ?: throw IllegalArgumentException("Invalid or missing property 'template'")
+            val recipe = SmithingTransformRecipe(base, addition, template)
+
+            return recipe
+        }
     }
 }

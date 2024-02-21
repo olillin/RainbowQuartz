@@ -9,9 +9,10 @@ import org.bukkit.inventory.RecipeChoice
 import org.bukkit.inventory.RecipeChoice.ExactChoice
 import org.bukkit.inventory.RecipeChoice.MaterialChoice
 
+@Suppress("UNUSED")
 class ShapedRecipe(vararg val pattern: String) : Recipe() {
-    private var group: String = ""
     private val ingredients: MutableMap<Char, RecipeChoice> = mutableMapOf()
+    private var group: String = ""
     private var amount: Int = 1
 
     override val suffix: String
@@ -77,6 +78,12 @@ class ShapedRecipe(vararg val pattern: String) : Recipe() {
         return setIngredient(key, ExactChoice(ingredient))
     }
 
+    fun setGroup(group: String): ShapedRecipe {
+        this.group = group
+        return this
+    }
+
+    fun getGroup(): String = group
 
     fun setAmount(amount: Int): ShapedRecipe {
         this.amount = amount
@@ -84,13 +91,6 @@ class ShapedRecipe(vararg val pattern: String) : Recipe() {
     }
 
     fun getAmount(): Int = amount
-
-    fun setGroup(group: String): ShapedRecipe {
-        this.group = group
-        return this
-    }
-
-    fun getGroup(): String = group
 
     override fun serialize(): MutableMap<String, Any> {
         return mutableMapOf(

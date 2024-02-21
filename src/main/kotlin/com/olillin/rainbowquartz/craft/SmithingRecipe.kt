@@ -7,8 +7,6 @@ import org.bukkit.inventory.RecipeChoice.MaterialChoice
 import org.bukkit.inventory.RecipeChoice.ExactChoice
 
 abstract class SmithingRecipe(var base: RecipeChoice, var addition: RecipeChoice) : Recipe() {
-    var group: String = ""
-
     fun setBase(base: RecipeChoice): SmithingRecipe {
         this.base = base
         return this
@@ -33,10 +31,5 @@ abstract class SmithingRecipe(var base: RecipeChoice, var addition: RecipeChoice
 
     fun setAddition(addition: ItemStack): SmithingRecipe {
         return setAddition(ExactChoice(addition))
-    }
-
-    fun setGroup(group: String): SmithingRecipe {
-        this.group = group
-        return this
     }
 }

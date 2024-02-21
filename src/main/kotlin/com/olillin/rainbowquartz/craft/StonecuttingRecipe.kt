@@ -9,8 +9,10 @@ import org.bukkit.inventory.RecipeChoice
 import org.bukkit.inventory.RecipeChoice.ExactChoice
 import org.bukkit.inventory.RecipeChoice.MaterialChoice
 
+@Suppress("UNUSED")
 class StonecuttingRecipe(var input: RecipeChoice) : Recipe() {
-    var group: String = ""
+    private var group: String = ""
+    private var amount: Int = 1
     override val suffix
         get() = id
 
@@ -69,6 +71,15 @@ class StonecuttingRecipe(var input: RecipeChoice) : Recipe() {
         this.group = group
         return this
     }
+
+    fun getGroup(): String = group
+
+    fun setAmount(amount: Int): StonecuttingRecipe {
+        this.amount = amount
+        return this
+    }
+
+    fun getAmount(): Int = amount
 
     override fun serialize(): MutableMap<String, Any> {
         return mutableMapOf(
