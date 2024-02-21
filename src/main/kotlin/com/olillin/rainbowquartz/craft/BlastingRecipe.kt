@@ -63,7 +63,7 @@ class BlastingRecipe(input: RecipeChoice) : CookingRecipe(input) {
                 ?: throw IllegalArgumentException("Invalid value for property 'input'")
             val recipe = BlastingRecipe(input)
 
-            val cookTime = section.getInt("cook_time")
+            val cookTime = section.getInt("cookTime", 100)
             recipe.setCookTime(cookTime)
 
             val exp = section.getDouble("exp").toFloat()
