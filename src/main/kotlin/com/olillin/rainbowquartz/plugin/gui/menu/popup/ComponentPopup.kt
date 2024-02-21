@@ -4,8 +4,7 @@ import com.olillin.rainbowquartz.item.ItemBuilder
 import com.olillin.rainbowquartz.plugin.gui.menu.Menu
 import com.olillin.rainbowquartz.plugin.gui.menu.playSound
 import net.kyori.adventure.text.Component
-import net.kyori.adventure.text.format.NamedTextColor
-import net.kyori.adventure.text.format.NamedTextColor.WHITE
+import net.kyori.adventure.text.format.NamedTextColor.*
 import net.kyori.adventure.text.format.TextDecoration
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer
 import org.bukkit.Material
@@ -39,7 +38,7 @@ class ComponentPopup(
         if (input == null) {
             return ItemStack(Material.BARRIER).apply {
                 itemMeta = itemMeta.apply {
-                    displayName(Component.text("Must be different than current name").color(NamedTextColor.RED))
+                    displayName(Component.text("Must be different than current value").color(RED))
                 }
             }
         }
@@ -58,25 +57,6 @@ class ComponentPopup(
     override fun parseInput(input: String?): Component? {
         input ?: return null
         return ItemBuilder.formatName(legacySerializer.deserialize(input))!!
-    }
-
-    @EventHandler
-    override fun onClickTextPopup(event: InventoryClickEvent) {
-        if (event.slotType != InventoryType.SlotType.RESULT) return
-
-        val name: Component? = parseInput(inventory.renameText)
-        if (name == null) {
-            // Invalid input
-            viewer.sendMessage(Component.text("Name must be different from old name").color(NamedTextColor.RED))
-            viewer.playSound(Sound.BLOCK_ANVIL_PLACE)
-            return
-        }
-        viewer.playSound(Sound.UI_CARTOGRAPHY_TABLE_TAKE_RESULT)
-
-        callback(name)
-        if (activeViewers().contains(viewer)) {
-            back()
-        }
     }
 
     companion object {

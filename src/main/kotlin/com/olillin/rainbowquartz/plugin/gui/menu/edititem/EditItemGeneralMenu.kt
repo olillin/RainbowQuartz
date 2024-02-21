@@ -77,7 +77,7 @@ class EditItemGeneralMenu(viewer: HumanEntity, builder: ItemBuilder, override va
         when (event.linkKey) {
             "rename" -> {
                 viewer.playSound(Sound.BLOCK_WOODEN_BUTTON_CLICK_ON)
-                ComponentPopup(viewer, placeholder = builder.getName(), previousMenu = this) { name ->
+                ComponentPopup(viewer, placeholder = builder.getName() ?: Component.translatable(builder.getMaterial().translationKey()), previousMenu = this) { name ->
                     builder.setName(name)
                 }.open()
             }
