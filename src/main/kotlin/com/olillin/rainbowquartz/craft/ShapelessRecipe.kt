@@ -10,50 +10,18 @@ import org.bukkit.inventory.RecipeChoice.ExactChoice
 import org.bukkit.inventory.RecipeChoice.MaterialChoice
 
 class ShapelessRecipe : Recipe() {
-    var group: String = ""
-    val ingredients: MutableList<RecipeChoice> = mutableListOf()
+    private var group: String = ""
+    private val ingredients: MutableList<RecipeChoice> = mutableListOf()
+    private var amount: Int = 1
     override val suffix: String
         get() = id
-
-    companion object {
-        const val id = "shapeless"
-        val material = Material.CRAFTING_TABLE
-
-        /**
-         * Required method for configuration serialization
-         *
-         * @param args map to deserialize
-         * @return deserialized item stack
-         * @see ConfigurationSerializable
-         */
-        @JvmStatic
-        fun deserialize(args: Map<String, Any>): ShapelessRecipe {
-
-            val section = MemoryConfiguration()
-            section.addDefaults(args)
-
-            val recipe = ShapelessRecipe()
-
-            val ingredients = section.getList("ingredients") ?: throw IllegalArgumentException("Missing or invalid property 'ingredients'")
-            for (ingredient in ingredients) {
-                if (ingredient !is ItemStack) throw IllegalArgumentException("Invalid ingredient, expected ItemStack")
-
-                recipe.addIngredient(ingredient)
-            }
-
-            val group = section.getString("group")
-                ?: throw IllegalArgumentException("Invalid value for property 'group'")
-            recipe.setGroup(group)
-
-            return recipe
-        }
-
-    }
 
     override fun asBukkitRecipe(item: Item): org.bukkit.inventory.ShapelessRecipe {
         val recipe = org.bukkit.inventory.ShapelessRecipe(
             key(item),
-            item.getItem()
+            item.getItem().also {
+                it.amount = amount
+            }
         )
         recipe.group = group
 
@@ -89,6 +57,10 @@ class ShapelessRecipe : Recipe() {
         return addIngredient(ExactChoice(ingredient))
     }
 
+    fun getIngredients(): List<RecipeChoice> {
+        return ingredients.toList()
+    }
+
     fun removeIngredient(ingredient: RecipeChoice, amount: Int): ShapelessRecipe {
         repeat(amount) {
             removeIngredient(ingredient)
@@ -117,14 +89,25 @@ class ShapelessRecipe : Recipe() {
         return removeIngredient(ExactChoice(ingredient))
     }
 
+    fun setAmount(amount: Int): ShapelessRecipe {
+        if (amount < 1) throw IllegalArgumentException("Amount must be at least 1")
+        this.amount = amount
+        return this
+    }
+
+    fun getAmount(): Int = amount
+
     fun setGroup(group: String): ShapelessRecipe {
         this.group = group
         return this
     }
 
+    fun getGroup(): String = group
+
     override fun serialize(): MutableMap<String, Any> {
         return mutableMapOf(
             "group" to group,
+            "amount" to amount,
             "ingredients" to ingredients.map {
                 it.itemStack
             }
@@ -147,5 +130,42 @@ class ShapelessRecipe : Recipe() {
         var result = group.hashCode()
         result = 31 * result + ingredients.hashCode()
         return result
+    }
+
+    companion object {
+        const val id = "shapeless"
+        val material = Material.CRAFTING_TABLE
+
+        /**
+         * Required method for configuration serialization
+         *
+         * @param args map to deserialize
+         * @return deserialized item stack
+         * @see ConfigurationSerializable
+         */
+        @JvmStatic
+        fun deserialize(args: Map<String, Any>): ShapelessRecipe {
+
+            val section = MemoryConfiguration()
+            section.addDefaults(args)
+
+            val recipe = ShapelessRecipe()
+
+            val ingredients = section.getList("ingredients") ?: throw IllegalArgumentException("Missing or invalid property 'ingredients'")
+            for (ingredient in ingredients) {
+                if (ingredient !is ItemStack) throw IllegalArgumentException("Invalid ingredient, expected ItemStack")
+
+                recipe.addIngredient(ingredient)
+            }
+
+            val group = section.getString("group")
+                ?: throw IllegalArgumentException("Invalid value for property 'group'")
+            recipe.setGroup(group)
+
+            val amount = section.getInt("amount", 1)
+            recipe.setAmount(amount)
+
+            return recipe
+        }
     }
 }

@@ -7,8 +7,10 @@ import com.olillin.rainbowquartz.plugin.gui.LinkItem
 import com.olillin.rainbowquartz.plugin.gui.enchanted
 import com.olillin.rainbowquartz.plugin.gui.menu.Menu
 import com.olillin.rainbowquartz.plugin.gui.menu.Paginator
-import com.olillin.rainbowquartz.plugin.gui.menu.edititem.recipe.ShapedRecipePopup
+import com.olillin.rainbowquartz.plugin.gui.menu.popup.recipe.ShapedRecipePopup
 import com.olillin.rainbowquartz.plugin.gui.menu.playSound
+import com.olillin.rainbowquartz.plugin.gui.menu.popup.recipe.ChoiceRecipePopup
+import com.olillin.rainbowquartz.plugin.gui.menu.popup.recipe.ShapelessRecipePopup
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.format.TextDecoration
@@ -50,7 +52,9 @@ class EditItemRecipesMenu(viewer: HumanEntity, builder: ItemBuilder, override va
         when (event.linkKey) {
             "add_recipe" -> {
                 viewer.playSound(Sound.BLOCK_WOODEN_BUTTON_CLICK_ON)
-                SelectRecipeTypeMenu(viewer, builder, this).open()
+                ChoiceRecipePopup(viewer, builder.build().getItem(), this) {
+                    builder.addRecipe(it)
+                }.open()
             }
             "previous_page" -> {
                 page--
@@ -85,25 +89,36 @@ class EditItemRecipesMenu(viewer: HumanEntity, builder: ItemBuilder, override va
                     }
                     renderPaginator()
                 }.open()
+                is ShapelessRecipe -> ShapelessRecipePopup(viewer, recipe, builder.build().getItem(), this) {
+                    if (it == null) {
+                        builder.removeRecipe(recipe)
+                    } else {
+                        builder.removeRecipe(recipe)
+                        builder.addRecipe(it)
+                    }
+                    renderPaginator()
+                }.open()
             }
         } else if (event.click == ClickType.RIGHT) {
-            viewer.playSound(Sound.BLOCK_WOODEN_BUTTON_CLICK_OFF)
+            viewer.playSound(Sound.ITEM_BUCKET_EMPTY)
             builder.removeRecipe(recipe)
+            renderPaginator()
         }
     }
 
     private fun recipeItem(recipe: Recipe): ItemStack {
         val material: Material = when (recipe) {
-            is ShapedRecipe, is ShapelessRecipe -> Material.CRAFTING_TABLE
-            is FurnaceRecipe -> Material.FURNACE
-            is SmokingRecipe -> Material.SMOKER
-            is BlastingRecipe -> Material.BLAST_FURNACE
-            is CampfireRecipe -> Material.CAMPFIRE
-            is SmithingTransformRecipe -> Material.SMITHING_TABLE
-            is StonecuttingRecipe -> Material.STONECUTTER
+            is ShapedRecipe -> ShapedRecipe.material
+            is ShapelessRecipe -> ShapelessRecipe.material
+            is FurnaceRecipe -> FurnaceRecipe.material
+            is SmokingRecipe -> SmokingRecipe.material
+            is BlastingRecipe -> BlastingRecipe.material
+            is CampfireRecipe -> CampfireRecipe.material
+            is SmithingTransformRecipe -> SmithingTransformRecipe.material
+            is StonecuttingRecipe -> StonecuttingRecipe.material
             else -> Material.BEDROCK
         }
-        val item = ItemStack(material, 1).apply {
+        val item = ItemStack(material).apply {
             itemMeta = itemMeta.apply {
                 val key: String = recipe.key(builder.key).toString()
                 // Name and lore

@@ -115,7 +115,7 @@ class LorePopup(override val viewer: HumanEntity, val placeholder: List<Componen
                     }
                     ClickType.RIGHT -> {
                         // Delete
-                        viewer.playSound(Sound.BLOCK_WOODEN_BUTTON_CLICK_OFF)
+                        viewer.playSound(Sound.ITEM_BUCKET_EMPTY)
                         lore.removeAt(index)
                         val pages = (lore.size-1) / ITEMS_PER_PAGE
                         if (page > pages)

@@ -1,13 +1,15 @@
-package com.olillin.rainbowquartz.plugin.gui.menu.edititem
+package com.olillin.rainbowquartz.plugin.gui.menu.popup.recipe
 
+import com.olillin.rainbowquartz.craft.Recipe
 import com.olillin.rainbowquartz.craft.ShapedRecipe
-import com.olillin.rainbowquartz.item.ItemBuilder
+import com.olillin.rainbowquartz.craft.ShapelessRecipe
 import com.olillin.rainbowquartz.plugin.gui.InventoryClickLinkEvent
 import com.olillin.rainbowquartz.plugin.gui.LinkItem
 import com.olillin.rainbowquartz.plugin.gui.menu.ImmutableMenu
-import com.olillin.rainbowquartz.plugin.gui.menu.edititem.recipe.ShapedRecipePopup
+import com.olillin.rainbowquartz.plugin.gui.menu.Menu
 import com.olillin.rainbowquartz.plugin.gui.menu.fill
 import com.olillin.rainbowquartz.plugin.gui.menu.playSound
+import com.olillin.rainbowquartz.plugin.gui.menu.popup.Popup
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
 import org.bukkit.Bukkit
@@ -16,8 +18,12 @@ import org.bukkit.entity.HumanEntity
 import org.bukkit.event.EventHandler
 import org.bukkit.event.inventory.InventoryOpenEvent
 import org.bukkit.inventory.Inventory
+import org.bukkit.inventory.ItemStack
 
-class SelectRecipeTypeMenu(override val viewer: HumanEntity, private val builder: ItemBuilder, override val previousMenu: EditItemMenu) : ImmutableMenu() {
+class ChoiceRecipePopup(override val viewer: HumanEntity, private val result: ItemStack, override val previousMenu: Menu,
+                        override val callback: (Recipe) -> Unit
+) :
+    ImmutableMenu(), Popup<Recipe> {
     override var inventory: Inventory = Bukkit.createInventory(viewer, 18, Component.text("Select recipe type"))
 
     @EventHandler
@@ -30,7 +36,14 @@ class SelectRecipeTypeMenu(override val viewer: HumanEntity, private val builder
                 Component.text("Shaped crafting recipe").color(NamedTextColor.AQUA)
             )
         )
-        inventory.setItem(13, LinkItem.BACK)
+        inventory.addItem(
+            LinkItem.makeLink(
+                "shapeless",
+                ShapelessRecipe.material,
+                Component.text("Shapeless crafting recipe").color(NamedTextColor.AQUA)
+            )
+        )
+        inventory.setItem(13, LinkItem.CANCEL)
         inventory.fill(EMPTY_PANEL)
     }
 
@@ -39,16 +52,23 @@ class SelectRecipeTypeMenu(override val viewer: HumanEntity, private val builder
         when (event.linkKey) {
             "shaped" -> {
                 viewer.playSound(Sound.BLOCK_WOODEN_BUTTON_CLICK_ON)
-                ShapedRecipePopup(viewer, null, builder.build().getItem(), this) {
-                    if (it != null) {
-                        builder.addRecipe(it)
-                    }
-                }.open()
+                ShapedRecipePopup(viewer, null, result, this, internalCallback).open()
             }
-            "back" -> {
+            "shapeless" -> {
+                viewer.playSound(Sound.BLOCK_WOODEN_BUTTON_CLICK_ON)
+                ShapelessRecipePopup(viewer, null, result, this, internalCallback).open()
+            }
+            "cancel" -> {
                 viewer.playSound(Sound.BLOCK_WOODEN_BUTTON_CLICK_OFF)
-                previousMenu.open()
+                back()
             }
         }
+    }
+
+    private val internalCallback: (Recipe?) -> Unit = {
+        if (it != null) {
+            callback(it)
+        }
+        back()
     }
 }

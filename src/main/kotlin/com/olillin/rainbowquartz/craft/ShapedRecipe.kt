@@ -14,6 +14,9 @@ class ShapedRecipe(vararg val pattern: String) : Recipe() {
     private val ingredients: MutableMap<Char, RecipeChoice> = mutableMapOf()
     private var amount: Int = 1
 
+    override val suffix: String
+        get() = id
+
     init {
         if (pattern.size < 1 || pattern.size > 3) {
             throw IllegalArgumentException("Expected pattern to be of size 1, 2 or 3, but got size ${pattern.size}")
@@ -28,9 +31,6 @@ class ShapedRecipe(vararg val pattern: String) : Recipe() {
             }
         }
     }
-
-    override val suffix: String
-        get() = id
 
     override fun asBukkitRecipe(item: Item): org.bukkit.inventory.ShapedRecipe {
         val recipe = org.bukkit.inventory.ShapedRecipe(
@@ -61,11 +61,11 @@ class ShapedRecipe(vararg val pattern: String) : Recipe() {
     }
 
     fun getIngredient(key: Char): RecipeChoice? {
-        return ingredients[key]
+        return ingredients[key]?.clone()
     }
 
     fun setIngredient(key: Char, ingredient: RecipeChoice): ShapedRecipe {
-        ingredients[key] = ingredient
+        ingredients[key] = ingredient.clone()
         return this
     }
 
@@ -77,10 +77,6 @@ class ShapedRecipe(vararg val pattern: String) : Recipe() {
         return setIngredient(key, ExactChoice(ingredient))
     }
 
-    fun setGroup(group: String): ShapedRecipe {
-        this.group = group
-        return this
-    }
 
     fun setAmount(amount: Int): ShapedRecipe {
         this.amount = amount
@@ -89,10 +85,18 @@ class ShapedRecipe(vararg val pattern: String) : Recipe() {
 
     fun getAmount(): Int = amount
 
+    fun setGroup(group: String): ShapedRecipe {
+        this.group = group
+        return this
+    }
+
+    fun getGroup(): String = group
+
     override fun serialize(): MutableMap<String, Any> {
         return mutableMapOf(
             "group" to group,
             "pattern" to pattern,
+            "amount" to amount,
             "ingredients" to ingredients.map {
                 it.key.toString() to it.value.itemStack
             }.toMap().toMutableMap()
@@ -156,6 +160,9 @@ class ShapedRecipe(vararg val pattern: String) : Recipe() {
             val group = section.getString("group")
                 ?: throw IllegalArgumentException("Invalid value for property 'group'")
             recipe.setGroup(group)
+
+            val amount = section.getInt("amount", 1)
+            recipe.setAmount(amount)
 
             return recipe
         }
