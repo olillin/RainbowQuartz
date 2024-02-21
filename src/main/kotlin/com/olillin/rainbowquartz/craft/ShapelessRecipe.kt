@@ -100,6 +100,26 @@ class ShapelessRecipe : Recipe() {
         return this
     }
 
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as ShapelessRecipe
+
+        if (group != other.group) return false
+        if (amount != other.amount) return false
+        if (ingredients != other.ingredients) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = group.hashCode()
+        result = 31 * result + amount.hashCode()
+        result = 31 * result + ingredients.hashCode()
+        return result
+    }
+
     override fun serialize(): MutableMap<String, Any> {
         return mutableMapOf(
             "group" to group,
@@ -108,24 +128,6 @@ class ShapelessRecipe : Recipe() {
                 it.itemStack
             }
         )
-    }
-
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (javaClass != other?.javaClass) return false
-
-        other as ShapelessRecipe
-
-        if (group != other.group) return false
-        if (ingredients != other.ingredients) return false
-
-        return true
-    }
-
-    override fun hashCode(): Int {
-        var result = group.hashCode()
-        result = 31 * result + ingredients.hashCode()
-        return result
     }
 
     companion object {
@@ -154,12 +156,10 @@ class ShapelessRecipe : Recipe() {
                 recipe.addIngredient(ingredient)
             }
 
-            val group = section.getString("group")
+            recipe.group = section.getString("group")
                 ?: throw IllegalArgumentException("Invalid value for property 'group'")
-            recipe.setGroup(group)
 
-            val amount = section.getInt("amount", 1)
-            recipe.setAmount(amount)
+            recipe.amount = section.getInt("amount", 1)
 
             return recipe
         }

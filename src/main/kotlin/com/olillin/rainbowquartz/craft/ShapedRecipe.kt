@@ -88,17 +88,6 @@ class ShapedRecipe(vararg val pattern: String) : Recipe() {
         return this
     }
 
-    override fun serialize(): MutableMap<String, Any> {
-        return mutableMapOf(
-            "group" to group,
-            "pattern" to pattern,
-            "amount" to amount,
-            "ingredients" to ingredients.map {
-                it.key.toString() to it.value.itemStack
-            }.toMap().toMutableMap()
-        )
-    }
-
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
@@ -106,6 +95,7 @@ class ShapedRecipe(vararg val pattern: String) : Recipe() {
         other as ShapedRecipe
 
         if (group != other.group) return false
+        if (amount != other.amount) return false
         if (!pattern.contentEquals(other.pattern)) return false
         if (ingredients != other.ingredients) return false
 
@@ -114,9 +104,22 @@ class ShapedRecipe(vararg val pattern: String) : Recipe() {
 
     override fun hashCode(): Int {
         var result = group.hashCode()
+        result = 31 * result + amount.hashCode()
         result = 31 * result + pattern.contentHashCode()
         result = 31 * result + ingredients.hashCode()
         return result
+    }
+
+    override fun serialize(): MutableMap<String, Any> {
+        return mutableMapOf(
+            "group" to group,
+            "amount" to amount,
+            "pattern" to pattern,
+            "amount" to amount,
+            "ingredients" to ingredients.map {
+                it.key.toString() to it.value.itemStack
+            }.toMap().toMutableMap()
+        )
     }
 
     companion object {
@@ -153,12 +156,10 @@ class ShapedRecipe(vararg val pattern: String) : Recipe() {
                 recipe.setIngredient(key[0], item)
             }
 
-            val group = section.getString("group")
+            recipe.group = section.getString("group")
                 ?: throw IllegalArgumentException("Invalid value for property 'group'")
-            recipe.setGroup(group)
 
-            val amount = section.getInt("amount", 1)
-            recipe.setAmount(amount)
+            recipe.amount = section.getInt("amount", 1)
 
             return recipe
         }

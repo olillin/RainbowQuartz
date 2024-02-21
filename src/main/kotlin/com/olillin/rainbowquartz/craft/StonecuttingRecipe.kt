@@ -16,6 +16,67 @@ class StonecuttingRecipe(var input: RecipeChoice) : Recipe() {
     override val suffix
         get() = id
 
+    constructor(input: Material) : this(MaterialChoice(input))
+    constructor(input: ItemStack) : this(ExactChoice(input))
+
+    override fun asBukkitRecipe(item: Item): org.bukkit.inventory.StonecuttingRecipe {
+        return org.bukkit.inventory.StonecuttingRecipe(
+            key(item),
+            item.getItem().also {
+                it.amount = amount
+            },
+            input
+        )
+    }
+
+    fun setInput(input: RecipeChoice): StonecuttingRecipe {
+        this.input = input
+        return this
+    }
+    fun setInput(input: Material): StonecuttingRecipe {
+        return setInput(MaterialChoice(input))
+    }
+    fun setInput(input: ItemStack): StonecuttingRecipe {
+        return setInput(ExactChoice(input))
+    }
+
+    fun setGroup(group: String): StonecuttingRecipe {
+        this.group = group
+        return this
+    }
+
+    fun setAmount(amount: Int): StonecuttingRecipe {
+        this.amount = amount
+        return this
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as StonecuttingRecipe
+
+        if (group != other.group) return false
+        if (amount != other.amount) return false
+        if (input != other.input) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = group.hashCode()
+        result = 31 * result + input.hashCode()
+        return result
+    }
+
+    override fun serialize(): MutableMap<String, Any> {
+        return mutableMapOf(
+            "group" to group,
+            "amount" to amount,
+            "input" to input.itemStack
+        )
+    }
+
     companion object {
         const val id = "stonecutting"
         val material = Material.STONECUTTER
@@ -43,61 +104,5 @@ class StonecuttingRecipe(var input: RecipeChoice) : Recipe() {
 
             return recipe
         }
-    }
-
-    constructor(input: Material) : this(MaterialChoice(input))
-    constructor(input: ItemStack) : this(ExactChoice(input))
-
-    override fun asBukkitRecipe(item: Item): org.bukkit.inventory.StonecuttingRecipe {
-        return org.bukkit.inventory.StonecuttingRecipe(
-            key(item),
-            item.getItem(),
-            input
-        )
-    }
-
-    fun setInput(input: RecipeChoice): StonecuttingRecipe {
-        this.input = input
-        return this
-    }
-    fun setInput(input: Material): StonecuttingRecipe {
-        return setInput(MaterialChoice(input))
-    }
-    fun setInput(input: ItemStack): StonecuttingRecipe {
-        return setInput(ExactChoice(input))
-    }
-
-    fun setGroup(group: String): StonecuttingRecipe {
-        this.group = group
-        return this
-    }
-
-    fun setAmount(amount: Int): StonecuttingRecipe {
-        this.amount = amount
-        return this
-    }
-
-    override fun serialize(): MutableMap<String, Any> {
-        return mutableMapOf(
-            "input" to input.itemStack
-        )
-    }
-
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (javaClass != other?.javaClass) return false
-
-        other as StonecuttingRecipe
-
-        if (group != other.group) return false
-        if (input != other.input) return false
-
-        return true
-    }
-
-    override fun hashCode(): Int {
-        var result = group.hashCode()
-        result = 31 * result + input.hashCode()
-        return result
     }
 }

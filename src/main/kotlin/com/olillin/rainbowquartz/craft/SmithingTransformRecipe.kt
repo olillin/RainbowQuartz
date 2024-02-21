@@ -54,7 +54,9 @@ class SmithingTransformRecipe(base: RecipeChoice, addition: RecipeChoice, var te
     override fun asBukkitRecipe(item: Item): org.bukkit.inventory.SmithingTransformRecipe {
         return org.bukkit.inventory.SmithingTransformRecipe(
             key(item),
-            item.getItem(),
+            item.getItem().also {
+                it.amount = amount
+            },
             template,
             base,
             addition
@@ -82,6 +84,7 @@ class SmithingTransformRecipe(base: RecipeChoice, addition: RecipeChoice, var te
     override fun serialize(): MutableMap<String, Any> {
         return mutableMapOf(
             "base" to base.itemStack,
+            "amount" to amount,
             "addition" to addition.itemStack,
             "template" to template.itemStack
         )
@@ -94,6 +97,7 @@ class SmithingTransformRecipe(base: RecipeChoice, addition: RecipeChoice, var te
         other as SmithingTransformRecipe
 
         if (base != other.base) return false
+        if (amount != other.amount) return false
         if (addition != other.addition) return false
         if (template != other.template) return false
 
@@ -101,7 +105,8 @@ class SmithingTransformRecipe(base: RecipeChoice, addition: RecipeChoice, var te
     }
 
     override fun hashCode(): Int {
-        var result = base.hashCode()
+        var result = amount.hashCode()
+        result = 31 * result + base.hashCode()
         result = 31 * result + addition.hashCode()
         result = 31 * result + template.hashCode()
         return result
@@ -128,6 +133,8 @@ class SmithingTransformRecipe(base: RecipeChoice, addition: RecipeChoice, var te
             val addition: ItemStack = section.getItemStack("addition") ?: throw IllegalArgumentException("Invalid or missing property 'addition'")
             val template: ItemStack = section.getItemStack("template") ?: throw IllegalArgumentException("Invalid or missing property 'template'")
             val recipe = SmithingTransformRecipe(base, addition, template)
+
+            recipe.amount = section.getInt("amount", 1)
 
             return recipe
         }

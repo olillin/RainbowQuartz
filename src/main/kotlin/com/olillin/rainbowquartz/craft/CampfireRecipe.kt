@@ -24,7 +24,9 @@ class CampfireRecipe(input: RecipeChoice) : CookingRecipe(input) {
     override fun asBukkitRecipe(item: Item): org.bukkit.inventory.CampfireRecipe {
         val recipe = org.bukkit.inventory.CampfireRecipe(
             key(item),
-            item.getItem(),
+            item.getItem().also {
+                it.amount = amount
+            },
             input,
             exp,
             cookTime
@@ -36,6 +38,7 @@ class CampfireRecipe(input: RecipeChoice) : CookingRecipe(input) {
     override fun serialize(): MutableMap<String, Any> {
         return mutableMapOf(
             "group" to group,
+            "amount" to amount,
             "input" to input.itemStack,
             "exp" to exp,
             "cookTime" to cookTime
@@ -63,15 +66,13 @@ class CampfireRecipe(input: RecipeChoice) : CookingRecipe(input) {
                 ?: throw IllegalArgumentException("Invalid value for property 'input'")
             val recipe = CampfireRecipe(input)
 
-            val cookTime = section.getInt("cookTime", 600)
-            recipe.setCookTime(cookTime)
+            recipe.cookTime = section.getInt("cookTime", 600)
+            recipe.exp = section.getDouble("exp", 0.0).toFloat()
 
-            val exp = section.getDouble("exp").toFloat()
-            recipe.setExp(exp)
-
-            val group = section.getString("group")
+            recipe.group = section.getString("group")
                 ?: throw IllegalArgumentException("Invalid value for property 'group'")
-            recipe.setGroup(group)
+
+            recipe.amount = section.getInt("amount", 1)
 
             return recipe
         }

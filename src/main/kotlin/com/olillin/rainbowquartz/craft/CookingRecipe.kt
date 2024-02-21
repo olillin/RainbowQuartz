@@ -8,8 +8,8 @@ import org.bukkit.inventory.RecipeChoice.MaterialChoice
 
 @Suppress("UNUSED")
 abstract class CookingRecipe(var input: RecipeChoice) : Recipe() {
-    protected var exp: Float = 0.0f
-    protected var cookTime: Int = 200
+    var exp: Float = 0.0f
+    var cookTime: Int = 200
     var group: String = ""
     var amount: Int = 1
 
@@ -53,6 +53,7 @@ abstract class CookingRecipe(var input: RecipeChoice) : Recipe() {
         other as CookingRecipe
 
         if (group != other.group) return false
+        if (amount != other.amount) return false
         if (input != other.input) return false
         if (exp != other.exp) return false
         if (cookTime != other.cookTime) return false
@@ -62,6 +63,7 @@ abstract class CookingRecipe(var input: RecipeChoice) : Recipe() {
 
     override fun hashCode(): Int {
         var result = group.hashCode()
+        result = 31 * result + amount.hashCode()
         result = 31 * result + input.hashCode()
         result = 31 * result + exp.hashCode()
         result = 31 * result + cookTime
