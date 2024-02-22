@@ -1,9 +1,7 @@
 package com.olillin.rainbowquartz.item
 
 import com.olillin.rainbowquartz.craft.Recipe
-import com.olillin.rainbowquartz.event.EventHandler
-import com.olillin.rainbowquartz.event.EventPredicate
-import com.olillin.rainbowquartz.event.PredicatedEventHandler
+import com.olillin.rainbowquartz.event.*
 import net.kyori.adventure.key.Key
 import net.kyori.adventure.key.Keyed
 import net.kyori.adventure.text.Component
@@ -17,41 +15,157 @@ import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.ItemMeta
 import org.bukkit.persistence.PersistentDataType
 
+@Suppress("UNUSED")
 class Item(
-    val key: NamespacedKey,
-    private val item: ItemStack,
-    recipes: List<Recipe>,
-    handlers: Map<Class<out Event>, Set<PredicatedEventHandler<*>>>
+    val key: NamespacedKey, item: ItemStack, recipes: List<Recipe>
 ) : Keyed, ConfigurationSerializable {
-    protected val handlers: MutableMap<Class<out Event>, MutableSet<PredicatedEventHandler<*>>>
-    val recipes: List<Recipe>
-
-    constructor(key: NamespacedKey, item: ItemStack) : this(key, item, listOf(), mutableMapOf())
-    constructor(key: NamespacedKey, item: ItemStack, recipes: List<Recipe>) : this(key, item, recipes, mutableMapOf())
-    constructor(
-        key: NamespacedKey,
-        item: ItemStack,
-        handlers: Map<Class<out Event>, Set<PredicatedEventHandler<*>>>
-    ) : this(key, item, listOf(), handlers)
-
-    init {
-        // Set id
-        item.apply {
-            itemMeta = itemMeta.apply {
-                rainbowQuartzId = key
-            }
+    private val item: ItemStack = ItemStack(item).apply {
+        itemMeta = itemMeta.apply {
+            rainbowQuartzId = key
         }
-
-        // Recipes
-        this.recipes = recipes.toList()
-
-        // Event handler
-        this.handlers = handlers.map {
-            it.key to it.value.toMutableSet()
-        }.toMap().toMutableMap()
+        amount = 1
     }
+    private val eventHandlerGroups: MutableList<EventHandlerGroup<*>> = mutableListOf()
+
+    val recipes: List<Recipe> = recipes.toList()
+
+    constructor(key: NamespacedKey, item: ItemStack) : this(key, item, listOf())
 
     fun getItem(): ItemStack = ItemStack(item)
+
+    /**
+     * Register an [EventHandlerGroup]
+     */
+    fun <T : Event> addEventHandler(eventHandlerGroup: EventHandlerGroup<T>) {
+        eventHandlerGroups.add(eventHandlerGroup)
+    }
+
+    /**
+     * Register an [EventHandler] to be executed when an [EventPredicate] is successful
+     *
+     * @param eventType The class of the event to listen for
+     * @param predicate The predicate to check against the event before the handler is called
+     * @param handler What should happen when the predicate is successful
+     */
+    fun <T : Event> addEventHandler(eventType: Class<out T>, predicate: EventPredicate<T>, handler: EventHandler<T>) {
+        addEventHandler(
+            EventHandlerGroup(
+                eventType, predicate, handler
+            )
+        )
+    }
+
+    /**
+     * Get all event handler groups that are registered for [eventType]
+     *
+     * @see EventHandlerGroup
+     */
+    @Suppress("UNCHECKED_CAST")
+    fun <T : Event> getEventHandlers(eventType: Class<out T>): List<EventHandlerGroup<in T>> {
+        return eventHandlerGroups.filter { it.eventType == eventType } as List<EventHandlerGroup<in T>>
+    }
+
+    /**
+     * Get all event handler groups that are registered for [eventType] with [predicate]
+     *
+     * @see EventHandlerGroup
+     */
+    @Suppress("UNCHECKED_CAST")
+    fun <T : Event> getEventHandlers(
+        eventType: Class<out T>, predicate: EventPredicate<T>
+    ): List<EventHandlerGroup<in T>> {
+        return eventHandlerGroups.filter { it.eventType == eventType && it.predicate == predicate } as List<EventHandlerGroup<in T>>
+    }
+
+    /**
+     * Get all event handler groups that are registered for [eventType] with [predicate] and [handler]
+     *
+     * @see EventHandlerGroup
+     */
+    @Suppress("UNCHECKED_CAST")
+    fun <T : Event> getEventHandlers(
+        eventType: Class<out T>, predicate: EventPredicate<T>, handler: EventHandler<T>
+    ): List<EventHandlerGroup<in T>> {
+        return eventHandlerGroups.filter { it.eventType == eventType && it.predicate == predicate && it.handler == handler } as List<EventHandlerGroup<in T>>
+    }
+
+    /**
+     * Remove all event handlers for [eventType]
+     */
+    fun <T : Event> removeEventHandlers(eventType: Class<T>) {
+        val handlers = getEventHandlers(eventType)
+        handlers.forEach {
+            removeEventHandler(it)
+        }
+    }
+
+    /**
+     * Remove all event handlers for [eventType] with [predicate]
+     */
+    fun <T : Event> removeEventHandlers(eventType: Class<T>, predicate: EventPredicate<T>) {
+        val handlers = getEventHandlers(eventType, predicate)
+        handlers.forEach {
+            removeEventHandler(it)
+        }
+    }
+
+    /**
+     * Remove all event handlers for [eventType] with [predicate] and [handler]
+     */
+    fun <T : Event> removeEventHandlers(eventType: Class<T>, predicate: EventPredicate<T>, handler: EventHandler<T>) {
+        val handlers = getEventHandlers(eventType, predicate, handler)
+        handlers.forEach {
+            removeEventHandler(it)
+        }
+    }
+
+    fun <T : Event> removeEventHandler(eventHandlerGroup: EventHandlerGroup<T>) {
+        eventHandlerGroups.remove(eventHandlerGroup)
+    }
+
+    fun getEventTypes(): Set<Class<out Event>> {
+        return eventHandlerGroups.map { it.eventType }.toSet()
+    }
+
+    override fun key(): Key {
+        return key
+    }
+
+    override fun toString(): String {
+        return "Item($key){material=${item.type}}"
+    }
+
+    override fun serialize(): MutableMap<String, Any> {
+        val result = mutableMapOf<String, Any>(
+            "id" to key.toString()
+        )
+
+        val stack = ItemStack(item)
+        val meta = stack.itemMeta
+        meta.rainbowQuartzId = null
+        stack.setItemMeta(meta)
+        result["item"] = stack
+
+        result["recipes"] = recipes
+
+        return result
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (other !is Item) return false
+        return key == other.key && item == other.item && recipes == other.recipes
+    }
+
+    override fun hashCode(): Int {
+        var result = key.hashCode()
+        result = 31 * result + result.hashCode()
+        result = 31 * result + recipes.hashCode()
+        return result
+    }
+
+    fun displayNameComponent(): Component? {
+        return (item.displayName() as? TranslatableComponent)?.args()?.get(0)
+    }
 
     companion object {
         /**
@@ -92,84 +206,12 @@ class Item(
             return builder.build()
         }
     }
-
-    /**
-     * Register an [EventHandler] to be executed when an [EventPredicate] is successful
-     *
-     * @param eventType The event class
-     * @param predicate The predicate to check before calling the handler
-     * @param handler What should happen when the predicate is successful
-     */
-    fun <T : Event> addEventHandler(eventType: Class<T>, predicate: EventPredicate<T>, handler: EventHandler<T>) {
-        if (!handlers.containsKey(eventType)) {
-            handlers[eventType] = mutableSetOf()
-        }
-        handlers[eventType]!!.add(PredicatedEventHandler(predicate, handler))
-    }
-
-    fun <T : Event> getHandlerPairs(eventType: Class<out T>): Set<PredicatedEventHandler<in T>>? {
-        val result: MutableSet<PredicatedEventHandler<in T>> = mutableSetOf()
-        val handler: Set<PredicatedEventHandler<*>> = handlers[eventType]
-            ?: return null
-        handler.forEach {
-            @Suppress("UNCHECKED_CAST")
-            result.add(it as PredicatedEventHandler<T>)
-        }
-        return result
-    }
-
-    fun getEventTypes(): Set<Class<out Event>> {
-        return handlers.keys
-    }
-
-    override fun key(): Key {
-        return key
-    }
-
-    override fun toString(): String {
-        return "Item($key){material=${item.type}}"
-    }
-
-    override fun serialize(): MutableMap<String, Any> {
-        val result = mutableMapOf<String, Any>(
-            "id" to key.toString()
-        )
-
-        val stack = ItemStack(item)
-        val meta = stack.itemMeta
-        meta.rainbowQuartzId = null
-        stack.setItemMeta(meta)
-        result["item"] = stack
-
-        result["recipes"] = recipes
-
-        return result
-    }
-
-    override fun equals(other: Any?): Boolean {
-        if (other !is Item) return false
-        return key == other.key
-                && item == other.item
-                && recipes == other.recipes
-    }
-
-    override fun hashCode(): Int {
-        var result = key.hashCode()
-        result = 31 * result + result.hashCode()
-        result = 31 * result + recipes.hashCode()
-        return result
-    }
-
-    fun displayNameComponent(): Component? {
-        return (item.displayName() as? TranslatableComponent)?.args()?.get(0)
-    }
 }
 
 var ItemMeta.rainbowQuartzId: NamespacedKey?
     get() {
         val id = persistentDataContainer.get(
-            NamespacedKey.fromString("rainbowquartz:id")!!,
-            PersistentDataType.STRING
+            NamespacedKey.fromString("rainbowquartz:id")!!, PersistentDataType.STRING
         ) ?: return null
         return NamespacedKey.fromString(id)
 
@@ -181,9 +223,7 @@ var ItemMeta.rainbowQuartzId: NamespacedKey?
             )
         } else {
             persistentDataContainer.set(
-                NamespacedKey.fromString("rainbowquartz:id")!!,
-                PersistentDataType.STRING,
-                value.toString()
+                NamespacedKey.fromString("rainbowquartz:id")!!, PersistentDataType.STRING, value.toString()
             )
         }
     }
