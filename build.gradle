@@ -30,15 +30,16 @@ dependencies {
     testRuntimeOnly 'org.slf4j:slf4j-simple:2.0.7'
 }
 
-shadowJar {
-    dependsOn 'build'
+tasks.build.dependsOn tasks.shadowJar
 
+shadowJar {
     manifest {
         archiveClassifier = null
     }
 
     dependencies {
         exclude(dependency('com.mojang:brigadier'))
+        exclude(dependency('net.kyori:adventure-text-serializer-legacy'))
         exclude('kotlin/')
     }
 
