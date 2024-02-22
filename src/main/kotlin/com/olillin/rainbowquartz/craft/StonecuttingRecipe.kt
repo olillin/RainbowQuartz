@@ -73,7 +73,7 @@ class StonecuttingRecipe(var input: RecipeChoice) : Recipe() {
         return mutableMapOf(
             "group" to group,
             "amount" to amount,
-            "input" to input.itemStack
+            "input" to asItemStack(input)
         )
     }
 

@@ -83,10 +83,10 @@ class SmithingTransformRecipe(base: RecipeChoice, addition: RecipeChoice, var te
 
     override fun serialize(): MutableMap<String, Any> {
         return mutableMapOf(
-            "base" to base.itemStack,
+            "base" to asItemStack(base),
             "amount" to amount,
-            "addition" to addition.itemStack,
-            "template" to template.itemStack
+            "addition" to asItemStack(addition),
+            "template" to asItemStack(template)
         )
     }
 

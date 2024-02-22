@@ -36,7 +36,7 @@ class FurnaceRecipe(input: RecipeChoice) : CookingRecipe(input) {
         return mutableMapOf(
             "group" to group,
             "amount" to amount,
-            "input" to input.itemStack,
+            "input" to asItemStack(input),
             "exp" to exp,
             "cookTime" to cookTime
         )

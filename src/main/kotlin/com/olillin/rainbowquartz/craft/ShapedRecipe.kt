@@ -117,7 +117,7 @@ class ShapedRecipe(vararg val pattern: String) : Recipe() {
             "pattern" to pattern,
             "amount" to amount,
             "ingredients" to ingredients.map {
-                it.key.toString() to it.value.itemStack
+                it.key.toString() to asItemStack(it.value)
             }.toMap().toMutableMap()
         )
     }

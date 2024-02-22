@@ -125,7 +125,7 @@ class ShapelessRecipe : Recipe() {
             "group" to group,
             "amount" to amount,
             "ingredients" to ingredients.map {
-                it.itemStack
+                asItemStack(it)
             }
         )
     }

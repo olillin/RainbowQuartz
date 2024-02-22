@@ -1,6 +1,7 @@
 package com.olillin.rainbowquartz.plugin.gui.menu.popup.recipe
 
 import com.olillin.rainbowquartz.craft.CampfireRecipe
+import com.olillin.rainbowquartz.craft.Recipe.Companion.asItemStack
 import com.olillin.rainbowquartz.plugin.gui.menu.Menu
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor.GOLD
@@ -26,7 +27,7 @@ class CampfireRecipePopup(
             exp = placeholder.exp
             cookTime = placeholder.cookTime
             amount = placeholder.amount
-            inventory.setItem(INPUT_SLOT, placeholder.input.itemStack.also {
+            inventory.setItem(INPUT_SLOT, asItemStack(placeholder.input).also {
                 it.amount = 1
             })
         }

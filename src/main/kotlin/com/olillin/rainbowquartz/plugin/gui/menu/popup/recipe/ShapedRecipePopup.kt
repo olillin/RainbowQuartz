@@ -1,5 +1,6 @@
 package com.olillin.rainbowquartz.plugin.gui.menu.popup.recipe
 
+import com.olillin.rainbowquartz.craft.Recipe.Companion.asItemStack
 import com.olillin.rainbowquartz.craft.ShapedRecipe
 import com.olillin.rainbowquartz.item.rainbowQuartzId
 import com.olillin.rainbowquartz.plugin.gui.menu.Menu
@@ -36,9 +37,10 @@ class ShapedRecipePopup(
     init {
         if (placeholder != null) {
             val items = mutableListOf<ItemStack?>()
-            padPattern(placeholder.getPattern()).forEach { line ->
-                line.forEach { key ->
-                    items.add(placeholder.getIngredient(key)?.itemStack?.apply {
+            for (line in padPattern(placeholder.getPattern())) {
+                for (key in line) {
+                    val ingredient = placeholder.getIngredient(key) ?: continue
+                    items.add(asItemStack(ingredient).apply {
                         amount = 1
                     })
                 }

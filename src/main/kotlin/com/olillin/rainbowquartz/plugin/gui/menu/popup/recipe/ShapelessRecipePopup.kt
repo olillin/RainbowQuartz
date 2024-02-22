@@ -1,5 +1,6 @@
 package com.olillin.rainbowquartz.plugin.gui.menu.popup.recipe
 
+import com.olillin.rainbowquartz.craft.Recipe.Companion.asItemStack
 import com.olillin.rainbowquartz.craft.ShapelessRecipe
 import com.olillin.rainbowquartz.plugin.gui.menu.Menu
 import org.bukkit.entity.HumanEntity
@@ -34,7 +35,7 @@ class ShapelessRecipePopup(
     init {
         if (placeholder != null) {
             val placeholderGrid: MutableList<ItemStack?> = placeholder.getIngredients()
-                .map { it.itemStack.apply { amount = 1 } }.toMutableList()
+                .map { asItemStack(it).apply { amount = 1 } }.toMutableList()
             amount = placeholder.amount
             while (placeholderGrid.size < 9) {
                 placeholderGrid.add(null)
