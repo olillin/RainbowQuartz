@@ -219,8 +219,9 @@ open class ItemBuilder(val key: NamespacedKey, result: ItemStack, recipes: List<
         return this
     }
 
-    fun getRecipe(key: NamespacedKey): Recipe {
-        return recipes.first { it.key(build()) == key }
+    fun getRecipe(key: NamespacedKey): Recipe? {
+        val item = build()
+        return recipes.firstOrNull { it.key(item) == key }
     }
 
     fun removeRecipe(recipe: Recipe): ItemBuilder {

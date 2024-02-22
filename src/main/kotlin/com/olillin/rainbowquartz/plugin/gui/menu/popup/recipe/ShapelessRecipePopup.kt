@@ -13,7 +13,7 @@ class ShapelessRecipePopup(
     override val result: ItemStack,
     override val previousMenu: Menu,
     override val callback: (ShapelessRecipe?) -> Unit
-) : RecipePopup<ShapelessRecipe>() {
+) : GroupRecipePopup<ShapelessRecipe>() {
     //    override val title = Component.text(if (placeholder == null) "New shapeless recipe" else "Edit shapeless recipe")
     override val recipeIcon = ShapelessRecipe.material
 
@@ -35,7 +35,7 @@ class ShapelessRecipePopup(
         if (placeholder != null) {
             val placeholderGrid: MutableList<ItemStack?> = placeholder.getIngredients()
                 .map { it.itemStack.apply { amount = 1 } }.toMutableList()
-            resultAmount = placeholder.amount
+            amount = placeholder.amount
             while (placeholderGrid.size < 9) {
                 placeholderGrid.add(null)
             }
@@ -46,7 +46,6 @@ class ShapelessRecipePopup(
     @EventHandler
     @Suppress("UNUSED_PARAMETER")
     fun onOpen(event: InventoryOpenEvent) {
-        inventory.setItem(4, EMPTY_PANEL)
         inventory.setItem(13, EMPTY_PANEL)
         inventory.setItem(22, EMPTY_PANEL)
     }
@@ -60,7 +59,8 @@ class ShapelessRecipePopup(
         for (ingredient in ingredients) {
             result.addIngredient(ingredient)
         }
-        result.setAmount(resultAmount)
+        result.group = group
+        result.amount = amount
 
         return result
     }

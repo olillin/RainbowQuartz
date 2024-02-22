@@ -3,7 +3,6 @@ package com.olillin.rainbowquartz.plugin.gui.menu.popup.recipe
 import com.olillin.rainbowquartz.craft.ShapedRecipe
 import com.olillin.rainbowquartz.item.rainbowQuartzId
 import com.olillin.rainbowquartz.plugin.gui.menu.Menu
-import net.kyori.adventure.text.Component
 import org.bukkit.Material
 import org.bukkit.entity.HumanEntity
 import org.bukkit.event.EventHandler
@@ -16,7 +15,7 @@ class ShapedRecipePopup(
     override val result: ItemStack,
     override val previousMenu: Menu,
     override val callback: (ShapedRecipe?) -> Unit
-) : RecipePopup<ShapedRecipe>() {
+) : GroupRecipePopup<ShapedRecipe>() {
 //    override val title: Component = Component.text(if (placeholder == null) "New shaped recipe" else "Edit shaped recipe")
     override val recipeIcon: Material = ShapedRecipe.material
 
@@ -46,14 +45,14 @@ class ShapedRecipePopup(
             }
             grid = items.toTypedArray()
 
-            resultAmount = placeholder.amount
+            group = placeholder.group
+            amount = placeholder.amount
         }
     }
 
     @EventHandler
     @Suppress("UNUSED_PARAMETER")
     fun onOpen(event: InventoryOpenEvent) {
-        inventory.setItem(4, EMPTY_PANEL)
         inventory.setItem(13, EMPTY_PANEL)
         inventory.setItem(22, EMPTY_PANEL)
     }
@@ -94,7 +93,8 @@ class ShapedRecipePopup(
         for (i in ingredients.entries) {
             result.setIngredient(i.key, i.value)
         }
-        result.setAmount(resultAmount)
+        result.group = group
+        result.amount = amount
 
         return result
     }

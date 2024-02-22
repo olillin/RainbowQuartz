@@ -1,8 +1,6 @@
 package com.olillin.rainbowquartz.plugin.gui.menu.popup.recipe
 
-import com.olillin.rainbowquartz.craft.Recipe
-import com.olillin.rainbowquartz.craft.ShapedRecipe
-import com.olillin.rainbowquartz.craft.ShapelessRecipe
+import com.olillin.rainbowquartz.craft.*
 import com.olillin.rainbowquartz.plugin.gui.InventoryClickLinkEvent
 import com.olillin.rainbowquartz.plugin.gui.LinkItem
 import com.olillin.rainbowquartz.plugin.gui.menu.ImmutableMenu
@@ -43,6 +41,34 @@ class ChoiceRecipePopup(override val viewer: HumanEntity, private val result: It
                 Component.text("Shapeless crafting recipe").color(NamedTextColor.AQUA)
             )
         )
+        inventory.addItem(
+            LinkItem.makeLink(
+                "furnace",
+                FurnaceRecipe.material,
+                Component.text("Furnace recipe").color(NamedTextColor.AQUA)
+            )
+        )
+        inventory.addItem(
+            LinkItem.makeLink(
+                "smoking",
+                SmokingRecipe.material,
+                Component.text("Smoking recipe").color(NamedTextColor.AQUA)
+            )
+        )
+        inventory.addItem(
+            LinkItem.makeLink(
+                "blasting",
+                BlastingRecipe.material,
+                Component.text("Blasting recipe").color(NamedTextColor.AQUA)
+            )
+        )
+        inventory.addItem(
+            LinkItem.makeLink(
+                "campfire",
+                CampfireRecipe.material,
+                Component.text("Campfire recipe").color(NamedTextColor.AQUA)
+            )
+        )
         inventory.setItem(13, LinkItem.CANCEL)
         inventory.fill(EMPTY_PANEL)
     }
@@ -57,6 +83,22 @@ class ChoiceRecipePopup(override val viewer: HumanEntity, private val result: It
             "shapeless" -> {
                 viewer.playSound(Sound.BLOCK_WOODEN_BUTTON_CLICK_ON)
                 ShapelessRecipePopup(viewer, null, result, this, internalCallback).open()
+            }
+            "furnace" -> {
+                viewer.playSound(Sound.BLOCK_WOODEN_BUTTON_CLICK_ON)
+                FurnaceRecipePopup(viewer, null, result, this, internalCallback).open()
+            }
+            "smoking" -> {
+                viewer.playSound(Sound.BLOCK_WOODEN_BUTTON_CLICK_ON)
+                SmokingRecipePopup(viewer, null, result, this, internalCallback).open()
+            }
+            "blasting" -> {
+                viewer.playSound(Sound.BLOCK_WOODEN_BUTTON_CLICK_ON)
+                BlastingRecipePopup(viewer, null, result, this, internalCallback).open()
+            }
+            "campfire" -> {
+                viewer.playSound(Sound.BLOCK_WOODEN_BUTTON_CLICK_ON)
+                CampfireRecipePopup(viewer, null, result, this, internalCallback).open()
             }
             "cancel" -> {
                 viewer.playSound(Sound.BLOCK_WOODEN_BUTTON_CLICK_OFF)

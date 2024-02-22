@@ -6,7 +6,6 @@ import com.olillin.rainbowquartz.plugin.gui.menu.InsertMenu
 import com.olillin.rainbowquartz.plugin.gui.menu.playSound
 import com.olillin.rainbowquartz.plugin.gui.menu.popup.Popup
 import net.kyori.adventure.text.Component
-import net.kyori.adventure.text.TextComponent
 import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.format.TextDecoration
 import org.bukkit.Bukkit
@@ -21,7 +20,7 @@ import org.bukkit.inventory.ItemStack
 
 abstract class RecipePopup<T>: InsertMenu(), Popup<T?> {
     protected abstract val result: ItemStack
-    protected var resultAmount: Int = 1
+    protected var amount: Int = 1
     protected abstract val placeholder: T?
 
     protected open val title: Component = Component.text(
@@ -71,41 +70,41 @@ abstract class RecipePopup<T>: InsertMenu(), Popup<T?> {
 
             "add_amount_1" -> {
                 viewer.playSound(Sound.BLOCK_WOODEN_BUTTON_CLICK_ON)
-                resultAmount++
+                amount++
                 updatePreview()
             }
 
             "add_amount_16" -> {
                 viewer.playSound(Sound.BLOCK_WOODEN_BUTTON_CLICK_ON)
-                if (resultAmount == 1) {
-                    resultAmount = 16
+                if (amount == 1) {
+                    amount = 16
                 } else {
-                    resultAmount += 16
+                    amount += 16
                 }
                 updatePreview()
             }
 
             "set_amount_max" -> {
                 viewer.playSound(Sound.BLOCK_WOODEN_BUTTON_CLICK_ON)
-                resultAmount = result.type.maxStackSize
+                amount = result.type.maxStackSize
                 updatePreview()
             }
 
             "remove_amount_1" -> {
                 viewer.playSound(Sound.BLOCK_WOODEN_BUTTON_CLICK_OFF)
-                resultAmount--
+                amount--
                 updatePreview()
             }
 
             "remove_amount_16" -> {
                 viewer.playSound(Sound.BLOCK_WOODEN_BUTTON_CLICK_OFF)
-                resultAmount -= 16
+                amount -= 16
                 updatePreview()
             }
 
             "set_amount_min" -> {
                 viewer.playSound(Sound.BLOCK_WOODEN_BUTTON_CLICK_OFF)
-                resultAmount = 1
+                amount = 1
                 updatePreview()
             }
 
@@ -156,11 +155,11 @@ abstract class RecipePopup<T>: InsertMenu(), Popup<T?> {
     }
 
     protected fun updatePreview() {
-        resultAmount = resultAmount.coerceIn(1, result.type.maxStackSize)
+        amount = amount.coerceIn(1, result.type.maxStackSize)
         ResultPreview.render(
             inventory,
             result,
-            resultAmount,
+            amount,
             5,
             0
         )

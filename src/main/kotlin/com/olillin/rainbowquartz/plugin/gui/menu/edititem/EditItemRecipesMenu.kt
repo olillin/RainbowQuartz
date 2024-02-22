@@ -7,10 +7,8 @@ import com.olillin.rainbowquartz.plugin.gui.LinkItem
 import com.olillin.rainbowquartz.plugin.gui.enchanted
 import com.olillin.rainbowquartz.plugin.gui.menu.Menu
 import com.olillin.rainbowquartz.plugin.gui.menu.Paginator
-import com.olillin.rainbowquartz.plugin.gui.menu.popup.recipe.ShapedRecipePopup
 import com.olillin.rainbowquartz.plugin.gui.menu.playSound
-import com.olillin.rainbowquartz.plugin.gui.menu.popup.recipe.ChoiceRecipePopup
-import com.olillin.rainbowquartz.plugin.gui.menu.popup.recipe.ShapelessRecipePopup
+import com.olillin.rainbowquartz.plugin.gui.menu.popup.recipe.*
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.format.TextDecoration
@@ -77,33 +75,31 @@ class EditItemRecipesMenu(viewer: HumanEntity, builder: ItemBuilder, override va
             .get(recipeKeyLocation, PersistentDataType.STRING) ?: return
         val (namespace, value) = recipeKeyString.split(':').toTypedArray()
         val recipeKey = NamespacedKey(namespace, value)
-        val recipe = builder.getRecipe(recipeKey)
+        val oldRecipe = builder.getRecipe(recipeKey) ?: return
         if (event.click == ClickType.LEFT) {
-            when (recipe) {
-                is ShapedRecipe -> ShapedRecipePopup(viewer, recipe, builder.build().getItem(), this) {
-                    if (it == null) {
-                        builder.removeRecipe(recipe)
-                    } else {
-                        builder.removeRecipe(recipe)
-                        builder.addRecipe(it)
-                    }
-                    renderPaginator()
-                }.open()
-                is ShapelessRecipe -> ShapelessRecipePopup(viewer, recipe, builder.build().getItem(), this) {
-                    if (it == null) {
-                        builder.removeRecipe(recipe)
-                    } else {
-                        builder.removeRecipe(recipe)
-                        builder.addRecipe(it)
-                    }
-                    renderPaginator()
-                }.open()
+            when (oldRecipe) {
+                is ShapedRecipe -> ShapedRecipePopup(viewer, oldRecipe, builder.build().getItem(), this) { updateRecipe(oldRecipe, it) }.open()
+                is ShapelessRecipe -> ShapelessRecipePopup(viewer, oldRecipe, builder.build().getItem(), this) { updateRecipe(oldRecipe, it) }.open()
+                is FurnaceRecipe -> FurnaceRecipePopup(viewer, oldRecipe, builder.build().getItem(), this) { updateRecipe(oldRecipe, it) }.open()
+                is SmokingRecipe -> SmokingRecipePopup(viewer, oldRecipe, builder.build().getItem(), this) { updateRecipe(oldRecipe, it) }.open()
+                is BlastingRecipe -> BlastingRecipePopup(viewer, oldRecipe, builder.build().getItem(), this) { updateRecipe(oldRecipe, it) }.open()
+                is CampfireRecipe -> CampfireRecipePopup(viewer, oldRecipe, builder.build().getItem(), this) { updateRecipe(oldRecipe, it) }.open()
             }
         } else if (event.click == ClickType.RIGHT) {
             viewer.playSound(Sound.ITEM_BUCKET_EMPTY)
-            builder.removeRecipe(recipe)
+            builder.removeRecipe(oldRecipe)
             renderPaginator()
         }
+    }
+
+    private fun updateRecipe(oldRecipe: Recipe, newRecipe: Recipe?) {
+        if (newRecipe == null) {
+            builder.removeRecipe(oldRecipe)
+        } else {
+            builder.removeRecipe(oldRecipe)
+            builder.addRecipe(newRecipe)
+        }
+        renderPaginator()
     }
 
     private fun recipeItem(recipe: Recipe): ItemStack {
