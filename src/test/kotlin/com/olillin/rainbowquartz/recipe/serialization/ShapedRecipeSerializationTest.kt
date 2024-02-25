@@ -5,13 +5,11 @@ import be.seeseemelk.mockbukkit.ServerMock
 import com.olillin.rainbowquartz.RainbowQuartz
 import com.olillin.rainbowquartz.craft.ShapedRecipe
 import org.bukkit.Material
-import org.bukkit.NamespacedKey
 import org.bukkit.inventory.ItemStack
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import java.util.*
 
 class RecipeSerializationTest {
     private lateinit var server: ServerMock
