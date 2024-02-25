@@ -25,10 +25,11 @@ import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 class IngredientTest {
-    fun getMaterial(): Material = Material.IRON_INGOT
-    fun getStack(): ItemStack {
-        val stack = ItemStack(Material.IRON_INGOT)
-        val meta = stack.itemMeta
+    private val material: Material = Material.IRON_INGOT
+    private val materialIngredient: Ingredient = Ingredient(material)
+
+    private val stack: ItemStack = ItemStack(material).apply {
+        val meta = itemMeta
         meta.displayName(Component.text("Giant Steel Ingot").color(GRAY).decoration(ITALIC, false))
         meta.lore(
             listOf(
@@ -46,13 +47,12 @@ class IngredientTest {
         )
         meta.addItemFlags(ItemFlag.HIDE_ENCHANTS, ItemFlag.HIDE_ATTRIBUTES)
 
-        stack.itemMeta = meta
-        return stack
+        itemMeta = meta
     }
+    private val stackIngredient: Ingredient = Ingredient.fromItemStack(stack)
 
-    fun getItem(): Item = ItemBuilder(
-        NamespacedKey("foo", "giant_steel_ingot"),
-        Material.IRON_INGOT
+    private val item: Item = ItemBuilder(
+        NamespacedKey("foo", "giant_steel_ingot"), Material.IRON_INGOT
     ).setName(Component.text("Giant Steel Ingot").color(GRAY).decoration(ITALIC, false)).addLore(
         Component.text("Hello world")
     ).addEnchant(Enchantment.PROTECTION_ENVIRONMENTAL, 1).addAttributeModifier(
@@ -63,123 +63,75 @@ class IngredientTest {
             AttributeModifier.Operation.ADD_NUMBER,
         )
     ).addItemFlags(ItemFlag.HIDE_ENCHANTS, ItemFlag.HIDE_ATTRIBUTES).build()
+    private val itemIngredient: Ingredient = Ingredient.fromItem(item)
 
     @Test
     fun stackIngredientMatchesStack() {
-        val ingredient = Ingredient.fromItemStack(getStack())
-        val stack = getStack()
+        val ingredient = stackIngredient
+        val stack = stack
 
         assertTrue(ingredient.test(stack))
     }
 
     @Test
-    fun stackIngredientDoesNotMatchItem() {
-        val ingredient = Ingredient.fromItemStack(getStack())
-        val item = getItem()
-
-        assertFalse(ingredient.test(item))
-    }
-
-    @Test
-    fun stackIngredientDoesNotMatchMaterial() {
-        val ingredient = Ingredient.fromItemStack(getStack())
-        val material = getMaterial()
-
-        assertFalse(ingredient.test(material))
-    }
-
-    @Test
-    fun itemIngredientMatchesItem() {
-        val ingredient = Ingredient.fromItem(getItem())
-        val item = getItem()
-
-        assertTrue(ingredient.test(item))
-    }
-
-    @Test
-    fun itemIngredientDoesNotMatchStack() {
-        val ingredient = Ingredient.fromItem(getItem())
-        val stack = getStack()
-
-        assertFalse(ingredient.test(stack))
-    }
-
-    @Test
-    fun itemIngredientDoesNotMatchMaterial() {
-        val ingredient = Ingredient.fromItem(getItem())
-        val material = getMaterial()
-
-        assertFalse(ingredient.test(material))
-    }
-
-    @Test
-    fun materialIngredientMatchesMaterial() {
-        val ingredient = Ingredient(getMaterial())
-        val material = getMaterial()
-
-        assertTrue(ingredient.test(material))
-    }
-
-    @Test
-    fun materialIngredientMatchesBlankStack() {
-        val ingredient = Ingredient(getMaterial())
-        val stack = ItemStack(getMaterial(), 7)
+    fun materialIngredientMatchesStackWithoutMeta() {
+        val ingredient = materialIngredient
+        val stack = ItemStack(material, 7)
 
         assertTrue(ingredient.test(stack))
     }
 
     @Test
-    fun materialIngredientDoesNotMatchStack() {
-        val ingredient = Ingredient(getMaterial())
-        val stack = getStack()
+    fun materialIngredientDoesNotMatchStackWithMeta() {
+        val ingredient = materialIngredient
+        val stack = stack
 
         assertFalse(ingredient.test(stack))
-    }
-
-
-    @Test
-    fun materialIngredientDoesNotMatchBlankItem() {
-        val ingredient = Ingredient(getMaterial())
-        val item = Item(NamespacedKey("foo", "iron"), ItemStack(getMaterial(), 7))
-
-        assertFalse(ingredient.test(item))
-    }
-
-    @Test
-    fun materialIngredientDoesNotMatchItem() {
-        val ingredient = Ingredient(getMaterial())
-        val item = getItem()
-
-        assertFalse(ingredient.test(item))
     }
 
     @Test
     fun stackIngredientEqualsSelf() {
-        val a = Ingredient.fromItemStack(getStack())
-        val b = Ingredient.fromItemStack(getStack())
+        val a = stackIngredient.clone()
+        val b = stackIngredient.clone()
 
         assertEquals(a, b)
     }
 
     @Test
     fun itemIngredientEqualsSelf() {
-        val a = Ingredient.fromItem(getItem())
-        val b = Ingredient.fromItem(getItem())
+        val a = itemIngredient.clone()
+        val b = itemIngredient.clone()
 
         assertEquals(a, b)
     }
 
     @Test
     fun materialIngredientEqualsSelf() {
-        val a = Ingredient(getMaterial())
-        val b = Ingredient(getMaterial())
+        val a = materialIngredient.clone()
+        val b = materialIngredient.clone()
 
         assertEquals(a, b)
     }
 
     @Test
-    fun ingredientSerialization() {
-        val ingredient = Ingredient.fromItem(getItem())
+    fun itemIngredientSerialization() {
+        val ingredient = itemIngredient
+        val deserialized = Ingredient.deserialize(ingredient.serialize())
+
+        assertEquals(ingredient, deserialized)
+    }
+
+    @Test
+    fun stackIngredientSerialization() {
+        val ingredient = stackIngredient
+        val deserialized = Ingredient.deserialize(ingredient.serialize())
+
+        assertEquals(ingredient, deserialized)
+    }
+
+    @Test
+    fun materialIngredientSerialization() {
+        val ingredient = materialIngredient
         val deserialized = Ingredient.deserialize(ingredient.serialize())
 
         assertEquals(ingredient, deserialized)

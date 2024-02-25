@@ -6,12 +6,12 @@ import org.bukkit.configuration.MemoryConfiguration
 import org.bukkit.configuration.serialization.ConfigurationSerializable
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.RecipeChoice
-import org.bukkit.inventory.RecipeChoice.MaterialChoice
 import org.bukkit.inventory.RecipeChoice.ExactChoice
+import org.bukkit.inventory.RecipeChoice.MaterialChoice
 import org.bukkit.inventory.meta.ItemMeta
 
 @Suppress("UNUSED")
-data class Ingredient(val material: Material, val meta: ItemMeta? = null) : RecipeChoice, ConfigurationSerializable {
+class Ingredient(val material: Material, val meta: ItemMeta? = null) : RecipeChoice, ConfigurationSerializable, Cloneable {
     override fun getItemStack(): ItemStack {
         return ItemStack(material).apply {
             itemMeta = meta
@@ -29,19 +29,12 @@ data class Ingredient(val material: Material, val meta: ItemMeta? = null) : Reci
         }
     }
 
-    fun test(material: Material): Boolean {
-        if (meta != null) return false
-        return this.material == material
+    override fun toString(): String {
+        return "Ingredient(material=$material" + (if (meta != null) ", meta=$meta" else "") + ")"
     }
-
-    fun test(item: Item): Boolean = test(item.getItem())
 
     override fun clone(): Ingredient {
         return Ingredient(material, meta?.clone())
-    }
-
-    override fun toString(): String {
-        return "Ingredient(material=$material" + (if (meta != null) ", meta=$meta" else "") + ")"
     }
 
     override fun hashCode(): Int {
