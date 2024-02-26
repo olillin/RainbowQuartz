@@ -12,6 +12,7 @@ import org.bukkit.inventory.meta.ItemMeta
 
 @Suppress("UNUSED")
 class Ingredient(val material: Material, val meta: ItemMeta? = null) : RecipeChoice, ConfigurationSerializable, Cloneable {
+    @Suppress("OVERRIDE_DEPRECATION")
     override fun getItemStack(): ItemStack {
         return ItemStack(material).apply {
             itemMeta = meta
