@@ -1,8 +1,5 @@
 package com.olillin.rainbowquartz.craft
 
-import org.bukkit.Material
-import org.bukkit.inventory.ItemStack
-
 @Suppress("UNUSED")
 abstract class CookingRecipe(var input: Ingredient) : Recipe() {
     var exp: Float = 0.0f
@@ -34,6 +31,8 @@ abstract class CookingRecipe(var input: Ingredient) : Recipe() {
         this.amount = amount
         return this
     }
+
+    override fun toString(): String = "${this::class.simpleName}(amount=$amount${if (group.isNotEmpty()) ", group=$group" else ""}, exp=$exp, cookTime=$cookTime, input=$input)"
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

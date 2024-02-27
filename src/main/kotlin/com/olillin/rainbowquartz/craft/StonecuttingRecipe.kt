@@ -38,6 +38,8 @@ class StonecuttingRecipe(var input: Ingredient) : Recipe() {
         return this
     }
 
+    override fun toString(): String = "${this::class.simpleName}(amount=$amount${if (group.isNotEmpty()) ", group=$group" else ""}, input=$input)"
+
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false

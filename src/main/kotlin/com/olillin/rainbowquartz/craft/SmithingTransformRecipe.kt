@@ -44,14 +44,7 @@ class SmithingTransformRecipe(var base: Ingredient, var addition: Ingredient, va
         return this
     }
 
-    override fun serialize(): MutableMap<String, Any> {
-        return mutableMapOf(
-            "base" to base,
-            "amount" to amount,
-            "addition" to addition,
-            "template" to template
-        )
-    }
+    override fun toString(): String = "${this::class.simpleName}(amount=$amount, base=$base, addition=$addition, template=$template)"
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -73,6 +66,15 @@ class SmithingTransformRecipe(var base: Ingredient, var addition: Ingredient, va
         result = 31 * result + addition.hashCode()
         result = 31 * result + template.hashCode()
         return result
+    }
+
+    override fun serialize(): MutableMap<String, Any> {
+        return mutableMapOf(
+            "base" to base,
+            "amount" to amount,
+            "addition" to addition,
+            "template" to template
+        )
     }
 
     companion object {

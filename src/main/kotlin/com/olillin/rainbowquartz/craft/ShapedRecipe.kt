@@ -78,7 +78,8 @@ class ShapedRecipe(vararg pattern: String) : Recipe() {
     }
 
     override fun toString(): String {
-        return "ShapedRecipe(pattern=[${pattern.joinToString(", ") { "\"$it\"" } }}], ingredients={${ingredients.map { "${it.key}=${it.value}" }.joinToString(", ")}})"
+        val patternString = pattern.joinToString(", ") { "\"$it\"" }
+        return "${this::class.simpleName}(amount=$amount${if (group.isNotEmpty()) ", group=$group" else ""}, pattern=[$patternString])"
     }
 
     override fun equals(other: Any?): Boolean {

@@ -4,7 +4,6 @@ import com.olillin.rainbowquartz.item.Item
 import org.bukkit.Material
 import org.bukkit.configuration.MemoryConfiguration
 import org.bukkit.configuration.serialization.ConfigurationSerializable
-import org.bukkit.inventory.RecipeChoice
 import org.bukkit.inventory.ShapelessRecipe as BukkitShapelessRecipe
 
 @Suppress("UNUSED")
@@ -54,6 +53,11 @@ class ShapelessRecipe : Recipe() {
     fun setAmount(amount: Int): ShapelessRecipe {
         this.amount = amount
         return this
+    }
+
+    override fun toString(): String {
+        val ingredientsString = ingredients.joinToString(", ")
+        return "${this::class.simpleName}(amount=$amount${if (group.isNotEmpty()) ", group=$group" else ""}, ingredients=[${ingredientsString}])"
     }
 
     override fun equals(other: Any?): Boolean {
