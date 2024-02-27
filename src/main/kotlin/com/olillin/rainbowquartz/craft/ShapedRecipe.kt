@@ -106,8 +106,8 @@ class ShapedRecipe(vararg pattern: String) : Recipe() {
 
     override fun serialize(): MutableMap<String, Any> {
         return mutableMapOf(
-            "group" to group,
             "amount" to amount,
+            "group" to group,
             "pattern" to padPattern(pattern.asIterable()).toList(),
             "ingredients" to ingredients.map {(key, value) ->
                 key.toString() to value
@@ -128,9 +128,10 @@ class ShapedRecipe(vararg pattern: String) : Recipe() {
          */
         @JvmStatic
         fun deserialize(args: Map<String, Any>): ShapedRecipe {
-
             val section = MemoryConfiguration()
-            section.addDefaults(args)
+            for ((key, value) in args.entries) {
+                section.set(key, value)
+            }
 
             val shape: Array<String> = section.getStringList("pattern").toTypedArray()
             if (shape.isEmpty()) {

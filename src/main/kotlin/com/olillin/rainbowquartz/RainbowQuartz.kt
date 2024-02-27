@@ -12,6 +12,7 @@ import me.lucko.commodore.CommodoreProvider
 import me.lucko.commodore.file.CommodoreFileReader
 import org.bukkit.command.PluginCommand
 import org.bukkit.command.TabExecutor
+import org.bukkit.configuration.serialization.ConfigurationSerializable
 import org.bukkit.configuration.serialization.ConfigurationSerialization
 import org.bukkit.event.Listener
 import org.bukkit.plugin.java.JavaPlugin
@@ -42,15 +43,21 @@ open class RainbowQuartz : JavaPlugin(), Listener {
     }
 
     override fun onLoad() {
-        ConfigurationSerialization.registerClass(Recipe::class.java)
-        ConfigurationSerialization.registerClass(BlastingRecipe::class.java)
-        ConfigurationSerialization.registerClass(CampfireRecipe::class.java)
-        ConfigurationSerialization.registerClass(FurnaceRecipe::class.java)
-        ConfigurationSerialization.registerClass(ShapedRecipe::class.java)
-        ConfigurationSerialization.registerClass(ShapelessRecipe::class.java)
-        ConfigurationSerialization.registerClass(SmithingTransformRecipe::class.java)
-        ConfigurationSerialization.registerClass(SmokingRecipe::class.java)
-        ConfigurationSerialization.registerClass(StonecuttingRecipe::class.java)
+        val serializable: List<Class<out ConfigurationSerializable>> = listOf(
+            Recipe::class.java,
+            Ingredient::class.java,
+            BlastingRecipe::class.java,
+            CampfireRecipe::class.java,
+            FurnaceRecipe::class.java,
+            ShapedRecipe::class.java,
+            ShapelessRecipe::class.java,
+            SmithingTransformRecipe::class.java,
+            SmokingRecipe::class.java,
+            StonecuttingRecipe::class.java,
+        )
+        for (clazz in serializable) {
+            ConfigurationSerialization.registerClass(clazz)
+        }
     }
 
     @Suppress("SpellCheckingInspection")

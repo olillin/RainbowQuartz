@@ -8,12 +8,9 @@ import org.bukkit.inventory.SmokingRecipe as BukkitSmokingRecipe
 
 @Suppress("UNUSED")
 class SmokingRecipe(input: Ingredient) : CookingRecipe(input) {
+    override var cookTime: Int = DEFAULT_COOK_TIME
     override val suffix: String
         get() = id
-
-    init {
-        cookTime = 100
-    }
 
     override fun asBukkitRecipe(item: Item): BukkitSmokingRecipe {
         val recipe = BukkitSmokingRecipe(
@@ -29,19 +26,10 @@ class SmokingRecipe(input: Ingredient) : CookingRecipe(input) {
         return recipe
     }
 
-    override fun serialize(): MutableMap<String, Any> {
-        return mutableMapOf(
-            "group" to group,
-            "amount" to amount,
-            "input" to input,
-            "exp" to exp,
-            "cookTime" to cookTime
-        )
-    }
-
     companion object {
         const val id = "smoking"
         val material = Material.SMOKER
+        private const val DEFAULT_COOK_TIME: Int = 100
 
         /**
          * Required method for configuration serialization
@@ -52,16 +40,17 @@ class SmokingRecipe(input: Ingredient) : CookingRecipe(input) {
          */
         @JvmStatic
         fun deserialize(args: Map<String, Any>): SmokingRecipe {
-
             val section = MemoryConfiguration()
-            section.addDefaults(args)
+            for ((key, value) in args.entries) {
+                section.set(key, value)
+            }
 
             val input: Ingredient = section.getObject("input", Ingredient::class.java)
                 ?: throw IllegalArgumentException("Invalid value for property 'input'")
             val recipe = SmokingRecipe(input)
 
-            recipe.cookTime = section.getInt("cookTime", 100)
-            recipe.exp = section.getDouble("exp", 0.0).toFloat()
+            recipe.cookTime = section.getInt("cookTime", DEFAULT_COOK_TIME)
+            recipe.exp = section.getDouble("exp").toFloat()
 
             recipe.group = section.getString("group")
                 ?: throw IllegalArgumentException("Invalid value for property 'group'")

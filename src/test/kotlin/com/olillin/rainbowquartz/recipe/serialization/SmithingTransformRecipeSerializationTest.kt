@@ -3,7 +3,6 @@ package com.olillin.rainbowquartz.recipe.serialization
 import be.seeseemelk.mockbukkit.MockBukkit
 import be.seeseemelk.mockbukkit.ServerMock
 import com.olillin.rainbowquartz.RainbowQuartz
-import com.olillin.rainbowquartz.craft.CampfireRecipe
 import com.olillin.rainbowquartz.craft.Ingredient
 import com.olillin.rainbowquartz.craft.SmithingTransformRecipe
 import org.bukkit.Material
@@ -22,7 +21,7 @@ class SmithingTransformRecipeSerializationTest {
         )
             .setAmount(2)
         val serialized = recipe.serialize()
-        val deserialized = CampfireRecipe.deserialize(serialized)
+        val deserialized = SmithingTransformRecipe.deserialize(serialized)
         Assertions.assertEquals(recipe, deserialized)
     }
 

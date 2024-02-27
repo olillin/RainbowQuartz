@@ -7,9 +7,9 @@ import com.olillin.rainbowquartz.craft.Ingredient
 import com.olillin.rainbowquartz.craft.SmokingRecipe
 import org.bukkit.Material
 import org.junit.jupiter.api.AfterAll
-import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
+import kotlin.test.assertEquals
 
 class SmokingRecipeSerializationTest {
     @Test
@@ -20,7 +20,7 @@ class SmokingRecipeSerializationTest {
             .setCookTime(50)
         val serialized = recipe.serialize()
         val deserialized = SmokingRecipe.deserialize(serialized)
-        Assertions.assertEquals(recipe, deserialized)
+        assertEquals(recipe, deserialized)
     }
 
     companion object {

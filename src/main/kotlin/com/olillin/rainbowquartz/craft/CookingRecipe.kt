@@ -2,10 +2,10 @@ package com.olillin.rainbowquartz.craft
 
 @Suppress("UNUSED")
 abstract class CookingRecipe(var input: Ingredient) : Recipe() {
-    var exp: Float = 0.0f
-    var cookTime: Int = 200
-    var group: String = ""
-    var amount: Int = 1
+    open var exp: Float = 0.0f
+    open var cookTime: Int = 200
+    open var group: String = ""
+    open var amount: Int = 1
 
     fun setInput(input: Ingredient): CookingRecipe {
         this.input = input
@@ -56,5 +56,15 @@ abstract class CookingRecipe(var input: Ingredient) : Recipe() {
         result = 31 * result + exp.hashCode()
         result = 31 * result + cookTime
         return result
+    }
+
+    override fun serialize(): MutableMap<String, Any> {
+        return mutableMapOf(
+            "amount" to amount,
+            "group" to group,
+            "exp" to exp.toDouble(),
+            "cookTime" to cookTime,
+            "input" to input,
+        )
     }
 }

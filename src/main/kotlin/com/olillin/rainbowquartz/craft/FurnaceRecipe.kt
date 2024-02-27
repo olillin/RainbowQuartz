@@ -25,19 +25,10 @@ class FurnaceRecipe(input: Ingredient) : CookingRecipe(input) {
         return recipe
     }
 
-    override fun serialize(): MutableMap<String, Any> {
-        return mutableMapOf(
-            "group" to group,
-            "amount" to amount,
-            "input" to input,
-            "exp" to exp,
-            "cookTime" to cookTime
-        )
-    }
-
     companion object {
         const val id = "furnace"
         val material = Material.FURNACE
+        private const val DEFAULT_COOK_TIME: Int = 200
 
         /**
          * Required method for configuration serialization
@@ -48,16 +39,17 @@ class FurnaceRecipe(input: Ingredient) : CookingRecipe(input) {
          */
         @JvmStatic
         fun deserialize(args: Map<String, Any>): FurnaceRecipe {
-
             val section = MemoryConfiguration()
-            section.addDefaults(args)
+            for ((key, value) in args.entries) {
+                section.set(key, value)
+            }
 
             val input: Ingredient = section.getObject("input", Ingredient::class.java)
                 ?: throw IllegalArgumentException("Invalid value for property 'input'")
             val recipe = FurnaceRecipe(input)
 
-            recipe.cookTime = section.getInt("cookTime", 200)
-            recipe.exp = section.getDouble("exp", 0.0).toFloat()
+            recipe.cookTime = section.getInt("cookTime", DEFAULT_COOK_TIME)
+            recipe.exp = section.getDouble("exp").toFloat()
 
             recipe.group = section.getString("group")
                 ?: throw IllegalArgumentException("Invalid value for property 'group'")

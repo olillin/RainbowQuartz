@@ -82,8 +82,8 @@ class ShapelessRecipe : Recipe() {
 
     override fun serialize(): MutableMap<String, Any> {
         return mutableMapOf(
-            "group" to group,
             "amount" to amount,
+            "group" to group,
             "ingredients" to ingredients
         )
     }
@@ -101,9 +101,10 @@ class ShapelessRecipe : Recipe() {
          */
         @JvmStatic
         fun deserialize(args: Map<String, Any>): ShapelessRecipe {
-
             val section = MemoryConfiguration()
-            section.addDefaults(args)
+            for ((key, value) in args.entries) {
+                section.set(key, value)
+            }
 
             val recipe = ShapelessRecipe()
 

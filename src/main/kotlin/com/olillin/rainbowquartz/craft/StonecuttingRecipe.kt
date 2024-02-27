@@ -61,8 +61,8 @@ class StonecuttingRecipe(var input: Ingredient) : Recipe() {
 
     override fun serialize(): MutableMap<String, Any> {
         return mutableMapOf(
-            "group" to group,
             "amount" to amount,
+            "group" to group,
             "input" to input
         )
     }
@@ -80,9 +80,10 @@ class StonecuttingRecipe(var input: Ingredient) : Recipe() {
          */
         @JvmStatic
         fun deserialize(args: Map<String, Any>): StonecuttingRecipe {
-
             val section = MemoryConfiguration()
-            section.addDefaults(args)
+            for ((key, value) in args.entries) {
+                section.set(key, value)
+            }
 
             val input: Ingredient = section.getObject("input", Ingredient::class.java) ?: throw IllegalArgumentException("Missing or invalid property 'input'")
 

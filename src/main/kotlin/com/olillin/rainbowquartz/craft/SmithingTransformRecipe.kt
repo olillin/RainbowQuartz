@@ -70,8 +70,8 @@ class SmithingTransformRecipe(var base: Ingredient, var addition: Ingredient, va
 
     override fun serialize(): MutableMap<String, Any> {
         return mutableMapOf(
-            "base" to base,
             "amount" to amount,
+            "base" to base,
             "addition" to addition,
             "template" to template
         )
@@ -90,9 +90,10 @@ class SmithingTransformRecipe(var base: Ingredient, var addition: Ingredient, va
          */
         @JvmStatic
         fun deserialize(args: Map<String, Any>): SmithingTransformRecipe {
-
             val section = MemoryConfiguration()
-            section.addDefaults(args)
+            for ((key, value) in args.entries) {
+                section.set(key, value)
+            }
 
             val base: Ingredient = section.getObject("base", Ingredient::class.java) ?: throw IllegalArgumentException("Invalid or missing property 'base'")
             val addition: Ingredient = section.getObject("addition", Ingredient::class.java) ?: throw IllegalArgumentException("Invalid or missing property 'addition'")
