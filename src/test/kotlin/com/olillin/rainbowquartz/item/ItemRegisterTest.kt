@@ -3,6 +3,7 @@ package com.olillin.rainbowquartz.item
 import be.seeseemelk.mockbukkit.MockBukkit
 import be.seeseemelk.mockbukkit.ServerMock
 import com.olillin.rainbowquartz.RainbowQuartz
+import com.olillin.rainbowquartz.craft.Ingredient
 import com.olillin.rainbowquartz.craft.ShapedRecipe
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
@@ -42,9 +43,9 @@ class ItemRegisterTest {
     @Test
     fun registerRecipe() {
         val recipe = ShapedRecipe(" G ", "BGB", " R ")
-                .setIngredient('G', Material.GOLD_INGOT)
-                .setIngredient('B', Material.BLAZE_POWDER)
-                .setIngredient('R', Material.BLAZE_ROD)
+                .setIngredient('G', Ingredient(Material.GOLD_INGOT))
+                .setIngredient('B', Ingredient(Material.BLAZE_POWDER))
+                .setIngredient('R', Ingredient(Material.BLAZE_ROD))
         val item = ItemBuilder(key, Material.GOLDEN_SWORD)
                 .addRecipe(recipe)
                 .build()

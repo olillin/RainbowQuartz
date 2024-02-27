@@ -1,6 +1,7 @@
 package com.olillin.rainbowquartz.plugin.gui.menu.popup.recipe
 
 import com.olillin.rainbowquartz.craft.FurnaceRecipe
+import com.olillin.rainbowquartz.craft.Ingredient
 import com.olillin.rainbowquartz.craft.Recipe.Companion.asItemStack
 import com.olillin.rainbowquartz.plugin.gui.menu.Menu
 import net.kyori.adventure.text.Component
@@ -47,7 +48,10 @@ class FurnaceRecipePopup(
 
     @Throws(IllegalStateException::class)
     override fun createRecipe(): FurnaceRecipe {
-        val input: ItemStack = untransformItem(inventory.getItem(INPUT_SLOT)) ?: throw IllegalStateException("Input cannot be empty")
+        val input: Ingredient = Ingredient.fromItemStack(
+            untransformItem(inventory.getItem(INPUT_SLOT))
+                ?: throw IllegalStateException("Input cannot be empty")
+        )
         return FurnaceRecipe(input)
             .setGroup(group)
             .setAmount(amount)

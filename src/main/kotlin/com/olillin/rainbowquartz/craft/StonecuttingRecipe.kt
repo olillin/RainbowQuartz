@@ -4,23 +4,17 @@ import com.olillin.rainbowquartz.item.Item
 import org.bukkit.Material
 import org.bukkit.configuration.MemoryConfiguration
 import org.bukkit.configuration.serialization.ConfigurationSerializable
-import org.bukkit.inventory.ItemStack
-import org.bukkit.inventory.RecipeChoice
-import org.bukkit.inventory.RecipeChoice.ExactChoice
-import org.bukkit.inventory.RecipeChoice.MaterialChoice
+import org.bukkit.inventory.StonecuttingRecipe as BukkitStonecuttingRecipe
 
 @Suppress("UNUSED")
-class StonecuttingRecipe(var input: RecipeChoice) : Recipe() {
+class StonecuttingRecipe(var input: Ingredient) : Recipe() {
     var group: String = ""
     var amount: Int = 1
     override val suffix
         get() = id
 
-    constructor(input: Material) : this(MaterialChoice(input))
-    constructor(input: ItemStack) : this(ExactChoice(input))
-
-    override fun asBukkitRecipe(item: Item): org.bukkit.inventory.StonecuttingRecipe {
-        return org.bukkit.inventory.StonecuttingRecipe(
+    override fun asBukkitRecipe(item: Item): BukkitStonecuttingRecipe {
+        return BukkitStonecuttingRecipe(
             key(item),
             item.getItem().also {
                 it.amount = amount
@@ -29,15 +23,9 @@ class StonecuttingRecipe(var input: RecipeChoice) : Recipe() {
         )
     }
 
-    fun setInput(input: RecipeChoice): StonecuttingRecipe {
+    fun setInput(input: Ingredient): StonecuttingRecipe {
         this.input = input
         return this
-    }
-    fun setInput(input: Material): StonecuttingRecipe {
-        return setInput(MaterialChoice(input))
-    }
-    fun setInput(input: ItemStack): StonecuttingRecipe {
-        return setInput(ExactChoice(input))
     }
 
     fun setGroup(group: String): StonecuttingRecipe {
@@ -73,7 +61,7 @@ class StonecuttingRecipe(var input: RecipeChoice) : Recipe() {
         return mutableMapOf(
             "group" to group,
             "amount" to amount,
-            "input" to asItemStack(input)
+            "input" to input
         )
     }
 
@@ -94,7 +82,7 @@ class StonecuttingRecipe(var input: RecipeChoice) : Recipe() {
             val section = MemoryConfiguration()
             section.addDefaults(args)
 
-            val input: ItemStack = section.getItemStack("input") ?: throw IllegalArgumentException("Missing or invalid property 'input'")
+            val input: Ingredient = section.getObject("input", Ingredient::class.java) ?: throw IllegalArgumentException("Missing or invalid property 'input'")
 
             val recipe = StonecuttingRecipe(input)
 

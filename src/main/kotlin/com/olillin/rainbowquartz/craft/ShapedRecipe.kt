@@ -4,14 +4,14 @@ import com.olillin.rainbowquartz.item.Item
 import org.bukkit.Material
 import org.bukkit.configuration.MemoryConfiguration
 import org.bukkit.configuration.serialization.ConfigurationSerializable
-import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.RecipeChoice
-import org.bukkit.inventory.RecipeChoice.ExactChoice
-import org.bukkit.inventory.RecipeChoice.MaterialChoice
+import org.bukkit.inventory.ShapedRecipe as BukkitShapedRecipe
 
 @Suppress("UNUSED")
-class ShapedRecipe(vararg val pattern: String) : Recipe() {
-    private val ingredients: MutableMap<Char, RecipeChoice> = mutableMapOf()
+class ShapedRecipe(vararg pattern: String) : Recipe() {
+    var pattern: Array<String>
+        private set
+    private val ingredients: MutableMap<Char, Ingredient> = mutableMapOf()
     var group: String = ""
     var amount: Int = 1
 
@@ -19,22 +19,19 @@ class ShapedRecipe(vararg val pattern: String) : Recipe() {
         get() = id
 
     init {
-        if (pattern.size < 1 || pattern.size > 3) {
-            throw IllegalArgumentException("Expected pattern to be of size 1, 2 or 3, but got size ${pattern.size}")
+        val trimmedPattern = trimPattern(pattern.toList())
+        if (trimmedPattern.isEmpty() || trimmedPattern.size > 3) {
+            throw IllegalArgumentException("Expected pattern height to be 1, 2 or 3, but got ${trimmedPattern.size}")
         }
-        val width = pattern[0].length
-        for (row in pattern) {
-            if (row.length != width) {
-                throw IllegalArgumentException("Inconsistent row lengths")
-            }
-            if (row.length < 1 || row.length > 3) {
-                throw IllegalArgumentException("Expected row to be of length 1, 2 or 3, but got size ${row.length}")
-            }
+        val maxWidth = trimmedPattern.maxOf { it.length }
+        if (maxWidth == 0 || maxWidth > 3) {
+            throw IllegalArgumentException("Expected pattern width to be 1, 2 or 3, but got $maxWidth")
         }
+        this.pattern = trimmedPattern
     }
 
-    override fun asBukkitRecipe(item: Item): org.bukkit.inventory.ShapedRecipe {
-        val recipe = org.bukkit.inventory.ShapedRecipe(
+    override fun asBukkitRecipe(item: Item): BukkitShapedRecipe {
+        val recipe = BukkitShapedRecipe(
             key(item),
             item.getItem().also {
                 it.amount = amount
@@ -65,17 +62,9 @@ class ShapedRecipe(vararg val pattern: String) : Recipe() {
         return ingredients[key]?.clone()
     }
 
-    fun setIngredient(key: Char, ingredient: RecipeChoice): ShapedRecipe {
+    fun setIngredient(key: Char, ingredient: Ingredient): ShapedRecipe {
         ingredients[key] = ingredient.clone()
         return this
-    }
-
-    fun setIngredient(key: Char, ingredient: Material): ShapedRecipe {
-        return setIngredient(key, MaterialChoice(ingredient))
-    }
-
-    fun setIngredient(key: Char, ingredient: ItemStack): ShapedRecipe {
-        return setIngredient(key, ExactChoice(ingredient))
     }
 
     fun setGroup(group: String): ShapedRecipe {
@@ -88,6 +77,10 @@ class ShapedRecipe(vararg val pattern: String) : Recipe() {
         return this
     }
 
+    override fun toString(): String {
+        return "ShapedRecipe(pattern=[${pattern.joinToString(", ") { "\"$it\"" } }}], ingredients={${ingredients.map { "${it.key}=${it.value}" }.joinToString(", ")}})"
+    }
+
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
@@ -96,7 +89,7 @@ class ShapedRecipe(vararg val pattern: String) : Recipe() {
 
         if (group != other.group) return false
         if (amount != other.amount) return false
-        if (!pattern.contentEquals(other.pattern)) return false
+        if (!(pattern contentEquals other.pattern)) return false
         if (ingredients != other.ingredients) return false
 
         return true
@@ -114,11 +107,10 @@ class ShapedRecipe(vararg val pattern: String) : Recipe() {
         return mutableMapOf(
             "group" to group,
             "amount" to amount,
-            "pattern" to pattern,
-            "amount" to amount,
-            "ingredients" to ingredients.map {
-                it.key.toString() to asItemStack(it.value)
-            }.toMap().toMutableMap()
+            "pattern" to padPattern(pattern.asIterable()).toList(),
+            "ingredients" to ingredients.map {(key, value) ->
+                key.toString() to value
+            }.toMap()
         )
     }
 
@@ -139,10 +131,10 @@ class ShapedRecipe(vararg val pattern: String) : Recipe() {
             val section = MemoryConfiguration()
             section.addDefaults(args)
 
-            if (!section.isList("pattern")) {
+            val shape: Array<String> = section.getStringList("pattern").toTypedArray()
+            if (shape.isEmpty()) {
                 throw IllegalArgumentException("Missing or invalid property 'pattern'")
             }
-            val shape = section.getStringList("pattern").toTypedArray()
             val recipe = ShapedRecipe(*shape)
 
             val ingredients = section.get("ingredients") ?: throw IllegalArgumentException("Missing property 'ingredients'")
@@ -152,8 +144,8 @@ class ShapedRecipe(vararg val pattern: String) : Recipe() {
             for (key in ingredients.keys) {
                 if (key !is String) throw IllegalArgumentException("Invalid key '$key', must be of type String")
                 if (key.length != 1) throw IllegalArgumentException("Invalid key '$key', must be of length 1")
-                val item: ItemStack = ingredients[key] as? ItemStack ?: throw IllegalArgumentException("Invalid ingredient for key '$key'")
-                recipe.setIngredient(key[0], item)
+                val ingredient: Ingredient = ingredients[key] as? Ingredient ?: throw IllegalArgumentException("Invalid ingredient class for key '$key', expected Ingredient")
+                recipe.setIngredient(key[0], ingredient)
             }
 
             recipe.group = section.getString("group")
@@ -162,6 +154,46 @@ class ShapedRecipe(vararg val pattern: String) : Recipe() {
             recipe.amount = section.getInt("amount", 1)
 
             return recipe
+        }
+
+        /**
+         * Trim pattern to minimum size.
+         *
+         * @see padPattern
+         */
+        fun trimPattern(pattern: Iterable<String>): Array<String> {
+            // Trim vertically
+            val trimmedVertically = pattern.toMutableList().apply {
+                while (first().isBlank()) {
+                    removeFirst()
+                }
+                while (last().isBlank()) {
+                    removeLast()
+                }
+            }
+            // Trim horizontally
+            val width = trimmedVertically.maxOf { it.trim().length }
+            return pattern.map {
+                it.trimStart().padStart(width)
+                    .trimEnd().padEnd(width)
+            }.toTypedArray()
+        }
+
+        /**
+         * Pad pattern to fill grid.
+         *
+         * @see trimPattern
+         */
+        fun padPattern(pattern: Iterable<String>, width: Int = 3, height: Int = width): Array<String> {
+            return pattern.map {
+                // Pad horizontally
+                it.padEnd(width, ' ')
+            }.toMutableList().apply {
+                // Pad vertically
+                while (size < height) {
+                    add(" ".repeat(width))
+                }
+            }.toTypedArray()
         }
     }
 }

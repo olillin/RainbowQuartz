@@ -5,12 +5,13 @@ import org.bukkit.Material
 import org.bukkit.configuration.MemoryConfiguration
 import org.bukkit.configuration.serialization.ConfigurationSerializable
 import org.bukkit.inventory.ItemStack
+import org.bukkit.inventory.BlastingRecipe as BukkitBlastingRecipe
 import org.bukkit.inventory.RecipeChoice
 import org.bukkit.inventory.RecipeChoice.ExactChoice
 import org.bukkit.inventory.RecipeChoice.MaterialChoice
 
 @Suppress("UNUSED")
-class BlastingRecipe(input: RecipeChoice) : CookingRecipe(input) {
+class BlastingRecipe(input: Ingredient) : CookingRecipe(input) {
     override val suffix: String
         get() = id
 
@@ -18,11 +19,8 @@ class BlastingRecipe(input: RecipeChoice) : CookingRecipe(input) {
         cookTime = 100
     }
 
-    constructor(input: Material) : this(MaterialChoice(input))
-    constructor(input: ItemStack) : this(ExactChoice(input))
-
-    override fun asBukkitRecipe(item: Item): org.bukkit.inventory.BlastingRecipe {
-        val recipe = org.bukkit.inventory.BlastingRecipe(
+    override fun asBukkitRecipe(item: Item): BukkitBlastingRecipe {
+        val recipe = BukkitBlastingRecipe(
             key(item),
             item.getItem().also {
                 it.amount = amount
@@ -39,7 +37,7 @@ class BlastingRecipe(input: RecipeChoice) : CookingRecipe(input) {
         return mutableMapOf(
             "group" to group,
             "amount" to amount,
-            "input" to asItemStack(input),
+            "input" to input,
             "exp" to exp,
             "cookTime" to cookTime
         )
@@ -62,7 +60,7 @@ class BlastingRecipe(input: RecipeChoice) : CookingRecipe(input) {
             val section = MemoryConfiguration()
             section.addDefaults(args)
 
-            val input: ItemStack = section.getItemStack("input")
+            val input: Ingredient = section.getObject("input", Ingredient::class.java)
                 ?: throw IllegalArgumentException("Invalid value for property 'input'")
             val recipe = BlastingRecipe(input)
 

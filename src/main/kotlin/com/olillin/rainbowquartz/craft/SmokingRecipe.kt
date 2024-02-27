@@ -4,13 +4,10 @@ import com.olillin.rainbowquartz.item.Item
 import org.bukkit.Material
 import org.bukkit.configuration.MemoryConfiguration
 import org.bukkit.configuration.serialization.ConfigurationSerializable
-import org.bukkit.inventory.ItemStack
-import org.bukkit.inventory.RecipeChoice
-import org.bukkit.inventory.RecipeChoice.ExactChoice
-import org.bukkit.inventory.RecipeChoice.MaterialChoice
+import org.bukkit.inventory.SmokingRecipe as BukkitSmokingRecipe
 
 @Suppress("UNUSED")
-class SmokingRecipe(input: RecipeChoice) : CookingRecipe(input) {
+class SmokingRecipe(input: Ingredient) : CookingRecipe(input) {
     override val suffix: String
         get() = id
 
@@ -18,11 +15,8 @@ class SmokingRecipe(input: RecipeChoice) : CookingRecipe(input) {
         cookTime = 100
     }
 
-    constructor(input: Material) : this(MaterialChoice(input))
-    constructor(input: ItemStack) : this(ExactChoice(input))
-
-    override fun asBukkitRecipe(item: Item): org.bukkit.inventory.SmokingRecipe {
-        val recipe = org.bukkit.inventory.SmokingRecipe(
+    override fun asBukkitRecipe(item: Item): BukkitSmokingRecipe {
+        val recipe = BukkitSmokingRecipe(
             key(item),
             item.getItem().also {
                 it.amount = amount
@@ -39,7 +33,7 @@ class SmokingRecipe(input: RecipeChoice) : CookingRecipe(input) {
         return mutableMapOf(
             "group" to group,
             "amount" to amount,
-            "input" to asItemStack(input),
+            "input" to input,
             "exp" to exp,
             "cookTime" to cookTime
         )
@@ -62,7 +56,7 @@ class SmokingRecipe(input: RecipeChoice) : CookingRecipe(input) {
             val section = MemoryConfiguration()
             section.addDefaults(args)
 
-            val input: ItemStack = section.getItemStack("input")
+            val input: Ingredient = section.getObject("input", Ingredient::class.java)
                 ?: throw IllegalArgumentException("Invalid value for property 'input'")
             val recipe = SmokingRecipe(input)
 

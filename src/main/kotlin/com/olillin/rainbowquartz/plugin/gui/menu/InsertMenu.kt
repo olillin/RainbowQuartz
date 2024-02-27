@@ -44,12 +44,14 @@ abstract class InsertMenu : ImmutableMenu() {
         }
     }
 
-    protected open fun isInsertSlot(slot: Int): Boolean = slot >= 0 && slot < inventory.size && insertSlots.contains(slot)
+    protected open fun isInsertSlot(slot: Int): Boolean =
+        slot >= 0 && slot < inventory.size && insertSlots.contains(slot)
 
     @EventHandler
     open fun onClickInsertMenu(event: InventoryClickEvent) {
         if (event.isShiftClick) {
-            if (event.clickedInventory == inventory) {
+            if (event.clickedInventory == inventory
+            ) {
                 insertItem(event.rawSlot, null)
             } else if (event.currentItem != null) {
                 val slot: Int = (insertSlots.firstOrNull { slot ->
@@ -62,12 +64,15 @@ abstract class InsertMenu : ImmutableMenu() {
                 insertItem(slot, event.currentItem)
             }
         } else if ((event.isLeftClick || event.isRightClick)
-                    && event.clickedInventory == inventory) {
+            && event.clickedInventory == inventory
+        ) {
             insertItem(event.rawSlot, event.cursor)
         } else if (event.click == ClickType.MIDDLE
-                && viewer.gameMode == GameMode.CREATIVE
-                && (event.cursor == null || event.cursor?.type?.isAir == true)
-                && isInsertSlot(event.rawSlot)) {
+            && viewer.gameMode == GameMode.CREATIVE
+            && event.cursor.isEmpty
+            && isInsertSlot(event.rawSlot)
+        ) {
+            // Pick item
             viewer.setItemOnCursor(untransformItem(event.currentItem))
         }
     }
@@ -89,19 +94,19 @@ abstract class InsertMenu : ImmutableMenu() {
         if (item == null) return null
         val stack = ItemStack(item)
         val meta: ItemMeta = stack.itemMeta ?: return stack
-        meta.lore( (meta.lore() ?: ArrayList<Component>())
-                .also { lore ->
-                    lore.add(
-                            Component.text("Click to remove").color(RED).decoration(ITALIC, false)
-                    )
-                }
+        meta.lore((meta.lore() ?: ArrayList<Component>())
+            .also { lore ->
+                lore.add(
+                    Component.text("Click to remove").color(RED).decoration(ITALIC, false)
+                )
+            }
         )
         meta.persistentDataContainer.set(
-                NamespacedKey.fromString("rainbowquartz:origin_item")!!,
-                PersistentDataType.BYTE_ARRAY,
-                ItemStack(item).also {
-                    it.amount = it.maxStackSize
-                }.serializeAsBytes()
+            NamespacedKey.fromString("rainbowquartz:origin_item")!!,
+            PersistentDataType.BYTE_ARRAY,
+            ItemStack(item).also {
+                it.amount = it.maxStackSize
+            }.serializeAsBytes()
         )
         stack.itemMeta = meta
         stack.amount = 1
@@ -119,9 +124,10 @@ abstract class InsertMenu : ImmutableMenu() {
         val stack = ItemStack(item)
         val meta: ItemMeta = stack.itemMeta ?: return stack
         val bytes: ByteArray = meta.persistentDataContainer.get(
-                NamespacedKey.fromString("rainbowquartz:origin_item")!!,
-                PersistentDataType.BYTE_ARRAY)
-                ?: return stack
+            NamespacedKey.fromString("rainbowquartz:origin_item")!!,
+            PersistentDataType.BYTE_ARRAY
+        )
+            ?: return stack
         return ItemStack.deserializeBytes(bytes)
     }
 }

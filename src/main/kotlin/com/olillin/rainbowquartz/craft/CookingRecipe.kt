@@ -2,28 +2,17 @@ package com.olillin.rainbowquartz.craft
 
 import org.bukkit.Material
 import org.bukkit.inventory.ItemStack
-import org.bukkit.inventory.RecipeChoice
-import org.bukkit.inventory.RecipeChoice.ExactChoice
-import org.bukkit.inventory.RecipeChoice.MaterialChoice
 
 @Suppress("UNUSED")
-abstract class CookingRecipe(var input: RecipeChoice) : Recipe() {
+abstract class CookingRecipe(var input: Ingredient) : Recipe() {
     var exp: Float = 0.0f
     var cookTime: Int = 200
     var group: String = ""
     var amount: Int = 1
 
-    fun setInput(input: RecipeChoice): CookingRecipe {
+    fun setInput(input: Ingredient): CookingRecipe {
         this.input = input
         return this
-    }
-
-    fun setInput(input: Material): CookingRecipe {
-        return setInput(MaterialChoice(input))
-    }
-
-    fun setInput(input: ItemStack): CookingRecipe {
-        return setInput(ExactChoice(input))
     }
 
     fun setExp(exp: Float): CookingRecipe {

@@ -1,5 +1,6 @@
 package com.olillin.rainbowquartz.plugin.gui.menu.popup.recipe
 
+import com.olillin.rainbowquartz.craft.Ingredient
 import com.olillin.rainbowquartz.craft.Recipe.Companion.asItemStack
 import com.olillin.rainbowquartz.craft.SmokingRecipe
 import com.olillin.rainbowquartz.plugin.gui.menu.Menu
@@ -48,7 +49,10 @@ class SmokingRecipePopup(
 
     @Throws(IllegalStateException::class)
     override fun createRecipe(): SmokingRecipe {
-        val input: ItemStack = untransformItem(inventory.getItem(INPUT_SLOT)) ?: throw IllegalStateException("Input cannot be empty")
+        val input: Ingredient = Ingredient.fromItemStack(
+            untransformItem(inventory.getItem(INPUT_SLOT))
+                ?: throw IllegalStateException("Input cannot be empty")
+        )
         return SmokingRecipe(input)
             .setGroup(group)
             .setAmount(amount)

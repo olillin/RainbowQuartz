@@ -4,21 +4,19 @@ import com.olillin.rainbowquartz.item.Item
 import org.bukkit.Material
 import org.bukkit.configuration.MemoryConfiguration
 import org.bukkit.configuration.serialization.ConfigurationSerializable
-import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.RecipeChoice
-import org.bukkit.inventory.RecipeChoice.ExactChoice
-import org.bukkit.inventory.RecipeChoice.MaterialChoice
+import org.bukkit.inventory.ShapelessRecipe as BukkitShapelessRecipe
 
 @Suppress("UNUSED")
 class ShapelessRecipe : Recipe() {
-    private val ingredients: MutableList<RecipeChoice> = mutableListOf()
+    private val ingredients: MutableList<Ingredient> = mutableListOf()
     var group: String = ""
     var amount: Int = 1
     override val suffix: String
         get() = id
 
-    override fun asBukkitRecipe(item: Item): org.bukkit.inventory.ShapelessRecipe {
-        val recipe = org.bukkit.inventory.ShapelessRecipe(
+    override fun asBukkitRecipe(item: Item): BukkitShapelessRecipe {
+        val recipe = BukkitShapelessRecipe(
             key(item),
             item.getItem().also {
                 it.amount = amount
@@ -32,62 +30,20 @@ class ShapelessRecipe : Recipe() {
         return recipe
     }
 
-    fun addIngredient(ingredient: RecipeChoice, amount: Int): ShapelessRecipe {
+    fun addIngredient(ingredient: Ingredient, amount: Int = 1): ShapelessRecipe {
         ingredients.addAll(List(amount) {ingredient})
         return this
     }
 
-    fun addIngredient(ingredient: Material, amount: Int): ShapelessRecipe {
-        return addIngredient(MaterialChoice(ingredient), amount)
-    }
-
-    fun addIngredient(ingredient: ItemStack, amount: Int): ShapelessRecipe {
-        return addIngredient(ExactChoice(ingredient), amount)
-    }
-
-    fun addIngredient(ingredient: RecipeChoice): ShapelessRecipe {
-        ingredients.add(ingredient)
-        return this
-    }
-
-    fun addIngredient(ingredient: Material): ShapelessRecipe {
-        return addIngredient(MaterialChoice(ingredient))
-    }
-
-    fun addIngredient(ingredient: ItemStack): ShapelessRecipe {
-        return addIngredient(ExactChoice(ingredient))
-    }
-
-    fun getIngredients(): List<RecipeChoice> {
+    fun getIngredients(): List<Ingredient> {
         return ingredients.toList()
     }
 
-    fun removeIngredient(ingredient: RecipeChoice, amount: Int): ShapelessRecipe {
+    fun removeIngredient(ingredient: Ingredient, amount: Int = 1): ShapelessRecipe {
         repeat(amount) {
             removeIngredient(ingredient)
         }
         return this
-    }
-
-    fun removeIngredient(ingredient: Material, amount: Int): ShapelessRecipe {
-        return removeIngredient(MaterialChoice(ingredient), amount)
-    }
-
-    fun removeIngredient(ingredient: ItemStack, amount: Int): ShapelessRecipe {
-        return removeIngredient(ExactChoice(ingredient), amount)
-    }
-
-    fun removeIngredient(ingredient: RecipeChoice): ShapelessRecipe {
-        ingredients.remove(ingredient)
-        return this
-    }
-
-    fun removeIngredient(ingredient: Material): ShapelessRecipe {
-        return removeIngredient(MaterialChoice(ingredient))
-    }
-
-    fun removeIngredient(ingredient: ItemStack): ShapelessRecipe {
-        return removeIngredient(ExactChoice(ingredient))
     }
 
     fun setGroup(group: String): ShapelessRecipe {
@@ -124,9 +80,7 @@ class ShapelessRecipe : Recipe() {
         return mutableMapOf(
             "group" to group,
             "amount" to amount,
-            "ingredients" to ingredients.map {
-                asItemStack(it)
-            }
+            "ingredients" to ingredients
         )
     }
 
@@ -151,7 +105,7 @@ class ShapelessRecipe : Recipe() {
 
             val ingredients = section.getList("ingredients") ?: throw IllegalArgumentException("Missing or invalid property 'ingredients'")
             for (ingredient in ingredients) {
-                if (ingredient !is ItemStack) throw IllegalArgumentException("Invalid ingredient, expected ItemStack")
+                if (ingredient !is Ingredient) throw IllegalArgumentException("Invalid ingredient class, expected Ingredient")
 
                 recipe.addIngredient(ingredient)
             }

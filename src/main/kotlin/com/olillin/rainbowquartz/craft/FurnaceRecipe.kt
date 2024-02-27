@@ -4,22 +4,15 @@ import com.olillin.rainbowquartz.item.Item
 import org.bukkit.Material
 import org.bukkit.configuration.MemoryConfiguration
 import org.bukkit.configuration.serialization.ConfigurationSerializable
-import org.bukkit.inventory.ItemStack
-import org.bukkit.inventory.RecipeChoice
-import org.bukkit.inventory.RecipeChoice.ExactChoice
-import org.bukkit.inventory.RecipeChoice.MaterialChoice
+import org.bukkit.inventory.FurnaceRecipe as BukkitFurnaceRecipe
 
 @Suppress("UNUSED")
-class FurnaceRecipe(input: RecipeChoice) : CookingRecipe(input) {
+class FurnaceRecipe(input: Ingredient) : CookingRecipe(input) {
     override val suffix: String
         get() = id
 
-    constructor(input: Material) : this(MaterialChoice(input))
-
-    constructor(input: ItemStack) : this(ExactChoice(input))
-
-    override fun asBukkitRecipe(item: Item): org.bukkit.inventory.FurnaceRecipe {
-        val recipe = org.bukkit.inventory.FurnaceRecipe(
+    override fun asBukkitRecipe(item: Item): BukkitFurnaceRecipe {
+        val recipe = BukkitFurnaceRecipe(
             key(item),
             item.getItem().also {
                 it.amount = amount
@@ -36,7 +29,7 @@ class FurnaceRecipe(input: RecipeChoice) : CookingRecipe(input) {
         return mutableMapOf(
             "group" to group,
             "amount" to amount,
-            "input" to asItemStack(input),
+            "input" to input,
             "exp" to exp,
             "cookTime" to cookTime
         )
@@ -59,7 +52,7 @@ class FurnaceRecipe(input: RecipeChoice) : CookingRecipe(input) {
             val section = MemoryConfiguration()
             section.addDefaults(args)
 
-            val input: ItemStack = section.getItemStack("input")
+            val input: Ingredient = section.getObject("input", Ingredient::class.java)
                 ?: throw IllegalArgumentException("Invalid value for property 'input'")
             val recipe = FurnaceRecipe(input)
 

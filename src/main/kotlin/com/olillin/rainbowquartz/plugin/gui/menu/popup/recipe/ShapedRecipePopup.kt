@@ -1,5 +1,6 @@
 package com.olillin.rainbowquartz.plugin.gui.menu.popup.recipe
 
+import com.olillin.rainbowquartz.craft.Ingredient
 import com.olillin.rainbowquartz.craft.Recipe.Companion.asItemStack
 import com.olillin.rainbowquartz.craft.ShapedRecipe
 import com.olillin.rainbowquartz.item.rainbowQuartzId
@@ -37,7 +38,7 @@ class ShapedRecipePopup(
     init {
         if (placeholder != null) {
             val items = mutableListOf<ItemStack?>()
-            for (line in padPattern(placeholder.getPattern())) {
+            for (line in ShapedRecipe.padPattern(placeholder.getPattern())) {
                 for (key in line) {
                     val ingredient = placeholder.getIngredient(key) ?: continue
                     items.add(asItemStack(ingredient).apply {
@@ -64,7 +65,7 @@ class ShapedRecipePopup(
         if (grid.filterNotNull().isEmpty()) throw IllegalStateException("Grid cannot be empty")
 
         val validCharacters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".toCharArray()
-        val ingredients: MutableMap<Char, ItemStack> = mutableMapOf()
+        val ingredients: MutableMap<Char, Ingredient> = mutableMapOf()
 
         var shape = ""
         for (item in grid) {
@@ -73,8 +74,8 @@ class ShapedRecipePopup(
                 continue
             }
 
-            val key: Char = if (ingredients.containsValue(item)) {
-                ingredients.entries.first { it.value == item }.key
+            val key: Char = if (ingredients.values.any { it.test(item) }) {
+                ingredients.entries.first { it.value.test(item) }.key
             } else {
                 val firstChar: Char = (item.itemMeta.rainbowQuartzId ?: item.type.key).key.uppercase()[0]
                 if (ingredients.containsKey(firstChar)) {
@@ -84,14 +85,14 @@ class ShapedRecipePopup(
                     firstChar
                 }
             }
-            ingredients[key] = item
+            ingredients[key] = Ingredient.fromItemStack(item)
             shape += key
         }
 
         val chunkedShape: MutableList<String> = shape.chunked(3).toMutableList()
-        val pattern = trimPattern(chunkedShape)
+        val pattern = ShapedRecipe.trimPattern(chunkedShape)
 
-        val result = ShapedRecipe(*pattern.toTypedArray())
+        val result = ShapedRecipe(*pattern)
         for (i in ingredients.entries) {
             result.setIngredient(i.key, i.value)
         }
@@ -99,46 +100,6 @@ class ShapedRecipePopup(
         result.amount = amount
 
         return result
-    }
-
-    /**
-     * Trim pattern to minimum size.
-     *
-     * @see padPattern
-     */
-    private fun trimPattern(pattern: List<String>): List<String> {
-        // Trim vertically
-        val trimmedVertically = pattern.toMutableList().apply {
-            while (first().isBlank()) {
-                removeFirst()
-            }
-            while (last().isBlank()) {
-                removeLast()
-            }
-        }
-        // Trim horizontally
-        val width = trimmedVertically.maxOf { it.trim().length }
-        return pattern.map {
-            it.trimStart().padStart(width)
-                .trimEnd().padEnd(width)
-        }.toMutableList()
-    }
-
-    /**
-     * Pad pattern to fill grid.
-     *
-     * @see trimPattern
-     */
-    private fun padPattern(pattern: List<String>, width: Int = 3, height: Int = width): List<String> {
-        return pattern.map {
-            // Pad horizontally
-            it.padEnd(width, ' ')
-        }.toMutableList().apply {
-            // Pad vertically
-            while (size < height) {
-                add(" ".repeat(width))
-            }
-        }
     }
 
     companion object {

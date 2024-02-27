@@ -22,7 +22,7 @@ class ItemEventDispatcher(val plugin: Plugin) : Listener {
 
     private fun <T : Event> callEvent(event: T) {
         for (item in RainbowQuartz.itemManager.getItems()) {
-            item.getEventHandlers(event::class.java).forEach { (eventType, predicate, handler) ->
+            item.getEventHandlers(event::class.java).forEach { (_, predicate, handler) ->
                 val predicateItem: ItemStack = predicate.getItem(event) ?: return@forEach
                 if (predicateItem.itemMeta.rainbowQuartzId == item.key) {
                     handler.onEvent(predicateItem, event)

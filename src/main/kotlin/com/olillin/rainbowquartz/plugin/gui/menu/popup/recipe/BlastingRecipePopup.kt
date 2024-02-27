@@ -1,6 +1,7 @@
 package com.olillin.rainbowquartz.plugin.gui.menu.popup.recipe
 
 import com.olillin.rainbowquartz.craft.BlastingRecipe
+import com.olillin.rainbowquartz.craft.Ingredient
 import com.olillin.rainbowquartz.craft.Recipe.Companion.asItemStack
 import com.olillin.rainbowquartz.plugin.gui.menu.Menu
 import net.kyori.adventure.text.Component
@@ -48,7 +49,10 @@ class BlastingRecipePopup(
 
     @Throws(IllegalStateException::class)
     override fun createRecipe(): BlastingRecipe {
-        val input: ItemStack = untransformItem(inventory.getItem(INPUT_SLOT)) ?: throw IllegalStateException("Input cannot be empty")
+        val input: Ingredient = Ingredient.fromItemStack(
+            untransformItem(inventory.getItem(INPUT_SLOT))
+                ?: throw IllegalStateException("Input cannot be empty")
+        )
         return BlastingRecipe(input)
             .setGroup(group)
             .setAmount(amount)

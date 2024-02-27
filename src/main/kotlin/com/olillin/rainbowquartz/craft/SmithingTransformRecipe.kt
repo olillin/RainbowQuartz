@@ -4,55 +4,16 @@ import com.olillin.rainbowquartz.item.Item
 import org.bukkit.Material
 import org.bukkit.configuration.MemoryConfiguration
 import org.bukkit.configuration.serialization.ConfigurationSerializable
-import org.bukkit.inventory.ItemStack
-import org.bukkit.inventory.RecipeChoice
-import org.bukkit.inventory.RecipeChoice.ExactChoice
-import org.bukkit.inventory.RecipeChoice.MaterialChoice
+import org.bukkit.inventory.SmithingTransformRecipe as BukkitSmithingTransformRecipe
 
 @Suppress("UNUSED")
-class SmithingTransformRecipe(base: RecipeChoice, addition: RecipeChoice, var template: RecipeChoice) : SmithingRecipe(base, addition) {
+class SmithingTransformRecipe(var base: Ingredient, var addition: Ingredient, var template: Ingredient) : Recipe() {
     var amount: Int = 1
     override val suffix: String
         get() = id
 
-
-    constructor(base: Material, addition: RecipeChoice) : this(MaterialChoice(base), addition, Material.AIR)
-    constructor(base: ItemStack, addition: RecipeChoice) : this(ExactChoice(base), addition, Material.AIR)
-    constructor(base: RecipeChoice, addition: Material) : this(base, MaterialChoice(addition), Material.AIR)
-    constructor(base: Material, addition: Material) : this(base, MaterialChoice(addition), Material.AIR)
-    constructor(base: ItemStack, addition: Material) : this(base, MaterialChoice(addition), Material.AIR)
-    constructor(base: RecipeChoice, addition: ItemStack) : this(base, ExactChoice(addition), Material.AIR)
-    constructor(base: Material, addition: ItemStack) : this(base, ExactChoice(addition), Material.AIR)
-    constructor(base: ItemStack, addition: ItemStack) : this(base, ExactChoice(addition), Material.AIR)
-    constructor(base: Material, addition: RecipeChoice, template: RecipeChoice) : this(MaterialChoice(base), addition, template)
-    constructor(base: ItemStack, addition: RecipeChoice, template: RecipeChoice) : this(ExactChoice(base), addition, template)
-    constructor(base: RecipeChoice, addition: Material, template: RecipeChoice) : this(base, MaterialChoice(addition), template)
-    constructor(base: Material, addition: Material, template: RecipeChoice) : this(base, MaterialChoice(addition), template)
-    constructor(base: ItemStack, addition: Material, template: RecipeChoice) : this(base, MaterialChoice(addition), template)
-    constructor(base: RecipeChoice, addition: ItemStack, template: RecipeChoice) : this(base, ExactChoice(addition), template)
-    constructor(base: Material, addition: ItemStack, template: RecipeChoice) : this(base, ExactChoice(addition), template)
-    constructor(base: ItemStack, addition: ItemStack, template: RecipeChoice) : this(base, ExactChoice(addition), template)
-    constructor(base: RecipeChoice, addition: RecipeChoice, template: Material) : this(base, addition, MaterialChoice(template))
-    constructor(base: Material, addition: RecipeChoice, template: Material) : this(base, addition, MaterialChoice(template))
-    constructor(base: ItemStack, addition: RecipeChoice, template: Material) : this(base, addition, MaterialChoice(template))
-    constructor(base: RecipeChoice, addition: Material, template: Material) : this(base, addition, MaterialChoice(template))
-    constructor(base: Material, addition: Material, template: Material) : this(base, addition, MaterialChoice(template))
-    constructor(base: ItemStack, addition: Material, template: Material) : this(base, addition, MaterialChoice(template))
-    constructor(base: RecipeChoice, addition: ItemStack, template: Material) : this(base, addition, MaterialChoice(template))
-    constructor(base: Material, addition: ItemStack, template: Material) : this(base, addition, MaterialChoice(template))
-    constructor(base: ItemStack, addition: ItemStack, template: Material) : this(base, addition, MaterialChoice(template))
-    constructor(base: RecipeChoice, addition: RecipeChoice, template: ItemStack) : this(base, addition, ExactChoice(template))
-    constructor(base: Material, addition: RecipeChoice, template: ItemStack) : this(base, addition, ExactChoice(template))
-    constructor(base: ItemStack, addition: RecipeChoice, template: ItemStack) : this(base, addition, ExactChoice(template))
-    constructor(base: RecipeChoice, addition: Material, template: ItemStack) : this(base, addition, ExactChoice(template))
-    constructor(base: Material, addition: Material, template: ItemStack) : this(base, addition, ExactChoice(template))
-    constructor(base: ItemStack, addition: Material, template: ItemStack) : this(base, addition, ExactChoice(template))
-    constructor(base: RecipeChoice, addition: ItemStack, template: ItemStack) : this(base, addition, ExactChoice(template))
-    constructor(base: Material, addition: ItemStack, template: ItemStack) : this(base, addition, ExactChoice(template))
-    constructor(base: ItemStack, addition: ItemStack, template: ItemStack) : this(base, addition, ExactChoice(template))
-
-    override fun asBukkitRecipe(item: Item): org.bukkit.inventory.SmithingTransformRecipe {
-        return org.bukkit.inventory.SmithingTransformRecipe(
+    override fun asBukkitRecipe(item: Item): BukkitSmithingTransformRecipe {
+        return BukkitSmithingTransformRecipe(
             key(item),
             item.getItem().also {
                 it.amount = amount
@@ -63,17 +24,19 @@ class SmithingTransformRecipe(base: RecipeChoice, addition: RecipeChoice, var te
         )
     }
 
-    fun setTemplate(template: RecipeChoice): SmithingRecipe {
-        this.template = template
+    fun setBase(base: Ingredient): SmithingTransformRecipe {
+        this.base = base
         return this
     }
 
-    fun setTemplate(template: Material): SmithingRecipe {
-        return setBase(MaterialChoice(template))
+    fun setAddition(addition: Ingredient): SmithingTransformRecipe {
+        this.addition = addition
+        return this
     }
 
-    fun setTemplate(template: ItemStack): SmithingRecipe {
-        return setBase(ExactChoice(template))
+    fun setTemplate(template: Ingredient): SmithingTransformRecipe {
+        this.template = template
+        return this
     }
 
     fun setAmount(amount: Int): SmithingTransformRecipe {
@@ -83,10 +46,10 @@ class SmithingTransformRecipe(base: RecipeChoice, addition: RecipeChoice, var te
 
     override fun serialize(): MutableMap<String, Any> {
         return mutableMapOf(
-            "base" to asItemStack(base),
+            "base" to base,
             "amount" to amount,
-            "addition" to asItemStack(addition),
-            "template" to asItemStack(template)
+            "addition" to addition,
+            "template" to template
         )
     }
 
@@ -129,9 +92,9 @@ class SmithingTransformRecipe(base: RecipeChoice, addition: RecipeChoice, var te
             val section = MemoryConfiguration()
             section.addDefaults(args)
 
-            val base: ItemStack = section.getItemStack("base") ?: throw IllegalArgumentException("Invalid or missing property 'base'")
-            val addition: ItemStack = section.getItemStack("addition") ?: throw IllegalArgumentException("Invalid or missing property 'addition'")
-            val template: ItemStack = section.getItemStack("template") ?: throw IllegalArgumentException("Invalid or missing property 'template'")
+            val base: Ingredient = section.getObject("base", Ingredient::class.java) ?: throw IllegalArgumentException("Invalid or missing property 'base'")
+            val addition: Ingredient = section.getObject("addition", Ingredient::class.java) ?: throw IllegalArgumentException("Invalid or missing property 'addition'")
+            val template: Ingredient = section.getObject("template", Ingredient::class.java) ?: throw IllegalArgumentException("Invalid or missing property 'template'")
             val recipe = SmithingTransformRecipe(base, addition, template)
 
             recipe.amount = section.getInt("amount", 1)
