@@ -9,7 +9,7 @@ import org.bukkit.command.TabExecutor
 import org.bukkit.entity.Player
 import org.bukkit.plugin.Plugin
 
-class MenuCommand(private val plugin: Plugin) : TabExecutor {
+internal class MenuCommand(private val plugin: Plugin) : TabExecutor {
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>?): Boolean {
         if (sender !is Player) {
             sender.sendMessage(Component.text("This command is intended for use by players only").color(RED))
@@ -20,7 +20,12 @@ class MenuCommand(private val plugin: Plugin) : TabExecutor {
         return true
     }
 
-    override fun onTabComplete(sender: CommandSender, command: Command, label: String, args: Array<out String>?): MutableList<String> {
+    override fun onTabComplete(
+        sender: CommandSender,
+        command: Command,
+        label: String,
+        args: Array<out String>?
+    ): MutableList<String> {
         return mutableListOf()
     }
 }

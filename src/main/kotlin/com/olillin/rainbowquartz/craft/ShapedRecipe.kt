@@ -1,33 +1,22 @@
+@file:Suppress("MemberVisibilityCanBePrivate")
+
 package com.olillin.rainbowquartz.craft
 
 import com.olillin.rainbowquartz.item.Item
 import org.bukkit.Material
 import org.bukkit.configuration.MemoryConfiguration
 import org.bukkit.configuration.serialization.ConfigurationSerializable
-import org.bukkit.inventory.RecipeChoice
 import org.bukkit.inventory.ShapedRecipe as BukkitShapedRecipe
 
-@Suppress("UNUSED")
-class ShapedRecipe(vararg pattern: String) : Recipe() {
-    var pattern: Array<String>
-        private set
+public class ShapedRecipe(vararg pattern: String) : Recipe<ShapedRecipe, BukkitShapedRecipe>() {
+    private lateinit var pattern: Array<String>
     private val ingredients: MutableMap<Char, Ingredient> = mutableMapOf()
-    var group: String = ""
-    var amount: Int = 1
 
-    override val suffix: String
-        get() = id
+    public override val recipeId: String
+        get() = ID
 
     init {
-        val trimmedPattern = trimPattern(pattern.toList())
-        if (trimmedPattern.isEmpty() || trimmedPattern.size > 3) {
-            throw IllegalArgumentException("Expected pattern height to be 1, 2 or 3, but got ${trimmedPattern.size}")
-        }
-        val maxWidth = trimmedPattern.maxOf { it.length }
-        if (maxWidth == 0 || maxWidth > 3) {
-            throw IllegalArgumentException("Expected pattern width to be 1, 2 or 3, but got $maxWidth")
-        }
-        this.pattern = trimmedPattern
+        setPattern(pattern.toList())
     }
 
     override fun asBukkitRecipe(item: Item): BukkitShapedRecipe {
@@ -40,7 +29,7 @@ class ShapedRecipe(vararg pattern: String) : Recipe() {
         recipe.group = group
 
         val registeredIngredients = ingredients.keys
-        for (c: Char in pattern.joinToString("").toCharArray().filter{ c -> c != ' ' }) {
+        for (c: Char in pattern.joinToString("").toCharArray().filter { c -> c != ' ' }) {
             if (!registeredIngredients.contains(c)) {
                 throw IllegalStateException("Recipe does not contain a definition for ingredient '$c'")
             }
@@ -54,32 +43,31 @@ class ShapedRecipe(vararg pattern: String) : Recipe() {
         return recipe
     }
 
-    fun getPattern(): List<String> {
-        return pattern.toList()
+    public fun getPattern(): List<String> = pattern.toList()
+
+    public fun setPattern(pattern: List<String>): ShapedRecipe {
+        val trimmedPattern = trimPattern(pattern.toList())
+        if (trimmedPattern.isEmpty() || trimmedPattern.size > 3) {
+            throw IllegalArgumentException("Expected pattern height to be 1, 2 or 3, but got ${trimmedPattern.size}")
+        }
+        val maxWidth = trimmedPattern.maxOf { it.length }
+        if (maxWidth == 0 || maxWidth > 3) {
+            throw IllegalArgumentException("Expected pattern width to be 1, 2 or 3, but got $maxWidth")
+        }
+        this.pattern = trimmedPattern.toTypedArray()
+        return this
     }
 
-    fun getIngredient(key: Char): RecipeChoice? {
-        return ingredients[key]?.clone()
-    }
+    public fun getIngredient(key: Char): Ingredient? = ingredients[key]?.clone()
 
-    fun setIngredient(key: Char, ingredient: Ingredient): ShapedRecipe {
+    public fun setIngredient(key: Char, ingredient: Ingredient): ShapedRecipe {
         ingredients[key] = ingredient.clone()
-        return this
-    }
-
-    fun setGroup(group: String): ShapedRecipe {
-        this.group = group
-        return this
-    }
-
-    fun setAmount(amount: Int): ShapedRecipe {
-        this.amount = amount
         return this
     }
 
     override fun toString(): String {
         val patternString = pattern.joinToString(", ") { "\"$it\"" }
-        return "${this::class.simpleName}(amount=$amount${if (group.isNotEmpty()) ", group=$group" else ""}, pattern=[$patternString])"
+        return "${this::class.simpleName}(amount=$amount${", group=$group".takeIf { group.isNotEmpty() }}, pattern=[$patternString])"
     }
 
     override fun equals(other: Any?): Boolean {
@@ -88,8 +76,8 @@ class ShapedRecipe(vararg pattern: String) : Recipe() {
 
         other as ShapedRecipe
 
-        if (group != other.group) return false
         if (amount != other.amount) return false
+        if (group != other.group) return false
         if (!(pattern contentEquals other.pattern)) return false
         if (ingredients != other.ingredients) return false
 
@@ -97,8 +85,8 @@ class ShapedRecipe(vararg pattern: String) : Recipe() {
     }
 
     override fun hashCode(): Int {
-        var result = group.hashCode()
-        result = 31 * result + amount.hashCode()
+        var result = amount.hashCode()
+        result = 31 * result + group.hashCode()
         result = 31 * result + pattern.contentHashCode()
         result = 31 * result + ingredients.hashCode()
         return result
@@ -109,15 +97,15 @@ class ShapedRecipe(vararg pattern: String) : Recipe() {
             "amount" to amount,
             "group" to group,
             "pattern" to padPattern(pattern.asIterable()).toList(),
-            "ingredients" to ingredients.map {(key, value) ->
+            "ingredients" to ingredients.map { (key, value) ->
                 key.toString() to value
             }.toMap()
         )
     }
 
-    companion object {
-        const val id = "shaped"
-        val material = Material.CRAFTING_TABLE
+    public companion object {
+        internal const val ID = "shaped"
+        internal val ICON = Material.CRAFTING_TABLE
 
         /**
          * Required method for configuration serialization
@@ -127,7 +115,7 @@ class ShapedRecipe(vararg pattern: String) : Recipe() {
          * @see ConfigurationSerializable
          */
         @JvmStatic
-        fun deserialize(args: Map<String, Any>): ShapedRecipe {
+        public fun deserialize(args: Map<String, Any>): ShapedRecipe {
             val section = MemoryConfiguration()
             for ((key, value) in args.entries) {
                 section.set(key, value)
@@ -139,14 +127,16 @@ class ShapedRecipe(vararg pattern: String) : Recipe() {
             }
             val recipe = ShapedRecipe(*shape)
 
-            val ingredients = section.get("ingredients") ?: throw IllegalArgumentException("Missing property 'ingredients'")
+            val ingredients =
+                section.get("ingredients") ?: throw IllegalArgumentException("Missing property 'ingredients'")
             if (ingredients !is Map<*, *>) {
                 throw IllegalArgumentException("Invalid property 'ingredients'")
             }
             for (key in ingredients.keys) {
                 if (key !is String) throw IllegalArgumentException("Invalid key '$key', must be of type String")
                 if (key.length != 1) throw IllegalArgumentException("Invalid key '$key', must be of length 1")
-                val ingredient: Ingredient = ingredients[key] as? Ingredient ?: throw IllegalArgumentException("Invalid ingredient class for key '$key', expected Ingredient")
+                val ingredient: Ingredient = ingredients[key] as? Ingredient
+                    ?: throw IllegalArgumentException("Invalid ingredient class for key '$key', expected Ingredient")
                 recipe.setIngredient(key[0], ingredient)
             }
 
@@ -163,7 +153,7 @@ class ShapedRecipe(vararg pattern: String) : Recipe() {
          *
          * @see padPattern
          */
-        fun trimPattern(pattern: Iterable<String>): Array<String> {
+        public fun trimPattern(pattern: Iterable<String>): List<String> {
             // Trim vertically
             val trimmedVertically = pattern.toMutableList().apply {
                 while (first().isBlank()) {
@@ -178,7 +168,7 @@ class ShapedRecipe(vararg pattern: String) : Recipe() {
             return pattern.map {
                 it.trimStart().padStart(width)
                     .trimEnd().padEnd(width)
-            }.toTypedArray()
+            }.toList()
         }
 
         /**
@@ -186,7 +176,7 @@ class ShapedRecipe(vararg pattern: String) : Recipe() {
          *
          * @see trimPattern
          */
-        fun padPattern(pattern: Iterable<String>, width: Int = 3, height: Int = width): Array<String> {
+        public fun padPattern(pattern: Iterable<String>, width: Int = 3, height: Int = width): List<String> {
             return pattern.map {
                 // Pad horizontally
                 it.padEnd(width, ' ')
@@ -195,7 +185,7 @@ class ShapedRecipe(vararg pattern: String) : Recipe() {
                 while (size < height) {
                     add(" ".repeat(width))
                 }
-            }.toTypedArray()
+            }.toList()
         }
     }
 }

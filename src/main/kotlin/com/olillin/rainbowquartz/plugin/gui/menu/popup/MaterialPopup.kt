@@ -15,9 +15,16 @@ import org.bukkit.event.EventPriority
 import org.bukkit.event.inventory.InventoryEvent
 import org.bukkit.inventory.Inventory
 
-class MaterialPopup(override val viewer: HumanEntity, private val placeholder: Material?, override val previousMenu: Menu?, override val callback: (Material) -> Unit) : InsertMaterialMenu(), Popup<Material> {
+/** [TextPopup] that provides a [Material] */
+public class MaterialPopup(
+    override val viewer: HumanEntity,
+    placeholder: Material?,
+    override val previousMenu: Menu?,
+    override val callback: (Material) -> Unit
+) : InsertMaterialMenu(), Popup<Material> {
+
     override val inventory: Inventory = Bukkit.createInventory(viewer, 9, Component.text("Choose a material"))
-    override val insertSlots = listOf(0)
+    override val insertSlots: List<Int> = listOf(0)
     private var material: Material? = placeholder
 
     init {
@@ -27,7 +34,7 @@ class MaterialPopup(override val viewer: HumanEntity, private val placeholder: M
     }
 
     @EventHandler
-    fun onLink(event: InventoryClickLinkEvent) {
+    public fun onLink(event: InventoryClickLinkEvent) {
         when (event.linkKey) {
             "submit" -> {
                 if (material == null) {
@@ -41,11 +48,13 @@ class MaterialPopup(override val viewer: HumanEntity, private val placeholder: M
                     back()
                 }
             }
+
             "invalid" -> {
                 viewer.sendMessage(
                     Component.text("Could not submit, no material has been chosen").color(RED)
                 )
             }
+
             "cancel" -> {
                 back()
             }
@@ -53,7 +62,7 @@ class MaterialPopup(override val viewer: HumanEntity, private val placeholder: M
     }
 
     @EventHandler(priority = EventPriority.LOW)
-    fun onChange(event: InventoryEvent) {
+    public fun onChange(event: InventoryEvent) {
         material = inventory.getItem(0)?.type
         inventory.setItem(
             8,
@@ -63,7 +72,7 @@ class MaterialPopup(override val viewer: HumanEntity, private val placeholder: M
                     Material.BARRIER,
                     Component.text("Invalid input").color(RED),
                     listOf(
-                            Component.text("No material has been chosen")
+                        Component.text("No material has been chosen")
                     )
                 )
             } else {

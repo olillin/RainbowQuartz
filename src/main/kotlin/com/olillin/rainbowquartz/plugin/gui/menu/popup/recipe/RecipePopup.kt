@@ -1,5 +1,6 @@
 package com.olillin.rainbowquartz.plugin.gui.menu.popup.recipe
 
+import com.olillin.rainbowquartz.craft.Recipe
 import com.olillin.rainbowquartz.plugin.gui.InventoryClickLinkEvent
 import com.olillin.rainbowquartz.plugin.gui.LinkItem
 import com.olillin.rainbowquartz.plugin.gui.menu.InsertMenu
@@ -18,7 +19,7 @@ import org.bukkit.event.inventory.InventoryOpenEvent
 import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.ItemStack
 
-abstract class RecipePopup<T>: InsertMenu(), Popup<T?> {
+public abstract class RecipePopup<T: Recipe<*, *>> : InsertMenu(), Popup<T?> {
     protected abstract val result: ItemStack
     protected var amount: Int = 1
     protected abstract val placeholder: T?
@@ -38,26 +39,28 @@ abstract class RecipePopup<T>: InsertMenu(), Popup<T?> {
         title
     )
 
-    abstract fun createRecipe(): T
+    public abstract fun createRecipe(): T
 
     @EventHandler(priority = EventPriority.HIGH)
-    fun onOpenRecipePopup(event: InventoryOpenEvent) {
+    public fun onOpenRecipePopup(event: InventoryOpenEvent) {
         inventory.setItem(0, EMPTY_PANEL)
         inventory.setItem(9, EMPTY_PANEL)
         inventory.setItem(18, LinkItem.BACK)
 
         inventory.setItem(8, EMPTY_PANEL)
-        inventory.setItem(26, LinkItem.makeLink(
-            "delete",
-            Material.CAULDRON,
-            Component.text("Delete recipe").color(NamedTextColor.RED)
-        ))
+        inventory.setItem(
+            26, LinkItem.makeLink(
+                "delete",
+                Material.CAULDRON,
+                Component.text("Delete recipe").color(NamedTextColor.RED)
+            )
+        )
 
         updatePreview()
     }
 
     @EventHandler
-    fun onLinkRecipePopup(event: InventoryClickLinkEvent) {
+    public fun onLinkRecipePopup(event: InventoryClickLinkEvent) {
         when (event.linkKey) {
             "submit" -> {
                 viewer.playSound(Sound.BLOCK_WOODEN_BUTTON_CLICK_ON)
@@ -123,14 +126,16 @@ abstract class RecipePopup<T>: InsertMenu(), Popup<T?> {
     }
 
     @EventHandler(priority = EventPriority.LOW)
-    fun onChangeRecipePopup(event: InventoryEvent) {
+    public fun onChangeRecipePopup(event: InventoryEvent) {
         try {
             createRecipe()
-            inventory.setItem(CREATE_SLOT, LinkItem.makeLink(
-                "submit",
-                recipeIcon,
-                Component.text("Create recipe").color(NamedTextColor.GREEN)
-            ))
+            inventory.setItem(
+                CREATE_SLOT, LinkItem.makeLink(
+                    "submit",
+                    recipeIcon,
+                    Component.text("Create recipe").color(NamedTextColor.GREEN)
+                )
+            )
         } catch (e: RuntimeException) {
             val item = ItemStack(Material.BARRIER)
             val meta = item.itemMeta
@@ -165,7 +170,7 @@ abstract class RecipePopup<T>: InsertMenu(), Popup<T?> {
         )
     }
 
-    companion object {
-        protected const val CREATE_SLOT: Int = 17
+    protected companion object {
+        public const val CREATE_SLOT: Int = 17
     }
 }

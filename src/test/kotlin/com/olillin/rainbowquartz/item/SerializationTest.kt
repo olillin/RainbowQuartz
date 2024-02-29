@@ -11,18 +11,16 @@ import org.junit.jupiter.api.Assertions.assertDoesNotThrow
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import java.util.*
 
 class SerializationTest {
     private lateinit var server: ServerMock
     private lateinit var plugin: RainbowQuartz
-    private lateinit var key: NamespacedKey
+    private val id: NamespacedKey = NamespacedKey("foo", "example")
 
     @BeforeEach
     fun setUp() {
         server = MockBukkit.mock()
         plugin = MockBukkit.load(RainbowQuartz::class.java)
-        key = NamespacedKey.fromString("foo:${UUID.randomUUID()}")!!
     }
 
     @AfterEach
@@ -33,7 +31,7 @@ class SerializationTest {
     @Test
     fun serializeItem() {
         val config = MemoryConfiguration()
-        val item = ItemBuilder(key, Material.IRON_SWORD).build()
+        val item = ItemBuilder(id, Material.IRON_SWORD).build()
         var deserialized: Item? = null
         assertDoesNotThrow {
             config.set("item", item)

@@ -10,8 +10,8 @@ import org.bukkit.inventory.RecipeChoice.ExactChoice
 import org.bukkit.inventory.RecipeChoice.MaterialChoice
 import org.bukkit.inventory.meta.ItemMeta
 
-@Suppress("UNUSED")
-class Ingredient(val material: Material, val meta: ItemMeta? = null) : RecipeChoice, ConfigurationSerializable, Cloneable {
+public class Ingredient(public val material: Material, public val meta: ItemMeta? = null) : RecipeChoice,
+    ConfigurationSerializable, Cloneable {
     @Suppress("OVERRIDE_DEPRECATION")
     override fun getItemStack(): ItemStack {
         return ItemStack(material).apply {
@@ -20,10 +20,14 @@ class Ingredient(val material: Material, val meta: ItemMeta? = null) : RecipeCho
         }
     }
 
+    override fun clone(): Ingredient {
+        return Ingredient(material, meta?.clone())
+    }
+
     override fun test(itemStack: ItemStack): Boolean {
         if (itemStack.type != material) return false
         return if (itemStack.itemMeta != ItemStack(itemStack.type).itemMeta) {
-            // Custom item meta
+            // Has custom item meta
             itemStack.itemMeta == meta
         } else {
             meta == null
@@ -32,10 +36,6 @@ class Ingredient(val material: Material, val meta: ItemMeta? = null) : RecipeCho
 
     override fun toString(): String {
         return "Ingredient(material=$material" + (if (meta != null) ", meta=$meta" else "") + ")"
-    }
-
-    override fun clone(): Ingredient {
-        return Ingredient(material, meta?.clone())
     }
 
     override fun hashCode(): Int {
@@ -54,7 +54,7 @@ class Ingredient(val material: Material, val meta: ItemMeta? = null) : RecipeCho
                 && meta == other.meta
     }
 
-    override fun serialize(): MutableMap<String, Any> {
+    override fun serialize(): Map<String, Any> {
         val serialized: MutableMap<String, Any> = mutableMapOf(
             "material" to material
         )
@@ -64,15 +64,15 @@ class Ingredient(val material: Material, val meta: ItemMeta? = null) : RecipeCho
         return serialized
     }
 
-    companion object {
+    public companion object {
         @JvmStatic
-        fun fromItemStack(itemStack: ItemStack): Ingredient = Ingredient(itemStack.type, itemStack.itemMeta)
+        public fun fromItemStack(itemStack: ItemStack): Ingredient = Ingredient(itemStack.type, itemStack.itemMeta)
 
         @JvmStatic
-        fun fromItem(item: Item): Ingredient = fromItemStack(item.getItem())
+        public fun fromItem(item: Item): Ingredient = fromItemStack(item.getItem())
 
         @JvmStatic
-        fun fromRecipeChoice(ingredient: RecipeChoice) {
+        public fun fromRecipeChoice(ingredient: RecipeChoice) {
             val material = when (ingredient) {
                 is Ingredient -> ingredient.material
                 is MaterialChoice -> ingredient.choices[0]
@@ -89,9 +89,11 @@ class Ingredient(val material: Material, val meta: ItemMeta? = null) : RecipeCho
         }
 
         @JvmStatic
-        fun deserialize(args: Map<String, Any>): Ingredient {
+        public fun deserialize(args: Map<String, Any>): Ingredient {
             val section = MemoryConfiguration()
-            section.addDefaults(args)
+            for ((key, value) in args.entries) {
+                section.set(key, value)
+            }
 
             val material = section.getObject("material", Material::class.java)
                 ?: throw IllegalArgumentException("Missing required parameter material")

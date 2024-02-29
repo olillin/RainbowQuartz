@@ -6,12 +6,9 @@ import org.bukkit.configuration.MemoryConfiguration
 import org.bukkit.configuration.serialization.ConfigurationSerializable
 import org.bukkit.inventory.StonecuttingRecipe as BukkitStonecuttingRecipe
 
-@Suppress("UNUSED")
-class StonecuttingRecipe(var input: Ingredient) : Recipe() {
-    var group: String = ""
-    var amount: Int = 1
-    override val suffix
-        get() = id
+public class StonecuttingRecipe(public var input: Ingredient) : Recipe<StonecuttingRecipe, BukkitStonecuttingRecipe>() {
+    override val recipeId: String
+        get() = ID
 
     override fun asBukkitRecipe(item: Item): BukkitStonecuttingRecipe {
         return BukkitStonecuttingRecipe(
@@ -23,22 +20,13 @@ class StonecuttingRecipe(var input: Ingredient) : Recipe() {
         )
     }
 
-    fun setInput(input: Ingredient): StonecuttingRecipe {
+    public fun setInput(input: Ingredient): StonecuttingRecipe {
         this.input = input
         return this
     }
 
-    fun setGroup(group: String): StonecuttingRecipe {
-        this.group = group
-        return this
-    }
-
-    fun setAmount(amount: Int): StonecuttingRecipe {
-        this.amount = amount
-        return this
-    }
-
-    override fun toString(): String = "${this::class.simpleName}(amount=$amount${if (group.isNotEmpty()) ", group=$group" else ""}, input=$input)"
+    override fun toString(): String =
+        "${this::class.simpleName}(amount=$amount${", group=$group".takeIf { group.isNotEmpty() }}, input=$input)"
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -46,8 +34,8 @@ class StonecuttingRecipe(var input: Ingredient) : Recipe() {
 
         other as StonecuttingRecipe
 
-        if (group != other.group) return false
         if (amount != other.amount) return false
+        if (group != other.group) return false
         if (input != other.input) return false
 
         return true
@@ -67,9 +55,9 @@ class StonecuttingRecipe(var input: Ingredient) : Recipe() {
         )
     }
 
-    companion object {
-        const val id = "stonecutting"
-        val material = Material.STONECUTTER
+    public companion object {
+        internal const val ID = "stonecutting"
+        internal val ICON = Material.STONECUTTER
 
         /**
          * Required method for configuration serialization
@@ -79,19 +67,20 @@ class StonecuttingRecipe(var input: Ingredient) : Recipe() {
          * @see ConfigurationSerializable
          */
         @JvmStatic
-        fun deserialize(args: Map<String, Any>): StonecuttingRecipe {
+        public fun deserialize(args: Map<String, Any>): StonecuttingRecipe {
             val section = MemoryConfiguration()
             for ((key, value) in args.entries) {
                 section.set(key, value)
             }
 
-            val input: Ingredient = section.getObject("input", Ingredient::class.java) ?: throw IllegalArgumentException("Missing or invalid property 'input'")
+            val input: Ingredient = section.getObject("input", Ingredient::class.java)
+                ?: throw IllegalArgumentException("Missing or invalid property 'input'")
 
             val recipe = StonecuttingRecipe(input)
 
-            val group = section.getString("group")
+            recipe.amount = section.getInt("amount", 1)
+            recipe.group = section.getString("group")
                 ?: throw IllegalArgumentException("Invalid value for property 'group'")
-            recipe.setGroup(group)
 
             return recipe
         }

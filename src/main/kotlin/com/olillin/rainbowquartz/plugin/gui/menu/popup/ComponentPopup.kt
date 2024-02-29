@@ -2,22 +2,23 @@ package com.olillin.rainbowquartz.plugin.gui.menu.popup
 
 import com.olillin.rainbowquartz.item.ItemBuilder
 import com.olillin.rainbowquartz.plugin.gui.menu.Menu
-import com.olillin.rainbowquartz.plugin.gui.menu.playSound
 import net.kyori.adventure.text.Component
-import net.kyori.adventure.text.format.NamedTextColor.*
+import net.kyori.adventure.text.format.NamedTextColor.RED
+import net.kyori.adventure.text.format.NamedTextColor.WHITE
 import net.kyori.adventure.text.format.TextDecoration
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer
 import org.bukkit.Material
-import org.bukkit.Sound
 import org.bukkit.entity.HumanEntity
-import org.bukkit.event.EventHandler
-import org.bukkit.event.inventory.InventoryClickEvent
-import org.bukkit.event.inventory.InventoryType
 import org.bukkit.inventory.ItemStack
 
-class ComponentPopup(
-        override val viewer: HumanEntity, placeholder: Component? = null, override val previousMenu: Menu?, override val callback: (Component) -> Unit
+/** [TextPopup] that lets a player input a [Component]. */
+public class ComponentPopup(
+    override val viewer: HumanEntity,
+    placeholder: Component? = null,
+    override val previousMenu: Menu?,
+    override val callback: (Component) -> Unit
 ) : TextPopup<Component>(viewer, placeholder, previousMenu, callback) {
+
     override fun firstItem(placeholder: Component?): ItemStack {
         return ItemStack(Material.NAME_TAG).apply {
             val name: String = if (placeholder != null) {
@@ -59,7 +60,7 @@ class ComponentPopup(
         return ItemBuilder.formatName(legacySerializer.deserialize(input))!!
     }
 
-    companion object {
+    private companion object {
         val legacySerializer = LegacyComponentSerializer.legacy('&')
     }
 }

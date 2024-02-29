@@ -23,22 +23,26 @@ import org.bukkit.event.inventory.InventoryOpenEvent
 import org.bukkit.inventory.ItemStack
 import org.bukkit.persistence.PersistentDataType
 
-class EditItemRecipesMenu(viewer: HumanEntity, builder: ItemBuilder, override val previousMenu: Menu?) : EditItemMenu(viewer, builder) {
-    var page = 0
+internal class EditItemRecipesMenu(viewer: HumanEntity, builder: ItemBuilder, override val previousMenu: Menu?) :
+    EditItemMenu(viewer, builder) {
+
+    private var page: Int = 0
 
     @EventHandler
     @Suppress("UNUSED_PARAMETER")
     fun onOpen(event: InventoryOpenEvent) {
         inventory.setItem(RECIPES_SLOT, inventory.getItem(RECIPES_SLOT)?.enchanted())
 
-        inventory.setItem(8, LinkItem.makeLink(
-            "add_recipe",
-            Material.NETHER_STAR,
-            Component.text("New Recipe").color(NamedTextColor.AQUA),
-            listOf(
-                Component.text("Create a new recipe")
+        inventory.setItem(
+            8, LinkItem.makeLink(
+                "add_recipe",
+                Material.NETHER_STAR,
+                Component.text("New Recipe").color(NamedTextColor.AQUA),
+                listOf(
+                    Component.text("Create a new recipe")
+                )
             )
-        ))
+        )
         inventory.setItem(17, EMPTY_PANEL)
         inventory.setItem(26, EMPTY_PANEL)
 
@@ -54,11 +58,13 @@ class EditItemRecipesMenu(viewer: HumanEntity, builder: ItemBuilder, override va
                     builder.addRecipe(it)
                 }.open()
             }
+
             "previous_page" -> {
                 page--
                 renderPaginator()
                 viewer.playSound(Sound.ITEM_BOOK_PAGE_TURN)
             }
+
             "next_page" -> {
                 page++
                 renderPaginator()
@@ -78,12 +84,47 @@ class EditItemRecipesMenu(viewer: HumanEntity, builder: ItemBuilder, override va
         val oldRecipe = builder.getRecipe(recipeKey) ?: return
         if (event.click == ClickType.LEFT) {
             when (oldRecipe) {
-                is ShapedRecipe -> ShapedRecipePopup(viewer, oldRecipe, builder.build().getItem(), this) { updateRecipe(oldRecipe, it) }.open()
-                is ShapelessRecipe -> ShapelessRecipePopup(viewer, oldRecipe, builder.build().getItem(), this) { updateRecipe(oldRecipe, it) }.open()
-                is FurnaceRecipe -> FurnaceRecipePopup(viewer, oldRecipe, builder.build().getItem(), this) { updateRecipe(oldRecipe, it) }.open()
-                is SmokingRecipe -> SmokingRecipePopup(viewer, oldRecipe, builder.build().getItem(), this) { updateRecipe(oldRecipe, it) }.open()
-                is BlastingRecipe -> BlastingRecipePopup(viewer, oldRecipe, builder.build().getItem(), this) { updateRecipe(oldRecipe, it) }.open()
-                is CampfireRecipe -> CampfireRecipePopup(viewer, oldRecipe, builder.build().getItem(), this) { updateRecipe(oldRecipe, it) }.open()
+                is ShapedRecipe -> ShapedRecipePopup(viewer, oldRecipe, builder.build().getItem(), this) {
+                    updateRecipe(
+                        oldRecipe,
+                        it
+                    )
+                }.open()
+
+                is ShapelessRecipe -> ShapelessRecipePopup(
+                    viewer,
+                    oldRecipe,
+                    builder.build().getItem(),
+                    this
+                ) { updateRecipe(oldRecipe, it) }.open()
+
+                is FurnaceRecipe -> FurnaceRecipePopup(
+                    viewer,
+                    oldRecipe,
+                    builder.build().getItem(),
+                    this
+                ) { updateRecipe(oldRecipe, it) }.open()
+
+                is SmokingRecipe -> SmokingRecipePopup(
+                    viewer,
+                    oldRecipe,
+                    builder.build().getItem(),
+                    this
+                ) { updateRecipe(oldRecipe, it) }.open()
+
+                is BlastingRecipe -> BlastingRecipePopup(
+                    viewer,
+                    oldRecipe,
+                    builder.build().getItem(),
+                    this
+                ) { updateRecipe(oldRecipe, it) }.open()
+
+                is CampfireRecipe -> CampfireRecipePopup(
+                    viewer,
+                    oldRecipe,
+                    builder.build().getItem(),
+                    this
+                ) { updateRecipe(oldRecipe, it) }.open()
             }
         } else if (event.click == ClickType.RIGHT) {
             viewer.playSound(Sound.ITEM_BUCKET_EMPTY)
@@ -92,7 +133,7 @@ class EditItemRecipesMenu(viewer: HumanEntity, builder: ItemBuilder, override va
         }
     }
 
-    private fun updateRecipe(oldRecipe: Recipe, newRecipe: Recipe?) {
+    private fun updateRecipe(oldRecipe: Recipe<*, *>, newRecipe: Recipe<*, *>?) {
         if (newRecipe == null) {
             builder.removeRecipe(oldRecipe)
         } else {
@@ -102,40 +143,42 @@ class EditItemRecipesMenu(viewer: HumanEntity, builder: ItemBuilder, override va
         renderPaginator()
     }
 
-    private fun recipeItem(recipe: Recipe): ItemStack {
+    private fun recipeItem(recipe: Recipe<*, *>): ItemStack {
         val material: Material = when (recipe) {
-            is ShapedRecipe -> ShapedRecipe.material
-            is ShapelessRecipe -> ShapelessRecipe.material
-            is FurnaceRecipe -> FurnaceRecipe.material
-            is SmokingRecipe -> SmokingRecipe.material
-            is BlastingRecipe -> BlastingRecipe.material
-            is CampfireRecipe -> CampfireRecipe.material
-            is SmithingTransformRecipe -> SmithingTransformRecipe.material
-            is StonecuttingRecipe -> StonecuttingRecipe.material
+            is ShapedRecipe -> ShapedRecipe.ICON
+            is ShapelessRecipe -> ShapelessRecipe.ICON
+            is FurnaceRecipe -> FurnaceRecipe.ICON
+            is SmokingRecipe -> SmokingRecipe.ICON
+            is BlastingRecipe -> BlastingRecipe.ICON
+            is CampfireRecipe -> CampfireRecipe.ICON
+            is SmithingTransformRecipe -> SmithingTransformRecipe.ICON
+            is StonecuttingRecipe -> StonecuttingRecipe.ICON
             else -> Material.BEDROCK
         }
         val item = ItemStack(material).apply {
             itemMeta = itemMeta.apply {
-                val key: String = recipe.key(builder.key).toString()
+                val key: String = recipe.key(builder.id).toString()
                 // Name and lore
                 displayName(
                     Component.text(recipe::class.simpleName!!)
                         .color(NamedTextColor.GOLD)
                         .decoration(TextDecoration.ITALIC, false)
                 )
-                lore(listOf(
-                    Component.text(key)
-                        .color(NamedTextColor.DARK_PURPLE)
-                        .decoration(TextDecoration.ITALIC, false),
-                    Component.translatable("key.mouse.left")
-                        .color(NamedTextColor.GRAY)
-                        .decoration(TextDecoration.ITALIC, false)
-                        .append(Component.text(" to edit")),
-                    Component.translatable("key.mouse.right")
-                        .color(NamedTextColor.GRAY)
-                        .decoration(TextDecoration.ITALIC, false)
-                        .append(Component.text(" to delete"))
-                ))
+                lore(
+                    listOf(
+                        Component.text(key)
+                            .color(NamedTextColor.DARK_PURPLE)
+                            .decoration(TextDecoration.ITALIC, false),
+                        Component.translatable("key.mouse.left")
+                            .color(NamedTextColor.GRAY)
+                            .decoration(TextDecoration.ITALIC, false)
+                            .append(Component.text(" to edit")),
+                        Component.translatable("key.mouse.right")
+                            .color(NamedTextColor.GRAY)
+                            .decoration(TextDecoration.ITALIC, false)
+                            .append(Component.text(" to delete"))
+                    )
+                )
 
                 // Recipe key
                 persistentDataContainer.set(
@@ -161,7 +204,7 @@ class EditItemRecipesMenu(viewer: HumanEntity, builder: ItemBuilder, override va
         )
     }
 
-    companion object {
+    private companion object {
         val recipeKeyLocation: NamespacedKey = NamespacedKey.fromString("rainbowquartz:recipe_key")!!
     }
 }

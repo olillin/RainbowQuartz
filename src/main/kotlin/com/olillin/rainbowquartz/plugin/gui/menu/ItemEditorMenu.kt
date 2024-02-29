@@ -3,6 +3,7 @@ package com.olillin.rainbowquartz.plugin.gui.menu
 import com.olillin.rainbowquartz.RainbowQuartz
 import com.olillin.rainbowquartz.item.Item
 import com.olillin.rainbowquartz.item.ItemBuilder
+import com.olillin.rainbowquartz.item.rainbowQuartzId
 import com.olillin.rainbowquartz.plugin.gui.InventoryClickLinkEvent
 import com.olillin.rainbowquartz.plugin.gui.LinkItem
 import com.olillin.rainbowquartz.plugin.gui.menu.edititem.EditItemGeneralMenu
@@ -23,8 +24,9 @@ import org.bukkit.inventory.ItemStack
  * @param viewer The viewer of the inventory
  * @param page The 0-based
  */
-class ItemEditorMenu(override val viewer: HumanEntity, private var page: Int,
-                     override val previousMenu: Menu?
+internal class ItemEditorMenu(
+    override val viewer: HumanEntity, private var page: Int,
+    override val previousMenu: Menu?
 ) : ImmutableMenu() {
     constructor(viewer: HumanEntity, previousMenu: Menu?) : this(viewer, 0, previousMenu)
 
@@ -34,36 +36,42 @@ class ItemEditorMenu(override val viewer: HumanEntity, private var page: Int,
     @Suppress("UNUSED_PARAMETER")
     fun onOpen(event: InventoryOpenEvent) {
         // Stationary icons
-        inventory.setItem(0, LinkItem.makeLink(
-            "create_item",
-            Material.NETHER_STAR,
-            Component.text("New item").color(NamedTextColor.AQUA),
-            listOf(
-                Component.text("Create a new Item")
+        inventory.setItem(
+            0, LinkItem.makeLink(
+                "create_item",
+                Material.NETHER_STAR,
+                Component.text("New item").color(NamedTextColor.AQUA),
+                listOf(
+                    Component.text("Create a new Item")
+                )
             )
-        ))
+        )
         inventory.setItem(1, EMPTY_PANEL)
         inventory.setItem(9, EMPTY_PANEL)
         inventory.setItem(10, EMPTY_PANEL)
-        inventory.setItem(18, LinkItem.makeLink(
-            "search",
-            Material.OAK_SIGN,
-            Component.text("Search").color(NamedTextColor.LIGHT_PURPLE),
-            listOf(
-                Component.text("Find an item by id, name,"),
-                Component.text("item type or namespace")
+        inventory.setItem(
+            18, LinkItem.makeLink(
+                "search",
+                Material.OAK_SIGN,
+                Component.text("Search").color(NamedTextColor.LIGHT_PURPLE),
+                listOf(
+                    Component.text("Find an item by id, name,"),
+                    Component.text("item type or namespace")
+                )
             )
-        ))
+        )
         inventory.setItem(19, EMPTY_PANEL)
         inventory.setItem(27, EMPTY_PANEL)
         inventory.setItem(28, EMPTY_PANEL)
         inventory.setItem(36, EMPTY_PANEL)
         inventory.setItem(37, EMPTY_PANEL)
-        inventory.setItem(45, LinkItem.makeLink(
-            "back",
-            Material.ARROW,
-            Component.text("Back").color(NamedTextColor.RED)
-        ))
+        inventory.setItem(
+            45, LinkItem.makeLink(
+                "back",
+                Material.ARROW,
+                Component.text("Back").color(NamedTextColor.RED)
+            )
+        )
         inventory.setItem(46, EMPTY_PANEL)
 
         // Paginator
@@ -74,11 +82,11 @@ class ItemEditorMenu(override val viewer: HumanEntity, private var page: Int,
     fun onClick(event: InventoryClickEvent) {
         if (!InventoryClickLinkEvent.isLinkClick(event)) return
 
-        val item = event.currentItem ?: return
-        val rainbowQuartzItem = RainbowQuartz.itemManager.getItem(item) ?: return
+        val stack = event.currentItem ?: return
+        val item = stack.rainbowQuartzId?.let { RainbowQuartz.itemManager.getItem(it) } ?: return
         event.isCancelled = true
         viewer.playSound(Sound.BLOCK_WOODEN_BUTTON_CLICK_ON)
-        EditItemGeneralMenu(event.whoClicked, ItemBuilder(rainbowQuartzItem), this).open()
+        EditItemGeneralMenu(event.whoClicked, ItemBuilder(item), this).open()
     }
 
     @EventHandler
@@ -87,16 +95,19 @@ class ItemEditorMenu(override val viewer: HumanEntity, private var page: Int,
             "create_item" -> {
                 NewItemMenu(viewer, this).open()
             }
+
             "next_page" -> {
                 viewer.playSound(Sound.ITEM_BOOK_PAGE_TURN)
                 page++
                 renderPaginator()
             }
+
             "previous_page" -> {
                 viewer.playSound(Sound.ITEM_BOOK_PAGE_TURN)
                 page--
                 renderPaginator()
             }
+
             "back" -> {
                 viewer.playSound(Sound.BLOCK_WOODEN_BUTTON_CLICK_OFF)
                 back()
@@ -108,8 +119,8 @@ class ItemEditorMenu(override val viewer: HumanEntity, private var page: Int,
     private fun renderPaginator() {
         Paginator.render(
             inventory,
-            RainbowQuartz.itemManager.itemKeys.sortedBy { it.toString() },
-            { listedItem(RainbowQuartz.itemManager.getItem(it)!!) },
+            RainbowQuartz.itemManager.getItems().sortedBy { it.id.toString() },
+            { listedItem(it) },
             page,
             7,
             6,
@@ -122,7 +133,10 @@ class ItemEditorMenu(override val viewer: HumanEntity, private var page: Int,
         val result = item.getItem()
         val meta = result.itemMeta
         val lore = meta.lore() ?: ArrayList()
-        lore.add(0, Component.text(item.key.toString()).color(NamedTextColor.DARK_PURPLE).decoration(TextDecoration.ITALIC, false))
+        lore.add(0,
+            Component.text(item.id.toString()).color(NamedTextColor.DARK_PURPLE)
+                .decoration(TextDecoration.ITALIC, false)
+        )
         meta.lore(lore)
         result.itemMeta = meta
         return result

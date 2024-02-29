@@ -21,7 +21,7 @@ import org.jetbrains.annotations.Contract
  * it on the cursor. Clicking on the slot with the same item or no item
  * will remove it from the slot.
  */
-abstract class InsertMenu : ImmutableMenu() {
+public abstract class InsertMenu : ImmutableMenu() {
     /**
      * The whitelist of slots that items can be inserted into.
      */
@@ -33,7 +33,7 @@ abstract class InsertMenu : ImmutableMenu() {
      * the slot will be emptied instead.
      * If [slot] is not in [insertSlots] the call is silently ignored.
      */
-    open fun insertItem(slot: Int, item: ItemStack?) {
+    protected open fun insertItem(slot: Int, item: ItemStack?) {
         if (!isInsertSlot(slot)) return
 
         val stack: ItemStack? = transformItem(item?.let { ItemStack(it) })
@@ -48,7 +48,7 @@ abstract class InsertMenu : ImmutableMenu() {
         slot >= 0 && slot < inventory.size && insertSlots.contains(slot)
 
     @EventHandler
-    open fun onClickInsertMenu(event: InventoryClickEvent) {
+    public open fun onClickInsertMenu(event: InventoryClickEvent) {
         if (event.isShiftClick) {
             if (event.clickedInventory == inventory
             ) {
@@ -78,7 +78,7 @@ abstract class InsertMenu : ImmutableMenu() {
     }
 
     @EventHandler
-    open fun onDragInsertMenu(event: InventoryDragEvent) {
+    public open fun onDragInsertMenu(event: InventoryDragEvent) {
         for (slot in event.rawSlots) {
             insertItem(slot, event.oldCursor)
         }

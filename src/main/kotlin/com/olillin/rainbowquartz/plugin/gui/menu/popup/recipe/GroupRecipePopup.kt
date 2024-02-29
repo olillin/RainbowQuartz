@@ -1,5 +1,6 @@
 package com.olillin.rainbowquartz.plugin.gui.menu.popup.recipe
 
+import com.olillin.rainbowquartz.craft.Recipe
 import com.olillin.rainbowquartz.plugin.gui.InventoryClickLinkEvent
 import com.olillin.rainbowquartz.plugin.gui.LinkItem
 import com.olillin.rainbowquartz.plugin.gui.menu.popup.StringPopup
@@ -9,17 +10,17 @@ import org.bukkit.Material
 import org.bukkit.event.EventHandler
 import org.bukkit.event.inventory.InventoryOpenEvent
 
-abstract class GroupRecipePopup<T>: RecipePopup<T>() {
+public abstract class GroupRecipePopup<T: Recipe<*, *>> : RecipePopup<T>() {
     protected var group: String = ""
     protected open val groupSlot: Int = 4
 
     @EventHandler
-    fun onOpenGroupRecipePopup(event: InventoryOpenEvent) {
+    public fun onOpenGroupRecipePopup(event: InventoryOpenEvent) {
         renderGroup()
     }
 
     @EventHandler
-    fun onLinkGroupRecipePopup(event: InventoryClickLinkEvent) {
+    public fun onLinkGroupRecipePopup(event: InventoryClickLinkEvent) {
         if (event.linkKey == "group") {
             StringPopup(viewer, group, this) {
                 group = it

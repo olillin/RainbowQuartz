@@ -18,54 +18,66 @@ import org.bukkit.event.inventory.InventoryOpenEvent
 import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.ItemStack
 
-class LorePopup(override val viewer: HumanEntity, val placeholder: List<Component>?, override val previousMenu: Menu?, override val callback: (List<Component>) -> Unit) : ImmutableMenu(), Popup<List<Component>> {
+public class LorePopup(
+    override val viewer: HumanEntity,
+    public val placeholder: List<Component>?,
+    override val previousMenu: Menu?,
+    override val callback: (List<Component>) -> Unit
+) : ImmutableMenu(), Popup<List<Component>> {
+
     override val inventory: Inventory = Bukkit.createInventory(viewer, 54, Component.text("Lore editor"))
-    val lore: MutableList<Component> = placeholder?.toMutableList() ?: mutableListOf()
+    public val lore: MutableList<Component> = placeholder?.toMutableList() ?: mutableListOf()
     private var page: Int = 0
 
     @EventHandler
     @Suppress("UNUSED_PARAMETER")
-    fun onOpen(event: InventoryOpenEvent) = render()
+    public fun onOpen(event: InventoryOpenEvent) {
+        render()
+    }
 
     private fun render() {
-        inventory.setItem(0, LinkItem.makeLink(
+        inventory.setItem(
+            0, LinkItem.makeLink(
                 "add",
                 Material.NETHER_STAR,
                 Component.text("Add line").color(NamedTextColor.GREEN)
-        ))
+            )
+        )
         inventory.setItem(9, EMPTY_PANEL)
         inventory.setItem(18, EMPTY_PANEL)
         inventory.setItem(27, EMPTY_PANEL)
         inventory.setItem(36, LinkItem.CANCEL)
         inventory.setItem(45, LinkItem.SUBMIT)
         Paginator.render(
-                inventory,
-                lore.mapIndexed { i, text -> Pair(i, text) },
-                { pair -> lineItem(pair.first+1, pair.second) },
-                page,
-                PAGINATOR_WIDTH,
-                PAGINATOR_HEIGHT,
-                PAGINATOR_X,
-                PAGINATOR_Y
+            inventory,
+            lore.mapIndexed { i, text -> Pair(i, text) },
+            { pair -> lineItem(pair.first + 1, pair.second) },
+            page,
+            PAGINATOR_WIDTH,
+            PAGINATOR_HEIGHT,
+            PAGINATOR_X,
+            PAGINATOR_Y
         )
     }
 
     private fun lineItem(line: Int, text: Component): ItemStack {
         return LinkItem.makeLink(
-                "lore",
-                Material.PAPER,
-                text,
-                listOf(
-                        Component.text("Line $line").color(NamedTextColor.DARK_GRAY),
-                        Component.translatable("key.mouse.left").color(NamedTextColor.GRAY).append(Component.text(" to edit")),
-                        Component.translatable("key.mouse.middle").color(NamedTextColor.GRAY).append(Component.text(" to duplicate")),
-                        Component.translatable("key.mouse.right").color(NamedTextColor.GRAY).append(Component.text(" to delete"))
-                )
+            "lore",
+            Material.PAPER,
+            text,
+            listOf(
+                Component.text("Line $line").color(NamedTextColor.DARK_GRAY),
+                Component.translatable("key.mouse.left").color(NamedTextColor.GRAY).append(Component.text(" to edit")),
+                Component.translatable("key.mouse.middle").color(NamedTextColor.GRAY)
+                    .append(Component.text(" to duplicate")),
+                Component.translatable("key.mouse.right").color(NamedTextColor.GRAY)
+                    .append(Component.text(" to delete"))
+            )
         )
     }
 
     @EventHandler
-    fun onLink(event: InventoryClickLinkEvent) {
+    public fun onLink(event: InventoryClickLinkEvent) {
         when (event.linkKey) {
             "add" -> {
                 ComponentPopup(viewer, null, this) {
@@ -107,21 +119,24 @@ class LorePopup(override val viewer: HumanEntity, val placeholder: List<Componen
                             render()
                         }.open()
                     }
+
                     ClickType.MIDDLE -> {
                         // Duplicate
                         viewer.playSound(Sound.BLOCK_WOODEN_BUTTON_CLICK_ON)
                         lore.add(index, lore[index])
                         render()
                     }
+
                     ClickType.RIGHT -> {
                         // Delete
                         viewer.playSound(Sound.ITEM_BUCKET_EMPTY)
                         lore.removeAt(index)
-                        val pages = (lore.size-1) / ITEMS_PER_PAGE
+                        val pages = (lore.size - 1) / ITEMS_PER_PAGE
                         if (page > pages)
                             page--
                         render()
                     }
+
                     else -> {}
                 }
             }
@@ -134,14 +149,14 @@ class LorePopup(override val viewer: HumanEntity, val placeholder: List<Componen
         return translatedSlot + page * ITEMS_PER_PAGE
     }
 
-    companion object {
-        private const val PAGINATOR_WIDTH = 8
-        private const val PAGINATOR_HEIGHT = 6
-        private const val PAGINATOR_X = 1
-        private const val PAGINATOR_Y = 0
+    private companion object {
+        const val PAGINATOR_WIDTH = 8
+        const val PAGINATOR_HEIGHT = 6
+        const val PAGINATOR_X = 1
+        const val PAGINATOR_Y = 0
 
-        private const val INVENTORY_WIDTH = 9
-        private const val PAGINATOR_ITEM_WIDTH = PAGINATOR_WIDTH-1
-        private const val ITEMS_PER_PAGE = PAGINATOR_ITEM_WIDTH * PAGINATOR_HEIGHT
+        const val INVENTORY_WIDTH = 9
+        const val PAGINATOR_ITEM_WIDTH = PAGINATOR_WIDTH - 1
+        const val ITEMS_PER_PAGE = PAGINATOR_ITEM_WIDTH * PAGINATOR_HEIGHT
     }
 }

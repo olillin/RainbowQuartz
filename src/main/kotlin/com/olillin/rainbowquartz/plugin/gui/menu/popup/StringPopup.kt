@@ -9,7 +9,10 @@ import org.bukkit.entity.HumanEntity
 import org.bukkit.inventory.ItemFlag
 import org.bukkit.inventory.ItemStack
 
-class StringPopup(viewer: HumanEntity, placeholder: String?, previousMenu: Menu?, callback: (String) -> Unit): TextPopup<String>(viewer, placeholder, previousMenu, callback) {
+/** [TextPopup] that provides a [String]. */
+public class StringPopup(viewer: HumanEntity, placeholder: String?, previousMenu: Menu?, callback: (String) -> Unit) :
+    TextPopup<String>(viewer, placeholder, previousMenu, callback) {
+
     override fun parseInput(input: String?): String? = input
 
     override fun firstItem(placeholder: String?): ItemStack {
@@ -26,7 +29,8 @@ class StringPopup(viewer: HumanEntity, placeholder: String?, previousMenu: Menu?
         if (placeholder != null) {
             meta.lore(
                 listOf(
-                    Component.text("↑ Previous text ↑").color(NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false)
+                    Component.text("↑ Previous text ↑").color(NamedTextColor.GRAY)
+                        .decoration(TextDecoration.ITALIC, false)
                 )
             )
         }

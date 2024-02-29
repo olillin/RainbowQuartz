@@ -12,7 +12,7 @@ import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 import org.bukkit.event.inventory.InventoryOpenEvent
 
-abstract class CookingRecipePopup<T: CookingRecipe> : GroupRecipePopup<T>() {
+public abstract class CookingRecipePopup<T : CookingRecipe<*, *>> : GroupRecipePopup<T>() {
     protected open var exp: Float = 0f
     protected open var cookTime: Int = 200
     override val insertSlots: List<Int>
@@ -20,7 +20,7 @@ abstract class CookingRecipePopup<T: CookingRecipe> : GroupRecipePopup<T>() {
 
     @EventHandler(priority = EventPriority.HIGH)
     @Suppress("UNUSED_PARAMETER")
-    fun onOpenCookingRecipe(event: InventoryOpenEvent) {
+    public fun onOpenCookingRecipe(event: InventoryOpenEvent) {
         inventory.setItem(1, EMPTY_PANEL)
         inventory.setItem(2, EMPTY_PANEL)
         inventory.setItem(3, EMPTY_PANEL)
@@ -36,7 +36,7 @@ abstract class CookingRecipePopup<T: CookingRecipe> : GroupRecipePopup<T>() {
     }
 
     @EventHandler
-    fun onLinkCookingRecipe(event: InventoryClickLinkEvent) {
+    public fun onLinkCookingRecipe(event: InventoryClickLinkEvent) {
         when (event.linkKey) {
             "exp" -> {
                 FloatPopup(viewer, exp, this) {
@@ -44,6 +44,7 @@ abstract class CookingRecipePopup<T: CookingRecipe> : GroupRecipePopup<T>() {
                     renderExp()
                 }.open()
             }
+
             "cookTime" -> {
                 IntPopup(viewer, cookTime, this) {
                     cookTime = it
@@ -69,22 +70,24 @@ abstract class CookingRecipePopup<T: CookingRecipe> : GroupRecipePopup<T>() {
     }
 
     private fun renderCookTime() {
-        inventory.setItem(COOK_TIME_SLOT, LinkItem.makeLink(
-            "cookTime",
-            Material.CLOCK,
-            Component.text("Set cook time").color(NamedTextColor.YELLOW),
-            listOf(
-                Component.text("Current: ").append(
-                    Component.text(cookTime).color(NamedTextColor.GREEN)
+        inventory.setItem(
+            COOK_TIME_SLOT, LinkItem.makeLink(
+                "cookTime",
+                Material.CLOCK,
+                Component.text("Set cook time").color(NamedTextColor.YELLOW),
+                listOf(
+                    Component.text("Current: ").append(
+                        Component.text(cookTime).color(NamedTextColor.GREEN)
+                    )
                 )
             )
-        ))
+        )
     }
 
-    companion object {
-        const val INPUT_LABEL_SLOT = 10
-        const val INPUT_SLOT = 11
-        const val COOK_TIME_SLOT = 13
-        const val EXP_SLOT = 22
+    protected companion object {
+        public const val INPUT_LABEL_SLOT: Int = 10
+        public const val INPUT_SLOT: Int = 11
+        public const val COOK_TIME_SLOT: Int = 13
+        public const val EXP_SLOT: Int = 22
     }
 }

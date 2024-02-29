@@ -3,27 +3,27 @@ package com.olillin.rainbowquartz.craft
 import com.olillin.rainbowquartz.item.Item
 import org.bukkit.NamespacedKey
 import org.bukkit.configuration.serialization.ConfigurationSerializable
-import org.bukkit.inventory.ItemStack
-import org.bukkit.inventory.RecipeChoice
+import org.bukkit.inventory.Recipe as BukkitRecipe
 
-abstract class Recipe : ConfigurationSerializable {
-    abstract val suffix: String
-    abstract fun asBukkitRecipe(item: Item): org.bukkit.inventory.Recipe
-    fun key(item: Item): NamespacedKey = key(item.key)
-    fun key(itemKey: NamespacedKey): NamespacedKey = NamespacedKey.fromString("$itemKey/$suffix-${hashCode()}")!!
+@Suppress("UNCHECKED_CAST")
+public abstract class Recipe<Self : Recipe<Self, T>, T : BukkitRecipe> : ConfigurationSerializable {
+    public var amount: Int = 1
+    public var group: String = ""
+    protected abstract val recipeId: String
 
-    companion object {
-        @JvmStatic
-        fun asItemStack(ingredient: RecipeChoice): ItemStack {
-            return if (ingredient is RecipeChoice.ExactChoice) {
-                ingredient.itemStack
-            } else if (ingredient is RecipeChoice.MaterialChoice) {
-                ingredient.itemStack
-            } else {
-                throw IllegalArgumentException("Unsupported RecipeChoice type")
-            }.also {
-                it.amount = 1
-            }
-        }
+    public abstract fun asBukkitRecipe(item: Item): T
+
+    public fun setAmount(amount: Int): Self {
+        this.amount = amount
+        return this as Self
     }
+
+    public fun setGroup(group: String): Self {
+        this.group = group
+        return this as Self
+    }
+
+    public fun key(item: Item): NamespacedKey = key(item.id)
+    public fun key(itemKey: NamespacedKey): NamespacedKey =
+        NamespacedKey.fromString("$itemKey/$recipeId-${hashCode().toUInt()}")!!
 }

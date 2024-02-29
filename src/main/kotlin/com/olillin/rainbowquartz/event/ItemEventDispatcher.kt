@@ -8,9 +8,9 @@ import org.bukkit.event.Listener
 import org.bukkit.inventory.ItemStack
 import org.bukkit.plugin.Plugin
 
-class ItemEventDispatcher(val plugin: Plugin) : Listener {
+public class ItemEventDispatcher(private val plugin: Plugin) : Listener {
 
-    fun listen(eventType: Class<out Event>) {
+    public fun listen(eventType: Class<out Event>) {
         plugin.server.pluginManager.registerEvent(
             eventType,
             this,
@@ -20,11 +20,11 @@ class ItemEventDispatcher(val plugin: Plugin) : Listener {
         )
     }
 
-    private fun <T : Event> callEvent(event: T) {
+    public fun <T : Event> callEvent(event: T) {
         for (item in RainbowQuartz.itemManager.getItems()) {
             item.getEventHandlers(event::class.java).forEach { (_, predicate, handler) ->
                 val predicateItem: ItemStack = predicate.getItem(event) ?: return@forEach
-                if (predicateItem.itemMeta.rainbowQuartzId == item.key) {
+                if (predicateItem.itemMeta.rainbowQuartzId == item.id) {
                     handler.onEvent(predicateItem, event)
                 }
             }

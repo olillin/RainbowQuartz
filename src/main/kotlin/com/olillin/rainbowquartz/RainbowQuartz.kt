@@ -14,32 +14,22 @@ import org.bukkit.command.PluginCommand
 import org.bukkit.command.TabExecutor
 import org.bukkit.configuration.serialization.ConfigurationSerializable
 import org.bukkit.configuration.serialization.ConfigurationSerialization
-import org.bukkit.event.Listener
 import org.bukkit.plugin.java.JavaPlugin
 import java.io.IOException
 import java.util.*
 
-open class RainbowQuartz : JavaPlugin(), Listener {
-    companion object {
-        lateinit var itemManager: ItemManager
-        lateinit var itemEventDispatcher: ItemEventDispatcher
-        lateinit var guiEventDispatcher: GuiEventDispatcher
-        internal lateinit var instance: RainbowQuartz
-    }
-
+public open class RainbowQuartz : JavaPlugin() {
     override fun onEnable() {
         // Initialize event dispatchers
         itemEventDispatcher = ItemEventDispatcher(this)
         guiEventDispatcher = GuiEventDispatcher(this)
-        guiEventDispatcher.start()
-
         itemManager = ItemManager(this)
+
+        guiEventDispatcher.start()
         itemManager.reload()
 
         // Initialize commands
         registerCommands()
-
-        instance = this
     }
 
     override fun onLoad() {
@@ -60,7 +50,6 @@ open class RainbowQuartz : JavaPlugin(), Listener {
         }
     }
 
-    @Suppress("SpellCheckingInspection")
     @Throws(IOException::class)
     private fun registerCommands() {
 
@@ -102,5 +91,14 @@ open class RainbowQuartz : JavaPlugin(), Listener {
 
     override fun onDisable() {
         itemManager.clear()
+    }
+
+    public companion object {
+        internal lateinit var itemEventDispatcher: ItemEventDispatcher
+            private set
+        public lateinit var itemManager: ItemManager
+            private set
+        public lateinit var guiEventDispatcher: GuiEventDispatcher
+            private set
     }
 }

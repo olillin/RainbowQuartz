@@ -1,7 +1,6 @@
 package com.olillin.rainbowquartz.plugin.gui.menu.popup.recipe
 
 import com.olillin.rainbowquartz.craft.Ingredient
-import com.olillin.rainbowquartz.craft.Recipe.Companion.asItemStack
 import com.olillin.rainbowquartz.craft.ShapedRecipe
 import com.olillin.rainbowquartz.item.rainbowQuartzId
 import com.olillin.rainbowquartz.plugin.gui.menu.Menu
@@ -11,15 +10,16 @@ import org.bukkit.event.EventHandler
 import org.bukkit.event.inventory.InventoryOpenEvent
 import org.bukkit.inventory.ItemStack
 
-class ShapedRecipePopup(
+public class ShapedRecipePopup(
     override val viewer: HumanEntity,
     override val placeholder: ShapedRecipe?,
     override val result: ItemStack,
     override val previousMenu: Menu,
     override val callback: (ShapedRecipe?) -> Unit
 ) : GroupRecipePopup<ShapedRecipe>() {
-//    override val title: Component = Component.text(if (placeholder == null) "New shaped recipe" else "Edit shaped recipe")
-    override val recipeIcon: Material = ShapedRecipe.material
+
+    //    override val title: Component = Component.text(if (placeholder == null) "New shaped recipe" else "Edit shaped recipe")
+    override val recipeIcon: Material = ShapedRecipe.ICON
 
     override val insertSlots: List<Int>
         get() = gridSlots
@@ -41,9 +41,7 @@ class ShapedRecipePopup(
             for (line in ShapedRecipe.padPattern(placeholder.getPattern())) {
                 for (key in line) {
                     val ingredient = placeholder.getIngredient(key) ?: continue
-                    items.add(asItemStack(ingredient).apply {
-                        amount = 1
-                    })
+                    items.add(ingredient.itemStack)
                 }
             }
             grid = items.toTypedArray()
@@ -55,7 +53,7 @@ class ShapedRecipePopup(
 
     @EventHandler
     @Suppress("UNUSED_PARAMETER")
-    fun onOpen(event: InventoryOpenEvent) {
+    public fun onOpen(event: InventoryOpenEvent) {
         inventory.setItem(13, EMPTY_PANEL)
         inventory.setItem(22, EMPTY_PANEL)
     }
@@ -92,7 +90,7 @@ class ShapedRecipePopup(
         val chunkedShape: MutableList<String> = shape.chunked(3).toMutableList()
         val pattern = ShapedRecipe.trimPattern(chunkedShape)
 
-        val result = ShapedRecipe(*pattern)
+        val result = ShapedRecipe(*pattern.toTypedArray())
         for (i in ingredients.entries) {
             result.setIngredient(i.key, i.value)
         }
@@ -102,7 +100,7 @@ class ShapedRecipePopup(
         return result
     }
 
-    companion object {
-        private val gridSlots = listOf(1, 2, 3, 10, 11, 12, 19, 20, 21)
+    private companion object {
+        val gridSlots = listOf(1, 2, 3, 10, 11, 12, 19, 20, 21)
     }
 }

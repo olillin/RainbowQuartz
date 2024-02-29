@@ -1,3 +1,5 @@
+@file:Suppress("MemberVisibilityCanBePrivate")
+
 package com.olillin.rainbowquartz.item
 
 import com.olillin.rainbowquartz.craft.Recipe
@@ -17,18 +19,21 @@ import org.bukkit.inventory.ItemFlag
 import org.bukkit.inventory.ItemStack
 import org.jetbrains.annotations.Contract
 
-@Suppress("UNUSED")
-open class ItemBuilder(val key: NamespacedKey, result: ItemStack, recipes: List<Recipe>, handlers: List<EventHandlerGroup<*>>) {
-    constructor(key: NamespacedKey, itemStack: ItemStack) : this(key, itemStack, listOf(), listOf())
-    constructor(key: NamespacedKey, material: Material) : this(key, ItemStack(material))
-    constructor(key: NamespacedKey, itemStack: ItemStack, recipes: List<Recipe>) : this(key, itemStack, recipes, listOf())
-    constructor(key: NamespacedKey, material: Material, recipes: List<Recipe>) : this(key, ItemStack(material), recipes, listOf())
-    constructor(key: NamespacedKey, material: Material, recipes: List<Recipe>, handlers: List<EventHandlerGroup<*>>) : this(key, ItemStack(material), recipes, handlers)
-    constructor(item: Item) : this(item.key, item.getItem(), item.recipes)
-    constructor(builder: ItemBuilder) : this(builder.key, builder.result, builder.recipes)
+public open class ItemBuilder(
+    public val id: NamespacedKey,
+    result: ItemStack,
+    recipes: List<Recipe<*, *>> = listOf(),
+    handlers: List<EventHandlerGroup<*>> = listOf()
+) {
+    public constructor(id: NamespacedKey, material: Material, recipes: List<Recipe<*, *>> = listOf()) : this(
+        id, ItemStack(material), recipes, listOf()
+    )
+
+    public constructor(item: Item) : this(item.id, item.getItem(), item.recipes)
+    public constructor(builder: ItemBuilder) : this(builder.id, builder.result, builder.recipes)
 
     protected val result: ItemStack
-    protected val recipes: MutableList<Recipe>
+    protected val recipes: MutableList<Recipe<*, *>>
     protected val eventHandlerGroups: MutableList<EventHandlerGroup<*>>
 
     init {
@@ -37,50 +42,45 @@ open class ItemBuilder(val key: NamespacedKey, result: ItemStack, recipes: List<
         this.eventHandlerGroups = handlers.toMutableList()
     }
 
-    open fun getMaterial() = result.type
-    open fun setMaterial(material: Material): ItemBuilder {
+    public open fun getMaterial(): Material = result.type
+
+    public open fun setMaterial(material: Material): ItemBuilder {
         result.type = material
         return this
     }
 
-    open fun getAmount() = result.amount
-    open fun setAmount(amount: Int): ItemBuilder {
+    public open fun getAmount(): Int = result.amount
+
+    public open fun setAmount(amount: Int): ItemBuilder {
         result.amount = amount
         return this
     }
 
-    open fun getName(): Component? {
-        return result.itemMeta.displayName()
-    }
+    public open fun getName(): Component? = result.itemMeta.displayName()
 
-    open fun setName(name: Component?): ItemBuilder {
-        // Modify item
+    public open fun hasName(): Boolean = getName() != null
+
+    public open fun setName(name: Component?): ItemBuilder {
         val itemMeta = result.itemMeta
         itemMeta.displayName(formatName(name))
         result.itemMeta = itemMeta
         return this
     }
 
-    open fun setName(name: String): ItemBuilder {
-        return setName(Component.text(name))
-    }
+    public open fun setName(name: String): ItemBuilder = setName(Component.text(name))
 
-    open fun hasName(): Boolean {
-        return getName() != null
-    }
+    public open fun hasLore(): Boolean = getLore() != null
 
-    open fun getLore(): List<Component>? {
-        return result.itemMeta.lore()
-    }
+    public open fun getLore(): List<Component>? = result.itemMeta.lore()
 
-    open fun setLore(lore: List<Component>?): ItemBuilder {
+    public open fun setLore(lore: List<Component>?): ItemBuilder {
         result.itemMeta = result.itemMeta.apply {
             lore(lore?.map { formatLore(it) })
         }
         return this
     }
 
-    open fun addLore(vararg lore: Component): ItemBuilder {
+    public open fun addLore(vararg lore: Component): ItemBuilder {
         result.itemMeta = result.itemMeta.apply {
             val currentLore: MutableList<Component> = if (hasLore()) {
                 lore()!!
@@ -97,11 +97,9 @@ open class ItemBuilder(val key: NamespacedKey, result: ItemStack, recipes: List<
         return this
     }
 
-    open fun addLore(lore: String): ItemBuilder {
-        return addLore(Component.text(lore).color(NamedTextColor.GRAY))
-    }
+    public open fun addLore(lore: String): ItemBuilder = addLore(formatLore(Component.text(lore))!!)
 
-    open fun addLore(index: Int, lore: Component): ItemBuilder {
+    public open fun addLore(index: Int, lore: Component): ItemBuilder {
         result.itemMeta = result.itemMeta.apply {
 
             val currentLore: MutableList<Component> = if (hasLore()) {
@@ -115,19 +113,13 @@ open class ItemBuilder(val key: NamespacedKey, result: ItemStack, recipes: List<
         return this
     }
 
-    open fun addLore(index: Int, lore: String): ItemBuilder {
-        return addLore(index, Component.text(lore))
-    }
+    public open fun addLore(index: Int, lore: String): ItemBuilder = addLore(index, Component.text(lore))
 
-    open fun removeLore(): ItemBuilder = setLore(null)
+    public open fun removeLore(): ItemBuilder = setLore(null)
 
-    open fun hasLore(): Boolean {
-        return getLore() != null
-    }
+    public open fun hasEnchantments(): Boolean = getEnchantments().isNotEmpty()
 
-    open fun getEnchants(): Map<Enchantment, Int> {
-        return result.itemMeta.enchants
-    }
+    public open fun getEnchantments(): Map<Enchantment, Int> = result.itemMeta.enchants
 
     /**
      * Checks for the level of the specified enchantment.
@@ -135,98 +127,90 @@ open class ItemBuilder(val key: NamespacedKey, result: ItemStack, recipes: List<
      * @param enchantment The enchantment to check.
      * @return The level the specified enchantment has, or 0 if none.
      */
-    open fun getEnchantLevel(enchantment: Enchantment): Int {
-        return result.itemMeta.getEnchantLevel(enchantment)
-    }
+    public open fun getEnchantLevel(enchantment: Enchantment): Int = result.itemMeta.getEnchantLevel(enchantment)
 
-    open fun addEnchant(enchantment: Enchantment, level: Int): ItemBuilder {
+    public open fun addEnchant(enchantment: Enchantment, level: Int): ItemBuilder {
         val itemMeta = result.itemMeta
         itemMeta.addEnchant(enchantment, level, true)
         result.itemMeta = itemMeta
         return this
     }
 
-    open fun addEnchant(enchantment: Enchantment): ItemBuilder {
-        return addEnchant(enchantment, 1)
-    }
+    public open fun addEnchant(enchantment: Enchantment): ItemBuilder = addEnchant(enchantment, 1)
 
-    open fun removeEnchant(enchantment: Enchantment): ItemBuilder {
+    public open fun removeEnchant(enchantment: Enchantment): ItemBuilder {
         val itemMeta = result.itemMeta
         itemMeta.removeEnchant(enchantment)
         result.itemMeta = itemMeta
         return this
     }
 
-    open fun addAttributeModifier(attribute: Attribute, modifier: AttributeModifier): ItemBuilder {
+    public open fun addAttributeModifier(attribute: Attribute, modifier: AttributeModifier): ItemBuilder {
         val itemMeta = result.itemMeta
         itemMeta.addAttributeModifier(attribute, modifier)
         result.itemMeta = itemMeta
         return this
     }
 
-    open fun removeAttributeModifier(attribute: Attribute, modifier: AttributeModifier): ItemBuilder {
+    public open fun removeAttributeModifier(attribute: Attribute, modifier: AttributeModifier): ItemBuilder {
         val itemMeta = result.itemMeta
         itemMeta.removeAttributeModifier(attribute, modifier)
         result.itemMeta = itemMeta
         return this
     }
 
-    open fun removeAttributeModifier(attribute: Attribute): ItemBuilder {
+    public open fun removeAttributeModifier(attribute: Attribute): ItemBuilder {
         val itemMeta = result.itemMeta
         itemMeta.removeAttributeModifier(attribute)
         result.itemMeta = itemMeta
         return this
     }
 
-    open fun getItemFlags(): Set<ItemFlag> {
-        return result.itemMeta.itemFlags
-    }
+    public open fun getItemFlags(): Set<ItemFlag> = result.itemMeta.itemFlags
 
-    open fun addItemFlags(vararg itemFlags: ItemFlag): ItemBuilder {
+    public open fun addItemFlags(vararg itemFlags: ItemFlag): ItemBuilder {
         val itemMeta = result.itemMeta
         itemMeta.addItemFlags(*itemFlags)
         result.itemMeta = itemMeta
         return this
     }
 
-    open fun removeItemFlags(vararg itemFlags: ItemFlag): ItemBuilder {
+    public open fun removeItemFlags(vararg itemFlags: ItemFlag): ItemBuilder {
         val itemMeta = result.itemMeta
         itemMeta.removeItemFlags(*itemFlags)
         result.itemMeta = itemMeta
         return this
     }
 
-    open fun getUnbreakable(): Boolean {
-        return result.itemMeta.isUnbreakable
-    }
+    public open fun getUnbreakable(): Boolean = result.itemMeta.isUnbreakable
 
-    open fun setUnbreakable(unbreakable: Boolean): ItemBuilder {
+    public open fun setUnbreakable(unbreakable: Boolean): ItemBuilder {
         val itemMeta = result.itemMeta
         itemMeta.isUnbreakable = unbreakable
         result.itemMeta = itemMeta
         return this
     }
 
-    open fun recipes(): List<Recipe> {
+    public open fun recipes(): List<Recipe<*, *>> {
         return recipes.toList()
     }
 
-    open fun addRecipe(recipe: Recipe): ItemBuilder {
+    public open fun addRecipe(recipe: Recipe<*, *>): ItemBuilder {
         recipes.add(recipe)
         return this
     }
 
-    open fun getRecipe(key: NamespacedKey): Recipe? {
+    public open fun getRecipe(key: NamespacedKey): Recipe<*, *>? {
         val item = build()
         return recipes.firstOrNull { it.key(item) == key }
     }
 
-    open fun removeRecipe(recipe: Recipe): ItemBuilder {
+    public open fun removeRecipe(recipe: Recipe<*, *>): ItemBuilder {
         recipes.remove(recipe)
         return this
     }
 
-    open fun removeRecipe(recipeType: Class<out Recipe>): ItemBuilder {
+    public open fun removeRecipe(recipeType: Class<out Recipe<*, *>>): ItemBuilder {
         val iterator = recipes.iterator()
 
         while (iterator.hasNext()) {
@@ -240,7 +224,7 @@ open class ItemBuilder(val key: NamespacedKey, result: ItemStack, recipes: List<
         return this
     }
 
-    open fun clearRecipes(): ItemBuilder {
+    public open fun clearRecipes(): ItemBuilder {
         recipes.clear()
         return this
     }
@@ -248,8 +232,9 @@ open class ItemBuilder(val key: NamespacedKey, result: ItemStack, recipes: List<
     /**
      * Register an [EventHandlerGroup]
      */
-    fun <T : Event> addEventHandler(eventHandlerGroup: EventHandlerGroup<T>) {
+    public fun <T : Event> addEventHandler(eventHandlerGroup: EventHandlerGroup<T>): ItemBuilder {
         eventHandlerGroups.add(eventHandlerGroup)
+        return this
     }
 
     /**
@@ -259,13 +244,13 @@ open class ItemBuilder(val key: NamespacedKey, result: ItemStack, recipes: List<
      * @param predicate The predicate to check against the event before the handler is called
      * @param handler What should happen when the predicate is successful
      */
-    fun <T : Event> addEventHandler(eventType: Class<out T>, predicate: EventPredicate<T>, handler: EventHandler<T>) {
-        addEventHandler(
-            EventHandlerGroup(
-                eventType, predicate, handler
-            )
+    public fun <T : Event> addEventHandler(
+        eventType: Class<out T>, predicate: EventPredicate<T>, handler: EventHandler<T>
+    ): ItemBuilder = addEventHandler(
+        EventHandlerGroup(
+            eventType, predicate, handler
         )
-    }
+    )
 
     /**
      * Get all event handler groups that are registered for [eventType]
@@ -273,9 +258,8 @@ open class ItemBuilder(val key: NamespacedKey, result: ItemStack, recipes: List<
      * @see EventHandlerGroup
      */
     @Suppress("UNCHECKED_CAST")
-    fun <T : Event> getEventHandlers(eventType: Class<out T>): List<EventHandlerGroup<in T>> {
-        return eventHandlerGroups.filter { it.eventType == eventType } as List<EventHandlerGroup<in T>>
-    }
+    public fun <T : Event> getEventHandlers(eventType: Class<out T>): List<EventHandlerGroup<in T>> =
+        eventHandlerGroups.filter { it.eventType == eventType } as List<EventHandlerGroup<in T>>
 
     /**
      * Get all event handler groups that are registered for [eventType] with [predicate]
@@ -283,11 +267,11 @@ open class ItemBuilder(val key: NamespacedKey, result: ItemStack, recipes: List<
      * @see EventHandlerGroup
      */
     @Suppress("UNCHECKED_CAST")
-    fun <T : Event> getEventHandlers(
+    public fun <T : Event> getEventHandlers(
         eventType: Class<out T>, predicate: EventPredicate<T>
-    ): List<EventHandlerGroup<in T>> {
-        return eventHandlerGroups.filter { it.eventType == eventType && it.predicate == predicate } as List<EventHandlerGroup<in T>>
-    }
+    ): List<EventHandlerGroup<in T>> =
+        eventHandlerGroups.filter { it.eventType == eventType && it.predicate == predicate } as List<EventHandlerGroup<in T>>
+
 
     /**
      * Get all event handler groups that are registered for [eventType] with [predicate] and [handler]
@@ -295,16 +279,15 @@ open class ItemBuilder(val key: NamespacedKey, result: ItemStack, recipes: List<
      * @see EventHandlerGroup
      */
     @Suppress("UNCHECKED_CAST")
-    fun <T : Event> getEventHandlers(
+    public fun <T : Event> getEventHandlers(
         eventType: Class<out T>, predicate: EventPredicate<T>, handler: EventHandler<T>
-    ): List<EventHandlerGroup<in T>> {
-        return eventHandlerGroups.filter { it.eventType == eventType && it.predicate == predicate && it.handler == handler } as List<EventHandlerGroup<in T>>
-    }
+    ): List<EventHandlerGroup<in T>> =
+        eventHandlerGroups.filter { it.eventType == eventType && it.predicate == predicate && it.handler == handler } as List<EventHandlerGroup<in T>>
 
     /**
      * Remove all event handlers for [eventType]
      */
-    open fun <T : Event> removeEventHandlers(eventType: Class<T>) {
+    public open fun <T : Event> removeEventHandlers(eventType: Class<T>) {
         val handlers = getEventHandlers(eventType)
         handlers.forEach {
             removeEventHandler(it)
@@ -314,7 +297,7 @@ open class ItemBuilder(val key: NamespacedKey, result: ItemStack, recipes: List<
     /**
      * Remove all event handlers for [eventType] with [predicate]
      */
-    open fun <T : Event> removeEventHandlers(eventType: Class<T>, predicate: EventPredicate<T>) {
+    public open fun <T : Event> removeEventHandlers(eventType: Class<T>, predicate: EventPredicate<T>) {
         val handlers = getEventHandlers(eventType, predicate)
         handlers.forEach {
             removeEventHandler(it)
@@ -324,23 +307,23 @@ open class ItemBuilder(val key: NamespacedKey, result: ItemStack, recipes: List<
     /**
      * Remove all event handlers for [eventType] with [predicate] and [handler]
      */
-    open fun <T : Event> removeEventHandlers(eventType: Class<T>, predicate: EventPredicate<T>, handler: EventHandler<T>) {
+    public open fun <T : Event> removeEventHandlers(
+        eventType: Class<T>, predicate: EventPredicate<T>, handler: EventHandler<T>
+    ) {
         val handlers = getEventHandlers(eventType, predicate, handler)
         handlers.forEach {
             removeEventHandler(it)
         }
     }
 
-    open fun <T : Event> removeEventHandler(eventHandlerGroup: EventHandlerGroup<T>) {
+    public open fun <T : Event> removeEventHandler(eventHandlerGroup: EventHandlerGroup<T>) {
         eventHandlerGroups.remove(eventHandlerGroup)
     }
 
-    fun getEventTypes(): Set<Class<out Event>> {
-        return eventHandlerGroups.map { it.eventType }.toSet()
-    }
+    public fun getEventTypes(): Set<Class<out Event>> = eventHandlerGroups.map { it.eventType }.toSet()
 
-    open fun build(): Item {
-        val item = Item(key, result, recipes)
+    public open fun build(): Item {
+        val item = Item(id, result, recipes)
         eventHandlerGroups.forEach {
             item.addEventHandler(it)
         }
@@ -353,13 +336,13 @@ open class ItemBuilder(val key: NamespacedKey, result: ItemStack, recipes: List<
     }
 
     override fun hashCode(): Int {
-        var result = key.hashCode()
+        var result = id.hashCode()
         result = 31 * result + result.hashCode()
         result = 31 * result + recipes.hashCode()
         return result
     }
 
-    companion object {
+    public companion object {
         /**
          * Apply default formatting to an item [name].
          *
@@ -367,11 +350,11 @@ open class ItemBuilder(val key: NamespacedKey, result: ItemStack, recipes: List<
          */
         @JvmStatic
         @Contract("!null -> !null, null -> null")
-        fun formatName(name: Component?): Component? {
+        public fun formatName(name: Component?): Component? {
             return name?.color(
-                    name.color() ?: NamedTextColor.WHITE
+                name.color() ?: NamedTextColor.WHITE
             )?.decorationIfAbsent(
-                    TextDecoration.ITALIC, TextDecoration.State.FALSE
+                TextDecoration.ITALIC, TextDecoration.State.FALSE
             )
         }
 
@@ -382,16 +365,13 @@ open class ItemBuilder(val key: NamespacedKey, result: ItemStack, recipes: List<
          */
         @JvmStatic
         @Contract("!null -> !null, null -> null")
-        fun unformatName(name: Component?): Component? {
-            return name?.color (
-                    name.color().takeIf { it != NamedTextColor.WHITE}
-            )?.decoration(
-                    TextDecoration.ITALIC,
-                    if (name.decoration(TextDecoration.ITALIC) == TextDecoration.State.TRUE) {
-                        TextDecoration.State.TRUE
-                    } else {
-                        TextDecoration.State.NOT_SET
-                    }
+        public fun unformatName(name: Component?): Component? {
+            return name?.color(name.color().takeIf { it != NamedTextColor.WHITE })?.decoration(
+                TextDecoration.ITALIC, if (name.decoration(TextDecoration.ITALIC) == TextDecoration.State.TRUE) {
+                    TextDecoration.State.TRUE
+                } else {
+                    TextDecoration.State.NOT_SET
+                }
             )
         }
 
@@ -402,11 +382,11 @@ open class ItemBuilder(val key: NamespacedKey, result: ItemStack, recipes: List<
          */
         @JvmStatic
         @Contract("!null -> !null, null -> null")
-        fun formatLore(lore: Component?): Component? {
+        public fun formatLore(lore: Component?): Component? {
             return lore?.color(
-                    lore.color() ?: NamedTextColor.GRAY
+                lore.color() ?: NamedTextColor.GRAY
             )?.decorationIfAbsent(
-                    TextDecoration.ITALIC, TextDecoration.State.FALSE
+                TextDecoration.ITALIC, TextDecoration.State.FALSE
             )
         }
 
@@ -417,16 +397,13 @@ open class ItemBuilder(val key: NamespacedKey, result: ItemStack, recipes: List<
          */
         @JvmStatic
         @Contract("!null -> !null, null -> null")
-        fun unformatLore(lore: Component?): Component? {
-            return lore?.color (
-                    lore.color().takeIf { it != NamedTextColor.GRAY}
-            )?.decoration(
-                    TextDecoration.ITALIC,
-                    if (lore.decoration(TextDecoration.ITALIC) == TextDecoration.State.TRUE) {
-                        TextDecoration.State.TRUE
-                    } else {
-                        TextDecoration.State.NOT_SET
-                    }
+        public fun unformatLore(lore: Component?): Component? {
+            return lore?.color(lore.color().takeIf { it != NamedTextColor.GRAY })?.decoration(
+                TextDecoration.ITALIC, if (lore.decoration(TextDecoration.ITALIC) == TextDecoration.State.TRUE) {
+                    TextDecoration.State.TRUE
+                } else {
+                    TextDecoration.State.NOT_SET
+                }
             )
         }
     }

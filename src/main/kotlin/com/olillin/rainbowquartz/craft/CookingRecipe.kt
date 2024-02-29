@@ -1,64 +1,56 @@
 package com.olillin.rainbowquartz.craft
 
-@Suppress("UNUSED")
-abstract class CookingRecipe(var input: Ingredient) : Recipe() {
-    open var exp: Float = 0.0f
-    open var cookTime: Int = 200
-    open var group: String = ""
-    open var amount: Int = 1
+import org.bukkit.inventory.Recipe as BukkitRecipe
 
-    fun setInput(input: Ingredient): CookingRecipe {
-        this.input = input
-        return this
-    }
+@Suppress("UNCHECKED_CAST")
+public abstract class CookingRecipe<Self : CookingRecipe<Self, T>, T : BukkitRecipe>(public var input: Ingredient) :
+    Recipe<Self, T>() {
+    public open var exp: Float = 0.0f
+    public open var cookTime: Int = 200
 
-    fun setExp(exp: Float): CookingRecipe {
+    public fun setExp(exp: Float): Self {
         this.exp = exp
-        return this
+        return this as Self
     }
 
-    fun setCookTime(cookTime: Int): CookingRecipe {
+    public fun setCookTime(cookTime: Int): Self {
         this.cookTime = cookTime
-        return this
+        return this as Self
     }
 
-    fun setGroup(group: String): CookingRecipe {
-        this.group = group
-        return this
+    public fun setInput(input: Ingredient): Self {
+        this.input = input
+        return this as Self
     }
 
-    fun setAmount(amount: Int): CookingRecipe {
-        this.amount = amount
-        return this
-    }
-
-    override fun toString(): String = "${this::class.simpleName}(amount=$amount${if (group.isNotEmpty()) ", group=$group" else ""}, exp=$exp, cookTime=$cookTime, input=$input)"
+    override fun toString(): String =
+        "${this::class.simpleName}(amount=$amount${", group=$group".takeIf { group.isNotEmpty() }}, exp=$exp, cookTime=$cookTime, input=$input)"
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
 
-        other as CookingRecipe
+        other as Self
 
-        if (group != other.group) return false
         if (amount != other.amount) return false
-        if (input != other.input) return false
+        if (group != other.group) return false
         if (exp != other.exp) return false
         if (cookTime != other.cookTime) return false
+        if (input != other.input) return false
 
         return true
     }
 
     override fun hashCode(): Int {
-        var result = group.hashCode()
-        result = 31 * result + amount.hashCode()
-        result = 31 * result + input.hashCode()
+        var result = amount.hashCode()
+        result = 31 * result + group.hashCode()
         result = 31 * result + exp.hashCode()
-        result = 31 * result + cookTime
+        result = 31 * result + cookTime.hashCode()
+        result = 31 * result + input.hashCode()
         return result
     }
 
-    override fun serialize(): MutableMap<String, Any> {
+    override fun serialize(): Map<String, Any> {
         return mutableMapOf(
             "amount" to amount,
             "group" to group,

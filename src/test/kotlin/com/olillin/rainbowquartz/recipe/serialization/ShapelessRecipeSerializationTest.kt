@@ -4,12 +4,12 @@ import be.seeseemelk.mockbukkit.MockBukkit
 import be.seeseemelk.mockbukkit.ServerMock
 import com.olillin.rainbowquartz.RainbowQuartz
 import com.olillin.rainbowquartz.craft.Ingredient
-import com.olillin.rainbowquartz.craft.ShapedRecipe
 import com.olillin.rainbowquartz.craft.ShapelessRecipe
 import org.bukkit.Material
-import org.bukkit.inventory.ItemStack
-import org.junit.jupiter.api.*
+import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.Test
 
 class ShapelessRecipeSerializationTest {
     @Test

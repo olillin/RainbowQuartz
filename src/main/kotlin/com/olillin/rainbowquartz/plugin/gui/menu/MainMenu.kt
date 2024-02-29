@@ -12,19 +12,22 @@ import org.bukkit.event.EventHandler
 import org.bukkit.event.inventory.InventoryOpenEvent
 import org.bukkit.inventory.Inventory
 
-class MainMenu(override val viewer: HumanEntity) : ImmutableMenu() {
+internal class MainMenu(override val viewer: HumanEntity) : ImmutableMenu() {
     override var inventory: Inventory = Bukkit.createInventory(viewer, 9, Component.text("RainbowQuartz Menu"))
     override val previousMenu = null
 
+    @Suppress("UNUSED_PARAMETER")
     @EventHandler
     fun onOpen(event: InventoryOpenEvent) {
         if (viewer.hasPermission("rainbowquartz.editor")) {
-            inventory.addItem(LinkItem.makeLink(
-                "editor",
-                Material.IRON_SWORD,
-                Component.text("Item Editor").color(NamedTextColor.AQUA),
-                listOf(Component.text("Create and edit items"))
-            ))
+            inventory.addItem(
+                LinkItem.makeLink(
+                    "editor",
+                    Material.IRON_SWORD,
+                    Component.text("Item Editor").color(NamedTextColor.AQUA),
+                    listOf(Component.text("Create and edit items"))
+                )
+            )
         }
         inventory.setItem(8, LinkItem.CLOSE)
     }

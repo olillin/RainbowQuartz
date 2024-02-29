@@ -25,7 +25,7 @@ import org.bukkit.event.inventory.InventoryOpenEvent
 import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.ItemStack
 
-abstract class EditItemMenu(final override val viewer: HumanEntity, protected var builder: ItemBuilder) :
+public abstract class EditItemMenu(final override val viewer: HumanEntity, protected var builder: ItemBuilder) :
     ImmutableMenu() {
     private val title: Component = builder.build().getItem().itemMeta.displayName().let { itemName ->
         if (itemName != null) {
@@ -41,7 +41,7 @@ abstract class EditItemMenu(final override val viewer: HumanEntity, protected va
     )
 
     @EventHandler(priority = EventPriority.HIGHEST)
-    fun onOpenEditItemMenu(event: InventoryOpenEvent) {
+    public fun onOpenEditItemMenu(event: InventoryOpenEvent) {
         // Create preview panel
         val previewPanel = ItemStack(Material.PURPLE_STAINED_GLASS_PANE)
         var meta = previewPanel.itemMeta
@@ -60,30 +60,36 @@ abstract class EditItemMenu(final override val viewer: HumanEntity, protected va
 
         // Items
         inventory.setItem(0, LinkItem.BACK)
-        inventory.setItem(GENERAL_SLOT, LinkItem.makeLink(
-            "general",
-            Material.QUARTZ,
-            Component.text("General").color(NamedTextColor.YELLOW),
-            listOf(
-                Component.text("Change item name, etc")
+        inventory.setItem(
+            GENERAL_SLOT, LinkItem.makeLink(
+                "general",
+                Material.QUARTZ,
+                Component.text("General").color(NamedTextColor.YELLOW),
+                listOf(
+                    Component.text("Change item name, etc")
+                )
             )
-        ))
-        inventory.setItem(RECIPES_SLOT, LinkItem.makeLink(
-            "recipes",
-            Material.CRAFTING_TABLE,
-            Component.text("Recipes").color(NamedTextColor.YELLOW),
-            listOf(
-                Component.text("Edit and create recipes")
+        )
+        inventory.setItem(
+            RECIPES_SLOT, LinkItem.makeLink(
+                "recipes",
+                Material.CRAFTING_TABLE,
+                Component.text("Recipes").color(NamedTextColor.YELLOW),
+                listOf(
+                    Component.text("Edit and create recipes")
+                )
             )
-        ))
-        inventory.setItem(ACTIONS_SLOT, LinkItem.makeLink(
-            "actions",
-            Material.FIREWORK_ROCKET,
-            Component.text("Actions").color(NamedTextColor.LIGHT_PURPLE),
-            listOf(
-                Component.text("Event stuff")
+        )
+        inventory.setItem(
+            ACTIONS_SLOT, LinkItem.makeLink(
+                "actions",
+                Material.FIREWORK_ROCKET,
+                Component.text("Actions").color(NamedTextColor.LIGHT_PURPLE),
+                listOf(
+                    Component.text("Event stuff")
+                )
             )
-        ))
+        )
         inventory.setItem(18, EMPTY_PANEL)
         inventory.setItem(19, EMPTY_PANEL)
         inventory.setItem(2, previewPanel)
@@ -92,20 +98,23 @@ abstract class EditItemMenu(final override val viewer: HumanEntity, protected va
     }
 
     @EventHandler(priority = EventPriority.LOW)
-    fun onLinkEditItem(event: InventoryClickLinkEvent) {
+    public fun onLinkEditItem(event: InventoryClickLinkEvent) {
         when (event.linkKey) {
             "back" -> {
                 applyChanges()
-                backToPredicate(ItemEditorMenu(viewer, null)) { it is ItemEditorMenu }
+                backUntil(ItemEditorMenu(viewer, null)) { it is ItemEditorMenu }
             }
+
             "general" -> {
                 viewer.playSound(Sound.BLOCK_WOODEN_BUTTON_CLICK_ON)
                 EditItemGeneralMenu(viewer, builder, previousMenu).open()
             }
+
             "recipes" -> {
                 viewer.playSound(Sound.BLOCK_WOODEN_BUTTON_CLICK_ON)
                 EditItemRecipesMenu(viewer, builder, previousMenu).open()
             }
+
             "actions" -> {
                 viewer.playSound(Sound.BLOCK_WOODEN_BUTTON_CLICK_ON)
                 EditItemActionsMenu(viewer, builder, previousMenu).open()
@@ -115,37 +124,41 @@ abstract class EditItemMenu(final override val viewer: HumanEntity, protected va
 
     private fun applyChanges() {
         val item: Item = builder.build()
-        if (RainbowQuartz.itemManager.containsItem(builder.key)) {
+        if (RainbowQuartz.itemManager.containsItem(builder.id)) {
             // No changes have been made
-            if (item == RainbowQuartz.itemManager.getItem(builder.key)) {
+            if (item == RainbowQuartz.itemManager.getItem(builder.id)) {
                 viewer.sendMessage(Component.text("No changes have been made").color(NamedTextColor.RED))
                 return
             }
             // Re-register item
-            RainbowQuartz.itemManager.unregisterItem(builder.key)
-            viewer.sendMessage(Component.empty().color(NamedTextColor.WHITE)
-                .append(Component.text("Successfully applied changes to ").color(NamedTextColor.GREEN))
-                .append(item.displayNameComponent() ?: Component.text("item").color(NamedTextColor.GREEN)))
+            RainbowQuartz.itemManager.unregisterItem(builder.id)
+            viewer.sendMessage(
+                Component.empty().color(NamedTextColor.WHITE)
+                    .append(Component.text("Successfully applied changes to ").color(NamedTextColor.GREEN))
+                    .append(item.component())
+            )
         } else {
-            viewer.sendMessage(Component.empty().color(NamedTextColor.WHITE)
-                .append(Component.text("Successfully created ").color(NamedTextColor.GREEN))
-                .append(item.displayNameComponent() ?: Component.text("item").color(NamedTextColor.GREEN)))
+            viewer.sendMessage(
+                Component.empty().color(NamedTextColor.WHITE)
+                    .append(Component.text("Successfully created ").color(NamedTextColor.GREEN))
+                    .append(item.component())
+            )
         }
         RainbowQuartz.itemManager.registerItem(item)
     }
 
     @EventHandler(priority = EventPriority.LOW)
-    fun onCloseEditItem(event: InventoryCloseEvent) {
+    public fun onCloseEditItem(event: InventoryCloseEvent) {
         if (event.reason == InventoryCloseEvent.Reason.OPEN_NEW) return
         sendCancelledMessage(viewer)
     }
 
-    companion object {
-        const val GENERAL_SLOT = 1
-        const val RECIPES_SLOT = 9
-        const val ACTIONS_SLOT = 10
+    protected companion object {
+        public const val GENERAL_SLOT: Int = 1
+        public const val RECIPES_SLOT: Int = 9
+        public const val ACTIONS_SLOT: Int = 10
 
-        fun sendCancelledMessage(recipient: HumanEntity) {
+        public fun sendCancelledMessage(recipient: HumanEntity) {
             recipient.playSound(Sound.BLOCK_ANVIL_LAND)
             recipient.sendMessage(
                 Component.text("Item editor was closed, no changes have been applied")
@@ -155,7 +168,7 @@ abstract class EditItemMenu(final override val viewer: HumanEntity, protected va
     }
 }
 
-fun Component.removeStyle(): Component {
+public fun Component.removeStyle(): Component {
     var component = this.style(Style.empty())
     if (component is TranslatableComponent) {
         val args = component.args().map { it.removeStyle() }

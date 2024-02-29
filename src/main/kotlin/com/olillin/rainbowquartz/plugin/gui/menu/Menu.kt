@@ -11,10 +11,10 @@ import org.bukkit.event.inventory.InventoryCloseEvent
 import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.ItemStack
 
-abstract class Menu {
+public abstract class Menu {
     protected abstract val viewer: HumanEntity
     protected abstract val inventory: Inventory
-    abstract val previousMenu: Menu?
+    protected abstract val previousMenu: Menu?
 
     init {
         if (previousMenu != null && previousMenu?.viewer != viewer) {
@@ -25,7 +25,7 @@ abstract class Menu {
     /**
      * Make the viewer open the menu
      */
-    open fun open() {
+    public open fun open() {
         RainbowQuartz.guiEventDispatcher.registerMenu(this)
         viewer.openInventory(inventory)
     }
@@ -35,7 +35,7 @@ abstract class Menu {
      *
      * @param sound An optional sound to play
      */
-    fun back(sound: Sound? = Sound.BLOCK_WOODEN_BUTTON_CLICK_OFF) {
+    protected fun back(sound: Sound? = Sound.BLOCK_WOODEN_BUTTON_CLICK_OFF) {
         sound?.let { viewer.playSound(it) }
         if (previousMenu != null) {
             previousMenu?.open()
@@ -45,29 +45,30 @@ abstract class Menu {
     }
 
     /**
-     * Goes back to the last menu that matches the predicate. If none is found
+     * Goes back to the last menu that matches the [predicate]. If none is found
      * and a [default] menu is specified that menu will be opened instead.
      *
-     * @param default The default menu to go to if no matches were found
      * @param sound An optional sound to play
-     * @param predicate The predicate to check against
      * @return The opened menu, or `null` if none was found and there was no [default]
      */
-    fun backToPredicate(default: Menu? = null, sound: Sound? = Sound.BLOCK_WOODEN_BUTTON_CLICK_OFF, predicate: (Menu) -> Boolean): Menu? {
+    protected fun backUntil(
+        default: Menu? = null,
+        sound: Sound? = Sound.BLOCK_WOODEN_BUTTON_CLICK_OFF,
+        predicate: (Menu) -> Boolean
+    ): Menu? {
         sound?.let { viewer.playSound(it) }
         var prev: Menu? = previousMenu
         for (i in 0 until MAX_BACK_ITERATION_DEPTH) {
             if (prev == null) {
-                default?.open()
                 break
-            }
-            if (predicate(prev)) {
+            } else if (predicate(prev)) {
                 prev.open()
                 return prev
             }
             prev = prev.previousMenu
         }
-        return null
+        default?.open()
+        return default
     }
 
     /**
@@ -75,7 +76,7 @@ abstract class Menu {
      *
      * @param sound An optional sound to play
      */
-    fun close(sound: Sound? = Sound.BLOCK_WOODEN_BUTTON_CLICK_OFF) {
+    public fun close(sound: Sound? = Sound.BLOCK_WOODEN_BUTTON_CLICK_OFF) {
         sound?.let { viewer.playSound(it) }
         viewer.closeInventory(InventoryCloseEvent.Reason.PLAYER)
     }
@@ -83,36 +84,34 @@ abstract class Menu {
     /**
      * Get all viewers currently viewing this inventory.
      */
-    fun activeViewers(): List<HumanEntity> {
+    public fun activeViewers(): List<HumanEntity> {
         return this.inventory.viewers.toList()
     }
 
     @EventHandler
-    fun onCloseMenu(event: InventoryCloseEvent) {
+    public fun onCloseMenu(event: InventoryCloseEvent) {
         RainbowQuartz.guiEventDispatcher.unregisterMenu(this)
     }
 
-    companion object {
-        val EMPTY_PANEL = ItemStack(Material.GRAY_STAINED_GLASS_PANE).apply {
+    public companion object {
+        public val EMPTY_PANEL: ItemStack = ItemStack(Material.GRAY_STAINED_GLASS_PANE).apply {
             val meta = itemMeta
             meta.displayName(Component.empty())
             itemMeta = meta
         }
-        const val MAX_BACK_ITERATION_DEPTH: Int = 25
+        private const val MAX_BACK_ITERATION_DEPTH: Int = 50
     }
 }
 
-fun HumanEntity.playSound(sound: Sound) {
+public fun HumanEntity.playSound(sound: Sound) {
     playSound(net.kyori.adventure.sound.Sound.sound(sound, SoundCategory.MASTER, 1.0f, 1.0f))
 }
 
-/**
- * Fill all empty slots of an inventory with an item
- */
-fun Inventory.fill(stack: ItemStack) {
-    for (slot in 0 until this.size) {
-        if (this.getItem(slot) == null) {
-            this.setItem(slot, stack)
+/** Fill all empty slots of an inventory with an item */
+public fun Inventory.fill(stack: ItemStack) {
+    for (slot in 0 until size) {
+        if (getItem(slot)?.isEmpty != false) {
+            setItem(slot, stack)
         }
     }
 }

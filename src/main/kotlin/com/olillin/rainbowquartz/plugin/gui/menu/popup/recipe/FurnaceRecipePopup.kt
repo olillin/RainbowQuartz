@@ -2,7 +2,6 @@ package com.olillin.rainbowquartz.plugin.gui.menu.popup.recipe
 
 import com.olillin.rainbowquartz.craft.FurnaceRecipe
 import com.olillin.rainbowquartz.craft.Ingredient
-import com.olillin.rainbowquartz.craft.Recipe.Companion.asItemStack
 import com.olillin.rainbowquartz.plugin.gui.menu.Menu
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor.GOLD
@@ -13,34 +12,34 @@ import org.bukkit.event.EventHandler
 import org.bukkit.event.inventory.InventoryOpenEvent
 import org.bukkit.inventory.ItemStack
 
-class FurnaceRecipePopup(
+public class FurnaceRecipePopup(
     override val viewer: HumanEntity,
     override val placeholder: FurnaceRecipe?,
     override val result: ItemStack,
     override val previousMenu: Menu?,
     override val callback: (FurnaceRecipe?) -> Unit
 ) : CookingRecipePopup<FurnaceRecipe>() {
-    override val recipeIcon: Material = FurnaceRecipe.material
+
+    override val recipeIcon: Material = FurnaceRecipe.ICON
 
     init {
         if (placeholder != null) {
             exp = placeholder.exp
             cookTime = placeholder.cookTime
             amount = placeholder.amount
-            inventory.setItem(INPUT_SLOT, asItemStack(placeholder.input).also {
-                it.amount = 1
-            })
+            inventory.setItem(INPUT_SLOT, placeholder.input.itemStack)
         }
     }
 
     @EventHandler
     @Suppress("UNUSED_PARAMETER")
-    fun onOpen(event: InventoryOpenEvent) {
-        val label = ItemStack(FurnaceRecipe.material)
+    public fun onOpen(event: InventoryOpenEvent) {
+        val label = ItemStack(FurnaceRecipe.ICON)
         label.itemMeta = label.itemMeta.apply {
-            displayName(Component.text("Recipe input")
-                .color(GOLD)
-                .decoration(TextDecoration.ITALIC, false)
+            displayName(
+                Component.text("Recipe input")
+                    .color(GOLD)
+                    .decoration(TextDecoration.ITALIC, false)
             )
         }
         inventory.setItem(INPUT_LABEL_SLOT, label)
@@ -56,6 +55,6 @@ class FurnaceRecipePopup(
             .setGroup(group)
             .setAmount(amount)
             .setExp(exp)
-            .setCookTime(cookTime) as FurnaceRecipe
+            .setCookTime(cookTime)
     }
 }

@@ -17,11 +17,13 @@ import org.bukkit.command.TabExecutor
 import org.bukkit.entity.Player
 import kotlin.math.min
 
-class GetItemCommand : TabExecutor {
+internal class GetItemCommand : TabExecutor {
     companion object {
         val completion: LiteralArgumentBuilder<String> = literal<String>("getitem")
-            .then(argument<String, String>("item", word())
-            .then(argument("amount", integer(1))))
+            .then(
+                argument<String, String>("item", word())
+                    .then(argument("amount", integer(1)))
+            )
     }
 
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
@@ -73,7 +75,7 @@ class GetItemCommand : TabExecutor {
                 text(amount),
                 itemStack.displayName()
                     .hoverEvent(itemStack)
-                    .clickEvent(ClickEvent.suggestCommand("/getitem ${item.key}")),
+                    .clickEvent(ClickEvent.suggestCommand("/getitem ${item.id}")),
                 sender.teamDisplayName()
             )
         )
@@ -93,7 +95,7 @@ class GetItemCommand : TabExecutor {
         args: Array<out String>
     ): MutableList<String> {
         return if (args.size == 1) {
-            RainbowQuartz.itemManager.itemKeys.map { it.toString() }.toMutableList()
+            RainbowQuartz.itemManager.getItems().map { it.key().toString() }.toMutableList()
         } else {
             ArrayList()
         }

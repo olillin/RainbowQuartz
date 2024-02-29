@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.dsl.ExplicitApiMode
+
 plugins {
     id 'org.jetbrains.kotlin.jvm' version '1.8.22'
     id 'com.github.johnrengelman.shadow' version '7.1.2'
@@ -49,6 +51,7 @@ shadowJar {
 def targetJavaVersion = 17
 kotlin {
     jvmToolchain(targetJavaVersion)
+    explicitApi = ExplicitApiMode.Strict
 }
 
 tasks.withType(JavaCompile).configureEach {

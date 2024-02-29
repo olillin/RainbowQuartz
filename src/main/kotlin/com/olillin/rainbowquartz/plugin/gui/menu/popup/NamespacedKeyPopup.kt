@@ -10,14 +10,15 @@ import org.bukkit.entity.HumanEntity
 import org.bukkit.inventory.ItemFlag.HIDE_ITEM_SPECIFICS
 import org.bukkit.inventory.ItemStack
 
-/** A [TextPopup] menu that provides a [NamespacedKey] */
-class NamespacedKeyPopup(
+/** [TextPopup] that provides a [NamespacedKey] */
+public class NamespacedKeyPopup(
     viewer: HumanEntity,
     placeholder: NamespacedKey? = null,
     private val defaultNamespace: String = "rainbowquartz",
     previousMenu: Menu?,
     callback: (NamespacedKey) -> Unit
 ) : TextPopup<NamespacedKey>(viewer, placeholder, previousMenu, callback) {
+
     override fun firstItem(placeholder: NamespacedKey?): ItemStack {
         val stack = ItemStack(
             if (placeholder == null) Material.MAP

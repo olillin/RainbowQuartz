@@ -9,7 +9,10 @@ import org.bukkit.entity.HumanEntity
 import org.bukkit.inventory.ItemFlag
 import org.bukkit.inventory.ItemStack
 
-class IntPopup(viewer: HumanEntity, placeholder: Int?, previousMenu: Menu?, callback: (Int) -> Unit): TextPopup<Int>(viewer, placeholder, previousMenu, callback) {
+/** [TextPopup] that provides an int. */
+public class IntPopup(viewer: HumanEntity, placeholder: Int?, previousMenu: Menu?, callback: (Int) -> Unit) :
+    TextPopup<Int>(viewer, placeholder, previousMenu, callback) {
+
     override fun parseInput(input: String?): Int? = input
         ?.replace(Regex("\\D"), "")
         ?.toIntOrNull()
@@ -28,7 +31,8 @@ class IntPopup(viewer: HumanEntity, placeholder: Int?, previousMenu: Menu?, call
         if (placeholder != null) {
             meta.lore(
                 listOf(
-                    Component.text("↑ Previous number ↑").color(NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false)
+                    Component.text("↑ Previous number ↑").color(NamedTextColor.GRAY)
+                        .decoration(TextDecoration.ITALIC, false)
                 )
             )
         }

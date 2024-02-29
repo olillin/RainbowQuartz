@@ -9,7 +9,10 @@ import org.bukkit.entity.HumanEntity
 import org.bukkit.inventory.ItemFlag
 import org.bukkit.inventory.ItemStack
 
-class FloatPopup(viewer: HumanEntity, placeholder: Float?, previousMenu: Menu?, callback: (Float) -> Unit): TextPopup<Float>(viewer, placeholder, previousMenu, callback) {
+/** [TextPopup] that provides a float. */
+public class FloatPopup(viewer: HumanEntity, placeholder: Float?, previousMenu: Menu?, callback: (Float) -> Unit) :
+    TextPopup<Float>(viewer, placeholder, previousMenu, callback) {
+
     override fun parseInput(input: String?): Float? {
         return input?.replace(',', '.')
             ?.replace(Regex("[^\\d.]"), "")
@@ -30,7 +33,8 @@ class FloatPopup(viewer: HumanEntity, placeholder: Float?, previousMenu: Menu?, 
         if (placeholder != null) {
             meta.lore(
                 listOf(
-                    Component.text("↑ Previous number ↑").color(NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false)
+                    Component.text("↑ Previous number ↑").color(NamedTextColor.GRAY)
+                        .decoration(TextDecoration.ITALIC, false)
                 )
             )
         }

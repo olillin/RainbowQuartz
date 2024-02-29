@@ -14,11 +14,11 @@ import kotlin.math.min
 internal object Paginator {
     private const val INVENTORY_WIDTH = 9
     private val supportedInventoryTypes: Set<InventoryType> = hashSetOf(
-            InventoryType.BARREL,
-            InventoryType.CHEST,
-            InventoryType.ENDER_CHEST,
-            InventoryType.PLAYER,
-            InventoryType.SHULKER_BOX,
+        InventoryType.BARREL,
+        InventoryType.CHEST,
+        InventoryType.ENDER_CHEST,
+        InventoryType.PLAYER,
+        InventoryType.SHULKER_BOX,
     )
 
     fun <T> render(
@@ -38,17 +38,18 @@ internal object Paginator {
         if (height < 3) throw IllegalArgumentException("Height must be at least 3")
         val inventoryHeight = inventory.size / INVENTORY_WIDTH
         if (x < 0 || y < 0
-            || width+x > INVENTORY_WIDTH
-            || height+y > inventoryHeight) {
+            || width + x > INVENTORY_WIDTH
+            || height + y > inventoryHeight
+        ) {
             throw IllegalArgumentException("Paginator outside of inventory bounds")
         }
 
-        val itemWidth = width-1
+        val itemWidth = width - 1
         val itemsPerPage = itemWidth * height
         val start = itemsPerPage * page
         val end = min(start + itemsPerPage, content.size)
-        val shownItems = end-start
-        val pages = ceil(content.size.toDouble()/itemsPerPage).toInt()
+        val shownItems = end - start
+        val pages = ceil(content.size.toDouble() / itemsPerPage).toInt()
 
         val iterator: Iterator<ItemStack> = content.subList(start, end).map(transform).iterator()
 
@@ -65,8 +66,9 @@ internal object Paginator {
             }
         }
 
-        inventory.setItem(x+itemWidth + y*INVENTORY_WIDTH,
-            if(page > 0) LinkItem.makeLink(
+        inventory.setItem(
+            x + itemWidth + y * INVENTORY_WIDTH,
+            if (page > 0) LinkItem.makeLink(
                 "previous_page",
                 Material.ARROW,
                 Component.text("↑ Previous Page ↑").color(NamedTextColor.GREEN),
@@ -78,28 +80,32 @@ internal object Paginator {
             ) else Menu.EMPTY_PANEL
         )
 
-        inventory.setItem(x+itemWidth + (y+1)*INVENTORY_WIDTH,
-            LinkItem.makeLink("page_indicator",
+        inventory.setItem(
+            x + itemWidth + (y + 1) * INVENTORY_WIDTH,
+            LinkItem.makeLink(
+                "page_indicator",
                 Material.PAPER,
-                Component.text("Page ${page+1}/${max(pages,1)}").color(NamedTextColor.YELLOW),
+                Component.text("Page ${page + 1}/${max(pages, 1)}").color(NamedTextColor.YELLOW),
                 listOf(
                     Component.text("Showing ${shownItems}/${content.size} items")
+                )
             )
-        ))
-        inventory.setItem(x+itemWidth + (y+2)*INVENTORY_WIDTH,
-            if(page < pages-1) LinkItem.makeLink(
+        )
+        inventory.setItem(
+            x + itemWidth + (y + 2) * INVENTORY_WIDTH,
+            if (page < pages - 1) LinkItem.makeLink(
                 "next_page",
                 Material.ARROW,
                 Component.text("↓ Next Page ↓").color(NamedTextColor.GREEN),
                 listOf(
                     Component.text("Page ")
-                        .append(Component.text("${page+2}"))
+                        .append(Component.text("${page + 2}"))
                         .append(Component.text("/$pages"))
                 )
             ) else Menu.EMPTY_PANEL
         )
         for (dy in 3 until height) {
-            inventory.setItem(x+itemWidth + (y+dy)*INVENTORY_WIDTH, Menu.EMPTY_PANEL)
+            inventory.setItem(x + itemWidth + (y + dy) * INVENTORY_WIDTH, Menu.EMPTY_PANEL)
         }
     }
 }

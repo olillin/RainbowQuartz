@@ -17,7 +17,7 @@ import org.bukkit.event.EventHandler
 import org.bukkit.event.inventory.InventoryOpenEvent
 import org.bukkit.inventory.Inventory
 
-class NewItemMenu(override val viewer: HumanEntity, override val previousMenu: Menu?) : ImmutableMenu() {
+internal class NewItemMenu(override val viewer: HumanEntity, override val previousMenu: Menu?) : ImmutableMenu() {
     override val inventory: Inventory = Bukkit.createInventory(viewer, 27, Component.text("New item"))
 
     private var id: NamespacedKey? = null
@@ -33,39 +33,49 @@ class NewItemMenu(override val viewer: HumanEntity, override val previousMenu: M
             lore.add(Component.text("No id selected").color(RED))
         } else {
             lore.add(Component.text("Current id"))
-            lore.add(Component.text(" ")
-                .append(Component.text(id?.toString() ?: "").color(AQUA))
+            lore.add(
+                Component.text(" ")
+                    .append(Component.text(id?.toString() ?: "").color(AQUA))
             )
         }
-        inventory.setItem(11, LinkItem.makeLink("set_id",
-            Material.NAME_TAG,
-            Component.text("Set item id").color(LIGHT_PURPLE),
-            lore
-        ))
+        inventory.setItem(
+            11, LinkItem.makeLink(
+                "set_id",
+                Material.NAME_TAG,
+                Component.text("Set item id").color(LIGHT_PURPLE),
+                lore
+            )
+        )
 
         lore = mutableListOf()
         if (material == null) {
             lore.add(Component.text("No material selected").color(RED))
         } else {
             lore.add(Component.text("Current material"))
-            lore.add(Component.text(" ")
-                .append(Component.translatable(material!!).color(YELLOW))
+            lore.add(
+                Component.text(" ")
+                    .append(Component.translatable(material!!).color(YELLOW))
             )
         }
-        inventory.setItem(12, LinkItem.makeLink("set_material",
-            material ?: Material.IRON_INGOT,
-            Component.text("Set material").color(LIGHT_PURPLE),
-            lore
-        ))
-
-        inventory.setItem(17, invalidInputMessage(id, material)?.let{message -> LinkItem.makeLink(
-            "complete",
-            Material.BARRIER,
-            Component.text("Cannot create item").color(RED),
-            listOf(
-                Component.text(message).color(GRAY)
+        inventory.setItem(
+            12, LinkItem.makeLink(
+                "set_material",
+                material ?: Material.IRON_INGOT,
+                Component.text("Set material").color(LIGHT_PURPLE),
+                lore
             )
-        )} ?: LinkItem.SUBMIT)
+        )
+
+        inventory.setItem(17, invalidInputMessage(id, material)?.let { message ->
+            LinkItem.makeLink(
+                "complete",
+                Material.BARRIER,
+                Component.text("Cannot create item").color(RED),
+                listOf(
+                    Component.text(message).color(GRAY)
+                )
+            )
+        } ?: LinkItem.SUBMIT)
 
         inventory.setItem(18, LinkItem.BACK)
     }
@@ -74,15 +84,17 @@ class NewItemMenu(override val viewer: HumanEntity, override val previousMenu: M
     fun onLink(event: InventoryClickLinkEvent) {
         when (event.linkKey) {
             "set_id" -> {
-                NamespacedKeyPopup(viewer, placeholder = id, previousMenu = this) {key ->
+                NamespacedKeyPopup(viewer, placeholder = id, previousMenu = this) { key ->
                     id = key
                 }.open()
             }
+
             "set_material" -> {
-                MaterialPopup(viewer, material, previousMenu = this) {material ->
+                MaterialPopup(viewer, material, previousMenu = this) { material ->
                     this.material = material
                 }.open()
             }
+
             "submit" -> {
                 // Check input
                 val key = id
@@ -98,6 +110,7 @@ class NewItemMenu(override val viewer: HumanEntity, override val previousMenu: M
                 val builder = ItemBuilder(key!!, itemMaterial!!)
                 EditItemGeneralMenu(viewer, builder, this).open()
             }
+
             "back" -> {
                 back()
             }
@@ -105,21 +118,20 @@ class NewItemMenu(override val viewer: HumanEntity, override val previousMenu: M
     }
 
     /**
-     * Validates input and returns a message explaining the issue
+     * Validates input and returns a message explaining the issue or `null` if there is none.
      *
-     * @param key The key to validate
+     * @param id The id to validate
      * @param material The material to validate
-     * @return a message describing the issue, or null if the input is valid
      */
-    private fun invalidInputMessage(key: NamespacedKey?, material: Material?): String? {
-        return if (key == null) {
+    private fun invalidInputMessage(id: NamespacedKey?, material: Material?): String? {
+        return if (id == null) {
             "No id has been chosen"
         } else if (material == null) {
             "No material has been chosen"
         } else if (!material.isItem) {
             "$material is not a valid material"
-        } else if (RainbowQuartz.itemManager.containsItem(key)) {
-           "An item with the id $key already exists"
+        } else if (RainbowQuartz.itemManager.containsItem(id)) {
+            "An item with the id $id already exists"
         } else null
     }
 }

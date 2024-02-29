@@ -22,14 +22,15 @@ class ItemEventHandlerTest {
     private lateinit var server: ServerMock
     private lateinit var plugin: Plugin
     private lateinit var itemBuilder: ItemBuilder
+
     @BeforeEach
     fun setUp() {
         server = MockBukkit.mock()
         plugin = MockBukkit.load(RainbowQuartz::class.java)
         itemBuilder = ItemBuilder(NamespacedKey(plugin, "cryo_diamond"), Material.DIAMOND)
-                .setName(Component.text("Cryo Diamond").color(NamedTextColor.AQUA))
-                .addEnchant(Enchantment.DURABILITY)
-                .addItemFlags(ItemFlag.HIDE_ENCHANTS)
+            .setName(Component.text("Cryo Diamond").color(NamedTextColor.AQUA))
+            .addEnchant(Enchantment.DURABILITY)
+            .addItemFlags(ItemFlag.HIDE_ENCHANTS)
     }
 
     @AfterEach
@@ -42,7 +43,7 @@ class ItemEventHandlerTest {
         val item = itemBuilder.build()
         // Register handler
         val predicate = EventPredicate<PlayerItemBreakEvent> { event ->
-            event.brokenItem.takeIf { it.itemMeta.rainbowQuartzId == item.key }
+            event.brokenItem.takeIf { it.itemMeta.rainbowQuartzId == item.id }
         }
         var hasRun = false
         val handler = EventHandler<PlayerEvent> { _, _ ->
@@ -63,7 +64,7 @@ class ItemEventHandlerTest {
     fun breakItemTestWithBuilder() {
         // Register handler
         val predicate = EventPredicate<PlayerItemBreakEvent> { event ->
-            event.brokenItem.takeIf { it.itemMeta.rainbowQuartzId == itemBuilder.key }
+            event.brokenItem.takeIf { it.itemMeta.rainbowQuartzId == itemBuilder.id }
         }
         var hasRun = false
         val handler = EventHandler<PlayerEvent> { _, _ ->
@@ -86,7 +87,7 @@ class ItemEventHandlerTest {
         val item = itemBuilder.build()
         // Register handler
         val predicate = EventPredicate<PlayerItemBreakEvent> { event ->
-            event.brokenItem.takeIf { it.itemMeta.rainbowQuartzId == item.key }
+            event.brokenItem.takeIf { it.itemMeta.rainbowQuartzId == item.id }
         }
         var hasNotRun = true
         val handler = EventHandler<PlayerEvent> { _, _ ->
@@ -94,7 +95,7 @@ class ItemEventHandlerTest {
         }
         item.addEventHandler(PlayerItemBreakEvent::class.java, predicate, handler)
         RainbowQuartz.itemManager.registerItem(item)
-        RainbowQuartz.itemManager.unregisterItem(item.key)
+        RainbowQuartz.itemManager.unregisterItem(item.id)
 
         // Trigger event
         val player = server.addPlayer()

@@ -7,7 +7,7 @@ import com.olillin.rainbowquartz.plugin.gui.menu.ImmutableMenu
 import com.olillin.rainbowquartz.plugin.gui.menu.Menu
 import com.olillin.rainbowquartz.plugin.gui.menu.playSound
 import net.kyori.adventure.text.Component
-import net.kyori.adventure.text.format.NamedTextColor.*
+import net.kyori.adventure.text.format.NamedTextColor.RED
 import net.kyori.adventure.text.format.TextDecoration
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
@@ -24,13 +24,14 @@ import org.bukkit.inventory.ItemStack
 import org.bukkit.persistence.PersistentDataType
 import java.util.*
 
-/** A [Popup] menu that provides a value through text input */
-abstract class TextPopup<T>(
+/** [Popup] menu that provides a value through text input */
+public abstract class TextPopup<T>(
     override val viewer: HumanEntity,
     protected val placeholder: T? = null,
     override val previousMenu: Menu?,
     override val callback: (T) -> Unit
 ) : ImmutableMenu(), Popup<T> {
+
     override lateinit var inventory: AnvilInventory
     final override fun open() {
         inventory = viewer.openAnvil(null, true)!!.topInventory as AnvilInventory
@@ -51,12 +52,12 @@ abstract class TextPopup<T>(
     protected abstract fun resultItem(input: String?): ItemStack?
 
     @EventHandler
-    fun onPrepareAnvilTextPopup(event: PrepareAnvilEvent) {
+    public fun onPrepareAnvilTextPopup(event: PrepareAnvilEvent) {
         event.result = resultItem(event.inventory.renameText)
     }
 
     @EventHandler
-    open fun onClickTextPopup(event: InventoryClickEvent) {
+    public open fun onClickTextPopup(event: InventoryClickEvent) {
         if (event.slotType != SlotType.RESULT) return
 
         val result: T? = parseInput(inventory.renameText)
@@ -72,27 +73,28 @@ abstract class TextPopup<T>(
     }
 
     @EventHandler
-    open fun onLinkTextPopup(event: InventoryClickLinkEvent) {
+    public open fun onLinkTextPopup(event: InventoryClickLinkEvent) {
         if (event.linkKey == "cancel") {
             back()
         }
     }
 
     @EventHandler
-    open fun onCloseTextPopup(event: InventoryCloseEvent) {
+    public open fun onCloseTextPopup(event: InventoryCloseEvent) {
         inventory.clear() // Stop items from getting refunded into the player's inventory
         if (event.reason != Reason.OPEN_NEW) {
             back()
         }
     }
 
-    companion object {
-        val INVALID_INPUT: ItemStack
-            get() = ItemStack(Material.BARRIER).apply {
-                itemMeta = itemMeta.apply {
-                    displayName(Component.text("Input is invalid").color(RED).decoration(TextDecoration.ITALIC, false))
-                    persistentDataContainer.set(NamespacedKey("rainbowquartz", "uuid"), PersistentDataType.STRING, UUID.randomUUID().toString())
-                }
+    protected companion object {
+        public val INVALID_INPUT: ItemStack = ItemStack(Material.BARRIER).apply {
+            itemMeta = itemMeta.apply {
+                displayName(Component.text("Input is invalid").color(RED).decoration(TextDecoration.ITALIC, false))
+                persistentDataContainer.set(
+                    NamespacedKey("rainbowquartz", "uuid"), PersistentDataType.STRING, UUID.randomUUID().toString()
+                )
             }
+        }
     }
 }

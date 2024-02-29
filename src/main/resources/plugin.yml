@@ -2,9 +2,9 @@ name: RainbowQuartz
 version: '${version}'
 main: com.olillin.rainbowquartz.RainbowQuartz
 api-version: '1.20'
-depend: [MCKotlin-Paper]
+depend: [ MCKotlin-Paper ]
 prefix: RainbowQuartz
-authors: [OliTheHoodieBoi]
+authors: [ OliTheHoodieBoi ]
 description: Create custom items
 website: https://github.com/OliTheHoodieBoi/RainbowQuartz
 

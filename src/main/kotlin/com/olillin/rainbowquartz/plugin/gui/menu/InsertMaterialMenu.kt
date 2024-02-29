@@ -18,7 +18,7 @@ import org.bukkit.persistence.PersistentDataType
  * Clicking on the slot with an item of the same material or no item will
  * remove it from the slot.
  */
-abstract class InsertMaterialMenu : InsertMenu() {
+public abstract class InsertMaterialMenu : InsertMenu() {
     /**
      * Inserts a [material] into a [slot] of the menu's inventory.
      * If [material] is null or the same as the material in the
@@ -27,7 +27,7 @@ abstract class InsertMaterialMenu : InsertMenu() {
      *
      * @param transform Whether to apply the [transformItem] method to the item.
      */
-    fun insertMaterial(slot: Int, material: Material?, transform: Boolean = true) {
+    protected fun insertMaterial(slot: Int, material: Material?, transform: Boolean = true) {
         val stack: ItemStack? = if (transform) {
             material?.let {
                 transformItem(ItemStack(it))
@@ -45,15 +45,17 @@ abstract class InsertMaterialMenu : InsertMenu() {
         val stack = ItemStack(item.type, 1)
         val meta: ItemMeta = stack.itemMeta ?: return stack
         meta.persistentDataContainer.set(
-                NamespacedKey.fromString("rainbowquartz:origin_item")!!,
-                PersistentDataType.BYTE_ARRAY,
-                ItemStack(item).also {
-                    it.amount = it.maxStackSize
-                }.serializeAsBytes()
+            NamespacedKey.fromString("rainbowquartz:origin_item")!!,
+            PersistentDataType.BYTE_ARRAY,
+            ItemStack(item).also {
+                it.amount = it.maxStackSize
+            }.serializeAsBytes()
         )
-        meta.lore(listOf(
+        meta.lore(
+            listOf(
                 Component.text("Click to remove").color(RED).decoration(TextDecoration.ITALIC, false)
-        ))
+            )
+        )
         meta.addItemFlags(*ItemFlag.values())
         stack.itemMeta = meta
         return stack

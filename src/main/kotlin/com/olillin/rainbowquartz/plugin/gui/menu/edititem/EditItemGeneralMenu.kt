@@ -18,7 +18,7 @@ import org.bukkit.entity.HumanEntity
 import org.bukkit.event.EventHandler
 import org.bukkit.event.inventory.InventoryOpenEvent
 
-class EditItemGeneralMenu(viewer: HumanEntity, builder: ItemBuilder, override val previousMenu: Menu?) :
+internal class EditItemGeneralMenu(viewer: HumanEntity, builder: ItemBuilder, override val previousMenu: Menu?) :
     EditItemMenu(viewer, builder) {
 
     @EventHandler
@@ -30,7 +30,8 @@ class EditItemGeneralMenu(viewer: HumanEntity, builder: ItemBuilder, override va
         // Items
         inventory.setItem(GENERAL_SLOT, inventory.getItem(GENERAL_SLOT)?.enchanted())
 
-        inventory.setItem(3, LinkItem.makeLink(
+        inventory.setItem(
+            3, LinkItem.makeLink(
                 "rename",
                 Material.NAME_TAG,
                 Component.text("Rename").color(NamedTextColor.LIGHT_PURPLE),
@@ -40,21 +41,26 @@ class EditItemGeneralMenu(viewer: HumanEntity, builder: ItemBuilder, override va
                 )
             )
         )
-        inventory.setItem(4, LinkItem.makeLink(
+        inventory.setItem(
+            4, LinkItem.makeLink(
                 "change_material",
                 builder.getMaterial(),
                 Component.text("Change material").color(NamedTextColor.LIGHT_PURPLE),
                 listOf(
-                        Component.text("Current material"),
-                        Component.text(" ").color(NamedTextColor.WHITE).append(Component.translatable(builder.getMaterial()))
+                    Component.text("Current material"),
+                    Component.text(" ").color(NamedTextColor.WHITE)
+                        .append(Component.translatable(builder.getMaterial()))
                 )
-        ))
-        inventory.setItem(5, LinkItem.makeLink(
+            )
+        )
+        inventory.setItem(
+            5, LinkItem.makeLink(
                 "lore",
                 Material.WRITABLE_BOOK,
                 Component.text("Edit lore").color(NamedTextColor.LIGHT_PURPLE),
                 builder.getLore()
-        ))
+            )
+        )
         inventory.setItem(6, EMPTY_PANEL)
         inventory.setItem(7, EMPTY_PANEL)
         inventory.setItem(8, EMPTY_PANEL)
@@ -77,16 +83,22 @@ class EditItemGeneralMenu(viewer: HumanEntity, builder: ItemBuilder, override va
         when (event.linkKey) {
             "rename" -> {
                 viewer.playSound(Sound.BLOCK_WOODEN_BUTTON_CLICK_ON)
-                ComponentPopup(viewer, placeholder = builder.getName() ?: Component.translatable(builder.getMaterial().translationKey()), previousMenu = this) { name ->
+                ComponentPopup(
+                    viewer,
+                    placeholder = builder.getName() ?: Component.translatable(builder.getMaterial()),
+                    previousMenu = this
+                ) { name ->
                     builder.setName(name)
                 }.open()
             }
+
             "change_material" -> {
                 viewer.playSound(Sound.BLOCK_WOODEN_BUTTON_CLICK_ON)
                 MaterialPopup(viewer, placeholder = builder.getMaterial(), previousMenu = this) { material ->
                     builder.setMaterial(material)
                 }.open()
             }
+
             "lore" -> {
                 viewer.playSound(Sound.BLOCK_WOODEN_BUTTON_CLICK_ON)
                 LorePopup(viewer, placeholder = builder.getLore(), previousMenu = this) { lore ->

@@ -18,54 +18,56 @@ import org.bukkit.event.inventory.InventoryOpenEvent
 import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.ItemStack
 
-class ChoiceRecipePopup(override val viewer: HumanEntity, private val result: ItemStack, override val previousMenu: Menu,
-                        override val callback: (Recipe) -> Unit
+public class ChoiceRecipePopup(
+    override val viewer: HumanEntity, private val result: ItemStack, override val previousMenu: Menu,
+    override val callback: (Recipe<*, *>) -> Unit
 ) :
-    ImmutableMenu(), Popup<Recipe> {
+    ImmutableMenu(), Popup<Recipe<*, *>> {
+
     override var inventory: Inventory = Bukkit.createInventory(viewer, 18, Component.text("Select recipe type"))
 
     @EventHandler
     @Suppress("UNUSED_PARAMETER")
-    fun onOpen(event: InventoryOpenEvent) {
+    public fun onOpen(event: InventoryOpenEvent) {
         inventory.addItem(
             LinkItem.makeLink(
                 "shaped",
-                ShapedRecipe.material,
+                ShapedRecipe.ICON,
                 Component.text("Shaped crafting recipe").color(NamedTextColor.AQUA)
             )
         )
         inventory.addItem(
             LinkItem.makeLink(
                 "shapeless",
-                ShapelessRecipe.material,
+                ShapelessRecipe.ICON,
                 Component.text("Shapeless crafting recipe").color(NamedTextColor.AQUA)
             )
         )
         inventory.addItem(
             LinkItem.makeLink(
                 "furnace",
-                FurnaceRecipe.material,
+                FurnaceRecipe.ICON,
                 Component.text("Furnace recipe").color(NamedTextColor.AQUA)
             )
         )
         inventory.addItem(
             LinkItem.makeLink(
                 "smoking",
-                SmokingRecipe.material,
+                SmokingRecipe.ICON,
                 Component.text("Smoking recipe").color(NamedTextColor.AQUA)
             )
         )
         inventory.addItem(
             LinkItem.makeLink(
                 "blasting",
-                BlastingRecipe.material,
+                BlastingRecipe.ICON,
                 Component.text("Blasting recipe").color(NamedTextColor.AQUA)
             )
         )
         inventory.addItem(
             LinkItem.makeLink(
                 "campfire",
-                CampfireRecipe.material,
+                CampfireRecipe.ICON,
                 Component.text("Campfire recipe").color(NamedTextColor.AQUA)
             )
         )
@@ -74,32 +76,38 @@ class ChoiceRecipePopup(override val viewer: HumanEntity, private val result: It
     }
 
     @EventHandler
-    fun onLink(event: InventoryClickLinkEvent) {
+    public fun onLink(event: InventoryClickLinkEvent) {
         when (event.linkKey) {
             "shaped" -> {
                 viewer.playSound(Sound.BLOCK_WOODEN_BUTTON_CLICK_ON)
                 ShapedRecipePopup(viewer, null, result, this, internalCallback).open()
             }
+
             "shapeless" -> {
                 viewer.playSound(Sound.BLOCK_WOODEN_BUTTON_CLICK_ON)
                 ShapelessRecipePopup(viewer, null, result, this, internalCallback).open()
             }
+
             "furnace" -> {
                 viewer.playSound(Sound.BLOCK_WOODEN_BUTTON_CLICK_ON)
                 FurnaceRecipePopup(viewer, null, result, this, internalCallback).open()
             }
+
             "smoking" -> {
                 viewer.playSound(Sound.BLOCK_WOODEN_BUTTON_CLICK_ON)
                 SmokingRecipePopup(viewer, null, result, this, internalCallback).open()
             }
+
             "blasting" -> {
                 viewer.playSound(Sound.BLOCK_WOODEN_BUTTON_CLICK_ON)
                 BlastingRecipePopup(viewer, null, result, this, internalCallback).open()
             }
+
             "campfire" -> {
                 viewer.playSound(Sound.BLOCK_WOODEN_BUTTON_CLICK_ON)
                 CampfireRecipePopup(viewer, null, result, this, internalCallback).open()
             }
+
             "cancel" -> {
                 viewer.playSound(Sound.BLOCK_WOODEN_BUTTON_CLICK_OFF)
                 back()
@@ -107,7 +115,7 @@ class ChoiceRecipePopup(override val viewer: HumanEntity, private val result: It
         }
     }
 
-    private val internalCallback: (Recipe?) -> Unit = {
+    private val internalCallback: (Recipe<*, *>?) -> Unit = {
         if (it != null) {
             callback(it)
         }

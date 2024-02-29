@@ -11,17 +11,22 @@ import org.bukkit.inventory.PlayerInventory
 /**
  * This event occurs when a player clicks on a [LinkItem]
  */
-class InventoryClickLinkEvent(view: InventoryView, type: SlotType, slot: Int, click: ClickType, action: InventoryAction) : InventoryClickEvent(view, type, slot, click, action) {
-    constructor(clickEvent: InventoryClickEvent) : this(clickEvent.view, clickEvent.slotType, clickEvent.slot, clickEvent.click, clickEvent.action)
+public class InventoryClickLinkEvent(
+    view: InventoryView,
+    type: SlotType,
+    slot: Int,
+    click: ClickType,
+    action: InventoryAction
+) : InventoryClickEvent(view, type, slot, click, action) {
+
+    public val linkKey: String
+        get() = currentItem!!.itemMeta.linkKey!!
 
     init {
         if (currentItem?.itemMeta?.linkKey == null) {
             throw IllegalArgumentException("Event must have a clicked item with a link item key")
         }
     }
-
-    val linkKey: String
-        get() = currentItem!!.itemMeta.linkKey!!
 
     override fun setCurrentItem(stack: ItemStack?) {
         if (stack == null) {
@@ -33,12 +38,22 @@ class InventoryClickLinkEvent(view: InventoryView, type: SlotType, slot: Int, cl
         super.setCurrentItem(stack)
     }
 
-    companion object {
+    public companion object {
         @JvmStatic
-        fun isLinkClick(clickEvent: InventoryClickEvent): Boolean {
+        public fun fromClickEvent(clickEvent: InventoryClickEvent): InventoryClickLinkEvent =
+            InventoryClickLinkEvent(
+                clickEvent.view,
+                clickEvent.slotType,
+                clickEvent.slot,
+                clickEvent.click,
+                clickEvent.action
+            )
+        @JvmStatic
+        public fun isLinkClick(clickEvent: InventoryClickEvent): Boolean {
             if (clickEvent.slotType == SlotType.OUTSIDE
-                    || clickEvent.currentItem == null
-                    || clickEvent.clickedInventory is PlayerInventory) return false
+                || clickEvent.currentItem == null
+                || clickEvent.clickedInventory is PlayerInventory
+            ) return false
             // Only normal left and right click allowed
             return when (clickEvent.click) {
                 ClickType.LEFT, ClickType.RIGHT, ClickType.MIDDLE -> true

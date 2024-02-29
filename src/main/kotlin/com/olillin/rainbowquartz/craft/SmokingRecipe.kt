@@ -6,11 +6,10 @@ import org.bukkit.configuration.MemoryConfiguration
 import org.bukkit.configuration.serialization.ConfigurationSerializable
 import org.bukkit.inventory.SmokingRecipe as BukkitSmokingRecipe
 
-@Suppress("UNUSED")
-class SmokingRecipe(input: Ingredient) : CookingRecipe(input) {
+public class SmokingRecipe(input: Ingredient) : CookingRecipe<SmokingRecipe, BukkitSmokingRecipe>(input) {
     override var cookTime: Int = DEFAULT_COOK_TIME
-    override val suffix: String
-        get() = id
+    override val recipeId: String
+        get() = ID
 
     override fun asBukkitRecipe(item: Item): BukkitSmokingRecipe {
         val recipe = BukkitSmokingRecipe(
@@ -26,10 +25,11 @@ class SmokingRecipe(input: Ingredient) : CookingRecipe(input) {
         return recipe
     }
 
-    companion object {
-        const val id = "smoking"
-        val material = Material.SMOKER
+    public companion object {
         private const val DEFAULT_COOK_TIME: Int = 100
+
+        internal const val ID = "smoking"
+        internal val ICON = Material.SMOKER
 
         /**
          * Required method for configuration serialization
@@ -39,7 +39,7 @@ class SmokingRecipe(input: Ingredient) : CookingRecipe(input) {
          * @see ConfigurationSerializable
          */
         @JvmStatic
-        fun deserialize(args: Map<String, Any>): SmokingRecipe {
+        public fun deserialize(args: Map<String, Any>): SmokingRecipe {
             val section = MemoryConfiguration()
             for ((key, value) in args.entries) {
                 section.set(key, value)
@@ -47,15 +47,14 @@ class SmokingRecipe(input: Ingredient) : CookingRecipe(input) {
 
             val input: Ingredient = section.getObject("input", Ingredient::class.java)
                 ?: throw IllegalArgumentException("Invalid value for property 'input'")
+
             val recipe = SmokingRecipe(input)
 
-            recipe.cookTime = section.getInt("cookTime", DEFAULT_COOK_TIME)
-            recipe.exp = section.getDouble("exp").toFloat()
-
+            recipe.amount = section.getInt("amount", 1)
             recipe.group = section.getString("group")
                 ?: throw IllegalArgumentException("Invalid value for property 'group'")
-
-            recipe.amount = section.getInt("amount", 1)
+            recipe.exp = section.getDouble("exp").toFloat()
+            recipe.cookTime = section.getInt("cookTime", DEFAULT_COOK_TIME)
 
             return recipe
         }

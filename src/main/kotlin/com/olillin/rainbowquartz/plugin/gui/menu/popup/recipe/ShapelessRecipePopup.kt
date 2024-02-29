@@ -1,23 +1,24 @@
 package com.olillin.rainbowquartz.plugin.gui.menu.popup.recipe
 
 import com.olillin.rainbowquartz.craft.Ingredient
-import com.olillin.rainbowquartz.craft.Recipe.Companion.asItemStack
 import com.olillin.rainbowquartz.craft.ShapelessRecipe
 import com.olillin.rainbowquartz.plugin.gui.menu.Menu
+import org.bukkit.Material
 import org.bukkit.entity.HumanEntity
 import org.bukkit.event.EventHandler
 import org.bukkit.event.inventory.InventoryOpenEvent
 import org.bukkit.inventory.ItemStack
 
-class ShapelessRecipePopup(
+public class ShapelessRecipePopup(
     override val viewer: HumanEntity,
     override val placeholder: ShapelessRecipe?,
     override val result: ItemStack,
     override val previousMenu: Menu,
     override val callback: (ShapelessRecipe?) -> Unit
 ) : GroupRecipePopup<ShapelessRecipe>() {
+
     //    override val title = Component.text(if (placeholder == null) "New shapeless recipe" else "Edit shapeless recipe")
-    override val recipeIcon = ShapelessRecipe.material
+    override val recipeIcon: Material = ShapelessRecipe.ICON
 
     override val insertSlots: List<Int>
         get() = gridSlots
@@ -36,7 +37,7 @@ class ShapelessRecipePopup(
     init {
         if (placeholder != null) {
             val placeholderGrid: MutableList<ItemStack?> = placeholder.getIngredients()
-                .map { asItemStack(it).apply { amount = 1 } }.toMutableList()
+                .map { it.itemStack }.toMutableList()
             amount = placeholder.amount
             while (placeholderGrid.size < 9) {
                 placeholderGrid.add(null)
@@ -47,7 +48,7 @@ class ShapelessRecipePopup(
 
     @EventHandler
     @Suppress("UNUSED_PARAMETER")
-    fun onOpen(event: InventoryOpenEvent) {
+    public fun onOpen(event: InventoryOpenEvent) {
         inventory.setItem(13, EMPTY_PANEL)
         inventory.setItem(22, EMPTY_PANEL)
     }
@@ -67,7 +68,7 @@ class ShapelessRecipePopup(
         return result
     }
 
-    companion object {
-        private val gridSlots = listOf(1, 2, 3, 10, 11, 12, 19, 20, 21)
+    private companion object {
+        val gridSlots = listOf(1, 2, 3, 10, 11, 12, 19, 20, 21)
     }
 }
