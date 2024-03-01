@@ -10,7 +10,6 @@ import com.olillin.rainbowquartz.plugin.gui.menu.popup.ComponentPopup
 import com.olillin.rainbowquartz.plugin.gui.menu.popup.LorePopup
 import com.olillin.rainbowquartz.plugin.gui.menu.popup.MaterialPopup
 import net.kyori.adventure.text.Component
-import net.kyori.adventure.text.TranslatableComponent
 import net.kyori.adventure.text.format.NamedTextColor
 import org.bukkit.Material
 import org.bukkit.Sound
@@ -24,9 +23,6 @@ internal class EditItemGeneralMenu(viewer: HumanEntity, builder: ItemBuilder, ov
     @EventHandler
     @Suppress("UNUSED_PARAMETER")
     fun onOpen(event: InventoryOpenEvent) {
-        val itemName = (builder.build().getItem().displayName() as? TranslatableComponent)?.args()?.get(0)
-            ?: Component.text("Name Unavailable").color(NamedTextColor.DARK_GRAY)
-
         // Items
         inventory.setItem(GENERAL_SLOT, inventory.getItem(GENERAL_SLOT)?.enchanted())
 
@@ -37,7 +33,7 @@ internal class EditItemGeneralMenu(viewer: HumanEntity, builder: ItemBuilder, ov
                 Component.text("Rename").color(NamedTextColor.LIGHT_PURPLE),
                 listOf(
                     Component.text("Current name"),
-                    Component.text(" ").color(NamedTextColor.WHITE).append(itemName)
+                    Component.text(" ").color(NamedTextColor.WHITE).append(builder.build().component())
                 )
             )
         )

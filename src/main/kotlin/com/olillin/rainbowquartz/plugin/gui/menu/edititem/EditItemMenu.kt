@@ -172,8 +172,8 @@ public abstract class EditItemMenu(final override val viewer: HumanEntity, prote
 public fun Component.removeStyle(): Component {
     var component = this.style(Style.empty())
     if (component is TranslatableComponent) {
-        val args = component.args().map { it.removeStyle() }
-        component = component.args(args)
+        val children = component.children().map { it.removeStyle() }
+        component = component.children(children)
     }
     val children = component.children().map { it.removeStyle() }
     component = component.children(children)
