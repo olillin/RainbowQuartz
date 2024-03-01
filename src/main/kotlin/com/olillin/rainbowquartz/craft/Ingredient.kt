@@ -10,32 +10,26 @@ import org.bukkit.inventory.RecipeChoice.ExactChoice
 import org.bukkit.inventory.RecipeChoice.MaterialChoice
 import org.bukkit.inventory.meta.ItemMeta
 
-public class Ingredient(public val material: Material, public val meta: ItemMeta? = null) : RecipeChoice,
-    ConfigurationSerializable, Cloneable {
-    @Suppress("OVERRIDE_DEPRECATION")
-    override fun getItemStack(): ItemStack {
-        return ItemStack(material).apply {
+public class Ingredient(public val material: Material, public val meta: ItemMeta? = null) : ConfigurationSerializable,
+    Cloneable {
+    public val itemStack: ItemStack
+        get() = ItemStack(material).apply {
             itemMeta = meta
             amount = 1
         }
+
+    public fun toRecipeChoice(): RecipeChoice {
+        return ExactChoice(ItemStack(material).apply {
+            itemMeta = meta
+        })
     }
 
-    override fun clone(): Ingredient {
+    public override fun clone(): Ingredient {
         return Ingredient(material, meta?.clone())
     }
 
-    override fun test(itemStack: ItemStack): Boolean {
-        if (itemStack.type != material) return false
-        return if (itemStack.itemMeta != ItemStack(itemStack.type).itemMeta) {
-            // Has custom item meta
-            itemStack.itemMeta == meta
-        } else {
-            meta == null
-        }
-    }
-
     override fun toString(): String {
-        return "Ingredient(material=$material" + (if (meta != null) ", meta=$meta" else "") + ")"
+        return "Ingredient(material=$material${(if (meta != null) ", meta=$meta" else "")})"
     }
 
     override fun hashCode(): Int {
@@ -50,13 +44,12 @@ public class Ingredient(public val material: Material, public val meta: ItemMeta
 
         other as Ingredient
 
-        return material == other.material
-                && meta == other.meta
+        return material == other.material && meta == other.meta
     }
 
     override fun serialize(): Map<String, Any> {
         val serialized: MutableMap<String, Any> = mutableMapOf(
-            "material" to material
+            "material" to material.name
         )
         if (meta != null) {
             serialized["meta"] = meta
@@ -72,16 +65,14 @@ public class Ingredient(public val material: Material, public val meta: ItemMeta
         public fun fromItem(item: Item): Ingredient = fromItemStack(item.getItem())
 
         @JvmStatic
-        public fun fromRecipeChoice(ingredient: RecipeChoice) {
-            val material = when (ingredient) {
-                is Ingredient -> ingredient.material
-                is MaterialChoice -> ingredient.choices[0]
-                is ExactChoice -> ingredient.choices[0].type
+        public fun fromRecipeChoice(recipeChoice: RecipeChoice) {
+            val material = when (recipeChoice) {
+                is MaterialChoice -> recipeChoice.choices[0]
+                is ExactChoice -> recipeChoice.choices[0].type
                 else -> throw IllegalArgumentException("Unsupported ingredient type")
             }
-            val meta = when (ingredient) {
-                is Ingredient -> ingredient.meta
-                is ExactChoice -> ingredient.choices[0].itemMeta
+            val meta = when (recipeChoice) {
+                is ExactChoice -> recipeChoice.choices[0].itemMeta
                 is MaterialChoice -> null
                 else -> throw IllegalArgumentException("Unsupported ingredient type")
             }
@@ -95,8 +86,14 @@ public class Ingredient(public val material: Material, public val meta: ItemMeta
                 section.set(key, value)
             }
 
-            val material = section.getObject("material", Material::class.java)
+            val materialString = section.getString("material")
                 ?: throw IllegalArgumentException("Missing required parameter material")
+            val material: Material
+            try {
+                material = Material.valueOf(materialString)
+            } catch(e: IllegalArgumentException) {
+                throw IllegalArgumentException("Invalid value '$materialString' for material")
+            }
             val meta = section.getObject("meta", ItemMeta::class.java)
 
             return Ingredient(material, meta)

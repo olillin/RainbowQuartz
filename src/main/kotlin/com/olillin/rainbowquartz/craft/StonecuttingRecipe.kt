@@ -16,7 +16,7 @@ public class StonecuttingRecipe(public var input: Ingredient) : Recipe<Stonecutt
             item.getItem().also {
                 it.amount = amount
             },
-            input
+            input.toRecipeChoice()
         )
     }
 

@@ -23,7 +23,7 @@ public class ShapelessRecipe : Recipe<ShapelessRecipe, BukkitShapelessRecipe>() 
         recipe.group = group
 
         for (ingredient in ingredients) {
-            recipe.addIngredient(ingredient)
+            recipe.addIngredient(ingredient.toRecipeChoice())
         }
         return recipe
     }

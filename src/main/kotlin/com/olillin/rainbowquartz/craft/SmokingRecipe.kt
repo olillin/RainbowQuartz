@@ -17,7 +17,7 @@ public class SmokingRecipe(input: Ingredient) : CookingRecipe<SmokingRecipe, Buk
             item.getItem().also {
                 it.amount = amount
             },
-            input,
+            input.toRecipeChoice(),
             exp,
             cookTime
         )

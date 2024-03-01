@@ -15,7 +15,7 @@ public class ShapedRecipePopup(
     override val placeholder: ShapedRecipe?,
     override val result: ItemStack,
     override val previousMenu: Menu,
-    override val callback: (ShapedRecipe?) -> Unit
+    override val callback: (ShapedRecipe?) -> Unit,
 ) : GroupRecipePopup<ShapedRecipe>() {
 
     //    override val title: Component = Component.text(if (placeholder == null) "New shaped recipe" else "Edit shaped recipe")
@@ -37,17 +37,17 @@ public class ShapedRecipePopup(
 
     init {
         if (placeholder != null) {
-            val items = mutableListOf<ItemStack?>()
-            for (line in ShapedRecipe.padPattern(placeholder.getPattern())) {
-                for (key in line) {
-                    val ingredient = placeholder.getIngredient(key) ?: continue
-                    items.add(ingredient.itemStack)
+            val items = Array<ItemStack?>(9) { null }
+            ShapedRecipe.padPattern(placeholder.getPattern()).forEachIndexed line@{ y, line ->
+                line.forEachIndexed char@{ x, char ->
+                    val ingredient = placeholder.getIngredient(char) ?: return@char
+                    items[y * 3 + x] = ingredient.itemStack
                 }
             }
-            grid = items.toTypedArray()
+            grid = items
 
-            group = placeholder.group
             amount = placeholder.amount
+            group = placeholder.group
         }
     }
 
@@ -72,8 +72,8 @@ public class ShapedRecipePopup(
                 continue
             }
 
-            val key: Char = if (ingredients.values.any { it.test(item) }) {
-                ingredients.entries.first { it.value.test(item) }.key
+            val key: Char = if (ingredients.values.any { it.toRecipeChoice().test(item) }) {
+                ingredients.entries.first { it.value.toRecipeChoice().test(item) }.key
             } else {
                 val firstChar: Char = (item.itemMeta.rainbowQuartzId ?: item.type.key).key.uppercase()[0]
                 if (ingredients.containsKey(firstChar)) {

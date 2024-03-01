@@ -17,7 +17,7 @@ public class CampfireRecipe(input: Ingredient) : CookingRecipe<CampfireRecipe, B
             item.getItem().also {
                 it.amount = amount
             },
-            input,
+            input.toRecipeChoice(),
             exp,
             cookTime
         )

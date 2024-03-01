@@ -37,7 +37,7 @@ public class ShapedRecipe(vararg pattern: String) : Recipe<ShapedRecipe, BukkitS
 
         recipe.shape(*pattern)
         for (ingredient in ingredients) {
-            recipe.setIngredient(ingredient.key, ingredient.value)
+            recipe.setIngredient(ingredient.key, ingredient.value.toRecipeChoice())
         }
 
         return recipe

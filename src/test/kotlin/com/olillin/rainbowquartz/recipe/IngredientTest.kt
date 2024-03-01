@@ -70,7 +70,7 @@ class IngredientTest {
         val ingredient = stackIngredient
         val stack = stack
 
-        assertTrue(ingredient.test(stack))
+        assertTrue(ingredient.toRecipeChoice().test(stack))
     }
 
     @Test
@@ -78,7 +78,7 @@ class IngredientTest {
         val ingredient = materialIngredient
         val stack = ItemStack(material, 7)
 
-        assertTrue(ingredient.test(stack))
+        assertTrue(ingredient.toRecipeChoice().test(stack))
     }
 
     @Test
@@ -86,7 +86,7 @@ class IngredientTest {
         val ingredient = materialIngredient
         val stack = stack
 
-        assertFalse(ingredient.test(stack))
+        assertFalse(ingredient.toRecipeChoice().test(stack))
     }
 
     @Test

@@ -17,7 +17,7 @@ public class BlastingRecipe(input: Ingredient) : CookingRecipe<BlastingRecipe, B
             item.getItem().also {
                 it.amount = amount
             },
-            input,
+            input.toRecipeChoice(),
             exp,
             cookTime
         )

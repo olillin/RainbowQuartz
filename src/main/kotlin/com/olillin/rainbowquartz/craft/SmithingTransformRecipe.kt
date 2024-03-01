@@ -21,9 +21,9 @@ public class SmithingTransformRecipe(
             item.getItem().also {
                 it.amount = amount
             },
-            template,
-            base,
-            addition
+            template.toRecipeChoice(),
+            base.toRecipeChoice(),
+            addition.toRecipeChoice()
         )
     }
 

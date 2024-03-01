@@ -17,7 +17,7 @@ public class FurnaceRecipe(input: Ingredient) : CookingRecipe<FurnaceRecipe, Buk
             item.getItem().also {
                 it.amount = amount
             },
-            input,
+            input.toRecipeChoice(),
             exp,
             cookTime
         )
