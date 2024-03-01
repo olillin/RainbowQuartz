@@ -13,7 +13,7 @@ import org.bukkit.inventory.ItemStack
 public class ShapedRecipePopup(
     override val viewer: HumanEntity,
     override val placeholder: ShapedRecipe?,
-    override val result: ItemStack,
+    override val previewItem: ItemStack,
     override val previousMenu: Menu,
     override val callback: (ShapedRecipe?) -> Unit,
 ) : GroupRecipePopup<ShapedRecipe>() {
@@ -58,9 +58,9 @@ public class ShapedRecipePopup(
         inventory.setItem(22, EMPTY_PANEL)
     }
 
-    @Throws(IllegalStateException::class, NoSuchElementException::class)
+    @Throws(IllegalRecipeException::class, NoSuchElementException::class)
     override fun createRecipe(): ShapedRecipe {
-        if (grid.filterNotNull().isEmpty()) throw IllegalStateException("Grid cannot be empty")
+        if (grid.filterNotNull().isEmpty()) throw IllegalRecipeException("Grid cannot be empty")
 
         val validCharacters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".toCharArray()
         val ingredients: MutableMap<Char, Ingredient> = mutableMapOf()

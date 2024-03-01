@@ -7,6 +7,7 @@ import com.olillin.rainbowquartz.RainbowQuartz
 import org.bukkit.Bukkit
 import org.bukkit.NamespacedKey
 import org.bukkit.plugin.Plugin
+import javax.naming.OperationNotSupportedException
 
 public class ItemManager(private val plugin: Plugin) {
     private var items: MutableMap<NamespacedKey, Item> = mutableMapOf()
@@ -83,5 +84,5 @@ public class ItemManager(private val plugin: Plugin) {
     }
 
     /** Thrown to indicate that a new [Item] cannot be registered because it has already been registered. */
-    public class ItemAlreadyRegisteredException(message: String) : Exception(message)
+    public class ItemAlreadyRegisteredException(message: String) : OperationNotSupportedException(message)
 }

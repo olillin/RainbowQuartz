@@ -125,6 +125,20 @@ internal class EditItemRecipesMenu(viewer: HumanEntity, builder: ItemBuilder, ov
                     builder.build().getItem(),
                     this
                 ) { updateRecipe(oldRecipe, it) }.open()
+
+                is SmithingTransformRecipe -> SmithingTransformRecipePopup(
+                    viewer,
+                    oldRecipe,
+                    builder.build().getItem(),
+                    this
+                ) { updateRecipe(oldRecipe, it) }.open()
+
+                is StonecuttingRecipe -> StonecuttingRecipePopup(
+                    viewer,
+                    oldRecipe,
+                    builder.build().getItem(),
+                    this
+                ) { updateRecipe(oldRecipe, it) }.open()
             }
         } else if (event.click == ClickType.RIGHT) {
             viewer.playSound(Sound.ITEM_BUCKET_EMPTY)
@@ -153,7 +167,7 @@ internal class EditItemRecipesMenu(viewer: HumanEntity, builder: ItemBuilder, ov
             is CampfireRecipe -> CampfireRecipe.ICON
             is SmithingTransformRecipe -> SmithingTransformRecipe.ICON
             is StonecuttingRecipe -> StonecuttingRecipe.ICON
-            else -> Material.BEDROCK
+            else -> Material.CRAFTING_TABLE
         }
         val item = ItemStack(material).apply {
             itemMeta = itemMeta.apply {

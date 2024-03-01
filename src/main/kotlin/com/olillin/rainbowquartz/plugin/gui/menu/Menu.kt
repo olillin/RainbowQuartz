@@ -88,6 +88,7 @@ public abstract class Menu {
         return this.inventory.viewers.toList()
     }
 
+    @Suppress("UNUSED_PARAMETER")
     @EventHandler
     public fun onCloseMenu(event: InventoryCloseEvent) {
         RainbowQuartz.guiEventDispatcher.unregisterMenu(this)

@@ -14,6 +14,7 @@ public abstract class GroupRecipePopup<T: Recipe<*, *>> : RecipePopup<T>() {
     protected var group: String = ""
     protected open val groupSlot: Int = 4
 
+    @Suppress("UNUSED_PARAMETER")
     @EventHandler
     public fun onOpenGroupRecipePopup(event: InventoryOpenEvent) {
         renderGroup()

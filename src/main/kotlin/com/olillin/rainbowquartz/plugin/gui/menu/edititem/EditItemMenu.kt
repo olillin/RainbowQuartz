@@ -40,6 +40,7 @@ public abstract class EditItemMenu(final override val viewer: HumanEntity, prote
         title,
     )
 
+    @Suppress("UNUSED_PARAMETER")
     @EventHandler(priority = EventPriority.HIGHEST)
     public fun onOpenEditItemMenu(event: InventoryOpenEvent) {
         // Create preview panel

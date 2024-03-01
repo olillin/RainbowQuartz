@@ -15,7 +15,7 @@ import org.bukkit.inventory.ItemStack
 public class SmokingRecipePopup(
     override val viewer: HumanEntity,
     override val placeholder: SmokingRecipe?,
-    override val result: ItemStack,
+    override val previewItem: ItemStack,
     override val previousMenu: Menu?,
     override val callback: (SmokingRecipe?) -> Unit
 ) : CookingRecipePopup<SmokingRecipe>() {
@@ -28,7 +28,7 @@ public class SmokingRecipePopup(
             exp = placeholder.exp
             cookTime = placeholder.cookTime
             amount = placeholder.amount
-            inventory.setItem(INPUT_SLOT, placeholder.input.itemStack)
+            insertItem(INPUT_SLOT, placeholder.input.itemStack)
         }
     }
 
@@ -46,11 +46,11 @@ public class SmokingRecipePopup(
         inventory.setItem(INPUT_LABEL_SLOT, label)
     }
 
-    @Throws(IllegalStateException::class)
+    @Throws(IllegalRecipeException::class)
     override fun createRecipe(): SmokingRecipe {
         val input: Ingredient = Ingredient.fromItemStack(
             untransformItem(inventory.getItem(INPUT_SLOT))
-                ?: throw IllegalStateException("Input cannot be empty")
+                ?: throw IllegalRecipeException("Input cannot be empty")
         )
         return SmokingRecipe(input)
             .setGroup(group)

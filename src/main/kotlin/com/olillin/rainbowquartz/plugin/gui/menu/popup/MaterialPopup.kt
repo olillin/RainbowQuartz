@@ -61,6 +61,7 @@ public class MaterialPopup(
         }
     }
 
+    @Suppress("UNUSED_PARAMETER")
     @EventHandler(priority = EventPriority.LOW)
     public fun onChange(event: InventoryEvent) {
         material = inventory.getItem(0)?.type

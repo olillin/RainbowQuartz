@@ -15,7 +15,7 @@ import org.bukkit.inventory.ItemStack
 public class FurnaceRecipePopup(
     override val viewer: HumanEntity,
     override val placeholder: FurnaceRecipe?,
-    override val result: ItemStack,
+    override val previewItem: ItemStack,
     override val previousMenu: Menu?,
     override val callback: (FurnaceRecipe?) -> Unit
 ) : CookingRecipePopup<FurnaceRecipe>() {
@@ -27,7 +27,7 @@ public class FurnaceRecipePopup(
             exp = placeholder.exp
             cookTime = placeholder.cookTime
             amount = placeholder.amount
-            inventory.setItem(INPUT_SLOT, placeholder.input.itemStack)
+            insertItem(INPUT_SLOT, placeholder.input.itemStack)
         }
     }
 
@@ -42,14 +42,14 @@ public class FurnaceRecipePopup(
                     .decoration(TextDecoration.ITALIC, false)
             )
         }
-        inventory.setItem(INPUT_LABEL_SLOT, label)
+        insertItem(INPUT_LABEL_SLOT, label)
     }
 
-    @Throws(IllegalStateException::class)
+    @Throws(IllegalRecipeException::class)
     override fun createRecipe(): FurnaceRecipe {
         val input: Ingredient = Ingredient.fromItemStack(
             untransformItem(inventory.getItem(INPUT_SLOT))
-                ?: throw IllegalStateException("Input cannot be empty")
+                ?: throw IllegalRecipeException("Input cannot be empty")
         )
         return FurnaceRecipe(input)
             .setGroup(group)

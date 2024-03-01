@@ -4,12 +4,12 @@ import com.olillin.rainbowquartz.item.Item
 import org.bukkit.Material
 import org.bukkit.configuration.MemoryConfiguration
 import org.bukkit.configuration.serialization.ConfigurationSerializable
+import org.bukkit.inventory.ItemStack
+import org.bukkit.inventory.RecipeChoice
 import org.bukkit.inventory.SmithingTransformRecipe as BukkitSmithingTransformRecipe
 
 public class SmithingTransformRecipe(
-    public var base: Ingredient,
-    public var addition: Ingredient,
-    public var template: Ingredient
+    public var base: Ingredient, public var addition: Ingredient, public var template: Ingredient? = null
 ) : Recipe<SmithingTransformRecipe, BukkitSmithingTransformRecipe>() {
 
     override val recipeId: String
@@ -21,9 +21,10 @@ public class SmithingTransformRecipe(
             item.getItem().also {
                 it.amount = amount
             },
-            template.toRecipeChoice(),
+            template?.toRecipeChoice() ?: RecipeChoice.ExactChoice(ItemStack.empty()),
             base.toRecipeChoice(),
-            addition.toRecipeChoice()
+            addition.toRecipeChoice(),
+            false
         )
     }
 
@@ -43,7 +44,7 @@ public class SmithingTransformRecipe(
     }
 
     override fun toString(): String =
-        "${this::class.simpleName}(amount=$amount${", group=$group".takeIf { group.isNotEmpty() }}, base=$base, addition=$addition, template=$template)"
+        "${this::class.simpleName}(amount=$amount${", group=$group".takeIf { group.isNotEmpty() }}, base=$base, addition=$addition${", template=$template".takeIf { template != null }})"
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -69,13 +70,16 @@ public class SmithingTransformRecipe(
     }
 
     public override fun serialize(): MutableMap<String, Any> {
-        return mutableMapOf(
+        val result = mutableMapOf(
             "amount" to amount,
             "group" to group,
             "base" to base,
             "addition" to addition,
-            "template" to template
         )
+        if (template != null) {
+            result["template"] = template!!
+        }
+        return result
     }
 
     public companion object {
@@ -105,8 +109,8 @@ public class SmithingTransformRecipe(
             val recipe = SmithingTransformRecipe(base, addition, template)
 
             recipe.amount = section.getInt("amount", 1)
-            recipe.group = section.getString("group")
-                ?: throw IllegalArgumentException("Invalid value for property 'group'")
+            recipe.group =
+                section.getString("group") ?: throw IllegalArgumentException("Invalid value for property 'group'")
 
             return recipe
         }

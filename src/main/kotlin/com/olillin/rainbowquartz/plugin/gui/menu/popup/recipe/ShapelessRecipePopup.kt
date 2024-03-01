@@ -12,7 +12,7 @@ import org.bukkit.inventory.ItemStack
 public class ShapelessRecipePopup(
     override val viewer: HumanEntity,
     override val placeholder: ShapelessRecipe?,
-    override val result: ItemStack,
+    override val previewItem: ItemStack,
     override val previousMenu: Menu,
     override val callback: (ShapelessRecipe?) -> Unit
 ) : GroupRecipePopup<ShapelessRecipe>() {
@@ -53,10 +53,10 @@ public class ShapelessRecipePopup(
         inventory.setItem(22, EMPTY_PANEL)
     }
 
-    @Throws(IllegalStateException::class)
+    @Throws(IllegalRecipeException::class)
     override fun createRecipe(): ShapelessRecipe {
         val ingredients: List<Ingredient> = grid.filterNotNull().map { Ingredient.fromItemStack(it) }
-        if (ingredients.isEmpty()) throw IllegalStateException("Grid cannot be empty")
+        if (ingredients.isEmpty()) throw IllegalRecipeException("Grid cannot be empty")
 
         val result = ShapelessRecipe()
         for (ingredient in ingredients) {

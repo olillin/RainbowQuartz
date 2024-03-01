@@ -20,7 +20,7 @@ import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.ItemStack
 
 public abstract class RecipePopup<T: Recipe<*, *>> : InsertMenu(), Popup<T?> {
-    protected abstract val result: ItemStack
+    protected abstract val previewItem: ItemStack
     protected var amount: Int = 1
     protected abstract val placeholder: T?
 
@@ -41,6 +41,7 @@ public abstract class RecipePopup<T: Recipe<*, *>> : InsertMenu(), Popup<T?> {
 
     public abstract fun createRecipe(): T
 
+    @Suppress("UNUSED_PARAMETER")
     @EventHandler(priority = EventPriority.HIGH)
     public fun onOpenRecipePopup(event: InventoryOpenEvent) {
         inventory.setItem(0, EMPTY_PANEL)
@@ -89,7 +90,7 @@ public abstract class RecipePopup<T: Recipe<*, *>> : InsertMenu(), Popup<T?> {
 
             "set_amount_max" -> {
                 viewer.playSound(Sound.BLOCK_WOODEN_BUTTON_CLICK_ON)
-                amount = result.type.maxStackSize
+                amount = previewItem.type.maxStackSize
                 updatePreview()
             }
 
@@ -125,6 +126,7 @@ public abstract class RecipePopup<T: Recipe<*, *>> : InsertMenu(), Popup<T?> {
         }
     }
 
+    @Suppress("UNUSED_PARAMETER")
     @EventHandler(priority = EventPriority.LOW)
     public fun onChangeRecipePopup(event: InventoryEvent) {
         try {
@@ -136,7 +138,7 @@ public abstract class RecipePopup<T: Recipe<*, *>> : InsertMenu(), Popup<T?> {
                     Component.text("Create recipe").color(NamedTextColor.GREEN)
                 )
             )
-        } catch (e: RuntimeException) {
+        } catch (e: IllegalRecipeException) {
             val item = ItemStack(Material.BARRIER)
             val meta = item.itemMeta
             meta.displayName(
@@ -159,11 +161,14 @@ public abstract class RecipePopup<T: Recipe<*, *>> : InsertMenu(), Popup<T?> {
         }
     }
 
+    /** Signals that a [RecipePopup] cannot create a recipe because the input is illegal or incomplete. */
+    public class IllegalRecipeException(message: String? = null) : IllegalStateException(message)
+
     protected fun updatePreview() {
-        amount = amount.coerceIn(1, result.type.maxStackSize)
+        amount = amount.coerceIn(1, previewItem.type.maxStackSize)
         ResultPreview.render(
             inventory,
-            result,
+            previewItem,
             amount,
             5,
             0
