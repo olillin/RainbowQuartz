@@ -64,7 +64,7 @@ public open class RainbowQuartz : JavaPlugin() {
         viewItemCommand.tabCompleter = executor
 
         val menuCommand = server.getPluginCommand("rainbowquartz")
-        executor = MenuCommand(this)
+        executor = MenuCommand()
         menuCommand!!.setExecutor(executor)
         menuCommand.tabCompleter = executor
 
