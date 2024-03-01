@@ -30,7 +30,7 @@ public class ShapelessRecipePopup(
                 throw IllegalArgumentException("Invalid value, grid must be of length 9")
             }
             gridSlots.forEachIndexed { index, slot ->
-                inventory.setItem(slot, value[index])
+                insertItem(slot, value[index])
             }
         }
 

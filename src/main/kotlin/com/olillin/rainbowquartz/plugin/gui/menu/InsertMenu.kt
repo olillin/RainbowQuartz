@@ -69,7 +69,6 @@ public abstract class InsertMenu : ImmutableMenu() {
             insertItem(event.rawSlot, event.cursor)
         } else if (event.click == ClickType.MIDDLE
             && viewer.gameMode == GameMode.CREATIVE
-            && event.cursor.isEmpty
             && isInsertSlot(event.rawSlot)
         ) {
             // Pick item
