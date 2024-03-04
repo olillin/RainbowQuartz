@@ -15,8 +15,8 @@ public class ItemManager(private val plugin: Plugin) {
     private var oldConfigHash: Int = itemConfig.hashCode()
 
     /**
-     * Registers an [item], its recipes and its event handlers
-     * @throws ItemAlreadyRegisteredException if an item by the same ID is already registered
+     * Registers an [item], its recipes and its event handlers.
+     * @throws ItemAlreadyRegisteredException if an item by the same ID is already registered.
      */
     public fun registerItem(item: Item) {
         plugin.logger.info("Registering item ${item.id}")
@@ -37,6 +37,21 @@ public class ItemManager(private val plugin: Plugin) {
         saveToConfig()
     }
 
+    /**
+     * Registers an [item], its recipes and its event handlers.
+     * If an item by the same ID is already registered it is replaced.
+     */
+    public fun registerItemOverride(item: Item) {
+        if (items.containsKey(item.id)) {
+            unregisterItem(item.id)
+        }
+        registerItem(item)
+    }
+
+    /**
+     * Registers an [item], its recipes and its event handlers.
+     * If an item by the same ID is already registered the call is ignored.
+     */
     public fun registerDefault(item: Item) {
         if (containsItem(item.id)) {
             return
@@ -44,21 +59,26 @@ public class ItemManager(private val plugin: Plugin) {
         registerItem(item)
     }
 
-    public fun unregisterItem(id: NamespacedKey) {
-        val item = items[id] ?: return
+    /**
+     * Removes an item that matches [id] together with its recipes and event handlers.
+     * @return `true` if the item was successfully removed.
+     */
+    public fun unregisterItem(id: NamespacedKey): Boolean {
+        val item = items[id] ?: return false
         for (recipe in item.recipes) {
             Bukkit.removeRecipe(recipe.key(item))
         }
         items.remove(id)
         saveToConfig()
+        return true
     }
 
-    /** Returns a copy of the item that matches [key]. */
-    public fun getItem(key: NamespacedKey): Item? {
-        return items[key]?.clone()
+    /** Returns a copy of the item that matches [id]. */
+    public fun getItem(id: NamespacedKey): Item? {
+        return items[id]?.clone()
     }
 
-    /** Returns true if item manager contains item with the same ID. */
+    /** Returns `true` if item manager contains item with the same [id]. */
     public fun containsItem(id: NamespacedKey): Boolean = getItem(id) != null
 
     /** Returns a copy of the items registered in this item manager. */
@@ -80,7 +100,7 @@ public class ItemManager(private val plugin: Plugin) {
         oldConfigHash = items.hashCode()
 
         plugin.logger.info("Saving items to config...")
-        itemConfig.saveItems(items.values)
+        itemConfig.saveItems(items.values.filterIsInstance<GuiItem>())
     }
 
     /** Thrown to indicate that a new [Item] cannot be registered because it has already been registered. */

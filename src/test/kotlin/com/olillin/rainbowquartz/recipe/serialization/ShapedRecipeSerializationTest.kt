@@ -60,14 +60,12 @@ class ShapedRecipeSerializationTest {
         private lateinit var server: ServerMock
         private lateinit var plugin: RainbowQuartz
 
-        @JvmStatic
         @BeforeAll
         fun setUp() {
             server = MockBukkit.mock()
             plugin = MockBukkit.load(RainbowQuartz::class.java)
         }
 
-        @JvmStatic
         @AfterAll
         fun tearDown() {
             MockBukkit.unmock()

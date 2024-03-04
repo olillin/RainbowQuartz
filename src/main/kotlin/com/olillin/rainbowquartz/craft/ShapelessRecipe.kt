@@ -86,7 +86,6 @@ public class ShapelessRecipe : Recipe<ShapelessRecipe, BukkitShapelessRecipe>() 
          * @return deserialized item stack
          * @see ConfigurationSerializable
          */
-        @JvmStatic
         public fun deserialize(args: Map<String, Any>): ShapelessRecipe {
             val section = MemoryConfiguration()
             for ((key, value) in args.entries) {

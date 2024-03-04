@@ -38,7 +38,6 @@ public class BlastingRecipe(input: Ingredient) : CookingRecipe<BlastingRecipe, B
          * @return deserialized item stack
          * @see ConfigurationSerializable
          */
-        @JvmStatic
         public fun deserialize(args: Map<String, Any>): BlastingRecipe {
             val section = MemoryConfiguration()
             for ((key, value) in args.entries) {

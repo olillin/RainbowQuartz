@@ -58,13 +58,10 @@ public class Ingredient(public val material: Material, public val meta: ItemMeta
     }
 
     public companion object {
-        @JvmStatic
         public fun fromItemStack(itemStack: ItemStack): Ingredient = Ingredient(itemStack.type, itemStack.itemMeta)
 
-        @JvmStatic
         public fun fromItem(item: Item): Ingredient = fromItemStack(item.getItem())
 
-        @JvmStatic
         public fun fromRecipeChoice(recipeChoice: RecipeChoice) {
             val material = when (recipeChoice) {
                 is MaterialChoice -> recipeChoice.choices[0]
@@ -79,7 +76,6 @@ public class Ingredient(public val material: Material, public val meta: ItemMeta
             Ingredient(material, meta)
         }
 
-        @JvmStatic
         public fun deserialize(args: Map<String, Any>): Ingredient {
             val section = MemoryConfiguration()
             for ((key, value) in args.entries) {

@@ -2,10 +2,10 @@ package com.olillin.rainbowquartz.event
 
 import org.bukkit.event.Event
 
-public class EventHandlerGroup<T : Event>(
-    public val eventType: Class<out T>,
-    internal val predicate: EventPredicate<T>,
-    internal val handler: EventHandler<T>
+public open class EventHandlerGroup<T : Event>(
+    public open val eventType: Class<out T>,
+    internal open val predicate: EventPredicate<T>,
+    internal open val handler: EventHandler<T>
 ) {
     override fun toString(): String =
         "${this::class.simpleName}(eventType=$eventType)"

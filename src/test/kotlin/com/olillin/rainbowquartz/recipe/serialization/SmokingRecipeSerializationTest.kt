@@ -27,13 +27,11 @@ class SmokingRecipeSerializationTest {
         private lateinit var server: ServerMock
         private lateinit var plugin: RainbowQuartz
 
-        @JvmStatic
         @AfterAll
         fun tearDown() {
             MockBukkit.unmock()
         }
 
-        @JvmStatic
         @BeforeAll
         fun setUp() {
             server = MockBukkit.mock()

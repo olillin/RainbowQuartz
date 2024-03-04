@@ -114,7 +114,6 @@ public class ShapedRecipe(vararg pattern: String) : Recipe<ShapedRecipe, BukkitS
          * @return deserialized item stack
          * @see ConfigurationSerializable
          */
-        @JvmStatic
         public fun deserialize(args: Map<String, Any>): ShapedRecipe {
             val section = MemoryConfiguration()
             for ((key, value) in args.entries) {

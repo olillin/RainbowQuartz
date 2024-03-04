@@ -1,6 +1,6 @@
 package com.olillin.rainbowquartz
 
-import com.olillin.rainbowquartz.item.Item
+import com.olillin.rainbowquartz.item.GuiItem
 import org.bukkit.configuration.file.YamlConfiguration
 import org.bukkit.plugin.Plugin
 import java.io.File
@@ -22,7 +22,7 @@ public class ItemConfigManager @Throws(IOException::class) constructor(
             file.createNewFile()
         }
         configuration = YamlConfiguration.loadConfiguration(file)
-        configuration.addDefault("items", listOf<Item>())
+        configuration.addDefault("items", listOf<GuiItem>())
     }
 
     @Throws(IOException::class)
@@ -30,21 +30,20 @@ public class ItemConfigManager @Throws(IOException::class) constructor(
         configuration = YamlConfiguration.loadConfiguration(file)
     }
 
-    public fun getItems(): Set<Item> {
+    public fun getItems(): List<GuiItem> {
         val itemList: MutableList<*>? = configuration.getList("items")
         if (itemList == null) {
             plugin.logger.warning("Unable to load items from '$filePath', invalid or missing property 'items'")
-            return setOf()
+            return listOf()
         }
 
-        val items: MutableSet<Item> = mutableSetOf()
-        items.addAll(itemList.filterIsInstance<Item>())
+        val items: List<GuiItem> = itemList.filterIsInstance<GuiItem>()
 
-        return items.toSet()
+        return items
     }
 
     @Throws(IOException::class)
-    public fun saveItems(items: Collection<Item>) {
+    public fun saveItems(items: Collection<GuiItem>) {
         configuration.set("items", items.toList())
         configuration.save(file)
     }

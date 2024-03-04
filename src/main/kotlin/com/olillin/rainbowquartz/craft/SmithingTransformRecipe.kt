@@ -93,7 +93,6 @@ public class SmithingTransformRecipe(
          * @return deserialized item stack
          * @see ConfigurationSerializable
          */
-        @JvmStatic
         public fun deserialize(args: Map<String, Any>): SmithingTransformRecipe {
             val section = MemoryConfiguration()
             for ((key, value) in args.entries) {

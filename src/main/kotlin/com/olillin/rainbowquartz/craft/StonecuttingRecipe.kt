@@ -66,7 +66,6 @@ public class StonecuttingRecipe(public var input: Ingredient) : Recipe<Stonecutt
          * @return deserialized item stack
          * @see ConfigurationSerializable
          */
-        @JvmStatic
         public fun deserialize(args: Map<String, Any>): StonecuttingRecipe {
             val section = MemoryConfiguration()
             for ((key, value) in args.entries) {

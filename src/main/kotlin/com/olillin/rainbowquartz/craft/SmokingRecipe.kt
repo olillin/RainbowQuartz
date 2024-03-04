@@ -38,7 +38,6 @@ public class SmokingRecipe(input: Ingredient) : CookingRecipe<SmokingRecipe, Buk
          * @return deserialized item stack
          * @see ConfigurationSerializable
          */
-        @JvmStatic
         public fun deserialize(args: Map<String, Any>): SmokingRecipe {
             val section = MemoryConfiguration()
             for ((key, value) in args.entries) {

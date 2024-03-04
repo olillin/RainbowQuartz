@@ -348,7 +348,6 @@ public open class ItemBuilder(
          *
          * @see unformatName
          */
-        @JvmStatic
         @Contract("!null -> !null, null -> null")
         public fun formatName(name: Component?): Component? {
             return name?.color(
@@ -363,7 +362,6 @@ public open class ItemBuilder(
          *
          * @see formatName
          */
-        @JvmStatic
         @Contract("!null -> !null, null -> null")
         public fun unformatName(name: Component?): Component? {
             return name?.color(name.color().takeIf { it != NamedTextColor.WHITE })?.decoration(
@@ -380,7 +378,6 @@ public open class ItemBuilder(
          *
          * @see unformatLore
          */
-        @JvmStatic
         @Contract("!null -> !null, null -> null")
         public fun formatLore(lore: Component?): Component? {
             return lore?.color(
@@ -395,7 +392,6 @@ public open class ItemBuilder(
          *
          * @see formatLore
          */
-        @JvmStatic
         @Contract("!null -> !null, null -> null")
         public fun unformatLore(lore: Component?): Component? {
             return lore?.color(lore.color().takeIf { it != NamedTextColor.GRAY })?.decoration(

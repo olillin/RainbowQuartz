@@ -38,7 +38,6 @@ public class CampfireRecipe(input: Ingredient) : CookingRecipe<CampfireRecipe, B
          * @return deserialized item stack
          * @see ConfigurationSerializable
          */
-        @JvmStatic
         public fun deserialize(args: Map<String, Any>): CampfireRecipe {
             val section = MemoryConfiguration()
             for ((key, value) in args.entries) {

@@ -9,18 +9,15 @@ import com.olillin.rainbowquartz.event.EventPredicate
 import net.kyori.adventure.key.Key
 import net.kyori.adventure.key.Keyed
 import net.kyori.adventure.text.Component
-import org.bukkit.Bukkit
 import org.bukkit.NamespacedKey
-import org.bukkit.configuration.MemoryConfiguration
-import org.bukkit.configuration.serialization.ConfigurationSerializable
 import org.bukkit.event.Event
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.ItemMeta
 import org.bukkit.persistence.PersistentDataType
 
-public class Item(
+public open class Item(
     public val id: NamespacedKey, item: ItemStack, recipes: List<Recipe<*, *>> = listOf()
-) : Cloneable, ConfigurationSerializable, Keyed {
+) : Cloneable, Keyed {
 
     private val item: ItemStack = ItemStack(item).apply {
         itemMeta = itemMeta.apply {
@@ -28,16 +25,16 @@ public class Item(
         }
         amount = 1
     }
-    private val eventHandlerGroups: MutableList<EventHandlerGroup<*>> = mutableListOf()
+    protected open val eventHandlerGroups: MutableList<EventHandlerGroup<*>> = mutableListOf()
 
-    public val recipes: List<Recipe<*, *>> = recipes.toList()
+    public open val recipes: List<Recipe<*, *>> = recipes.toList()
 
     public fun getItem(): ItemStack = ItemStack(item)
 
     /**
      * Register an [EventHandlerGroup]
      */
-    public fun <T : Event> addEventHandler(eventHandlerGroup: EventHandlerGroup<T>) {
+    public open fun <T : Event> addEventHandler(eventHandlerGroup: EventHandlerGroup<T>) {
         eventHandlerGroups.add(eventHandlerGroup)
     }
 
@@ -128,7 +125,7 @@ public class Item(
 
     override fun key(): Key = id
 
-    public fun component(): Component {
+    public fun toComponent(): Component {
         val item: ItemStack = getItem()
         val name: Component = item.itemMeta.displayName() ?: Component.translatable(item.type)
         return name.hoverEvent(item)
@@ -164,64 +161,6 @@ public class Item(
         result = 31 * result + recipes.hashCode()
         result = 31 * result + eventHandlerGroups.hashCode()
         return result
-    }
-
-    override fun serialize(): MutableMap<String, Any> {
-        val result = mutableMapOf<String, Any>(
-            "id" to id.toString()
-        )
-
-        val stack = ItemStack(item).apply {
-            val meta = itemMeta
-            meta.rainbowQuartzId = null
-            itemMeta = meta
-        }
-        result["item"] = stack
-        result["recipes"] = recipes
-
-        return result
-    }
-
-    public companion object {
-        /**
-         * Required method for configuration serialization
-         *
-         * @param args map to deserialize
-         * @return deserialized item
-         * @see ConfigurationSerializable
-         */
-        @JvmStatic
-        public fun deserialize(args: Map<String, Any>): Item {
-            val section = MemoryConfiguration()
-            for ((key, value) in args.entries) {
-                section[key] = value
-            }
-
-            // Create key
-            val idString = section.getString("id")
-                ?: throw IllegalArgumentException("Missing required property 'id' of type String")
-            val id = NamespacedKey.fromString(idString)!!
-
-            // Initialize builder
-            val itemStack = section.getItemStack("item")
-                ?: throw IllegalArgumentException("Missing required property 'item' of type ItemStack")
-            val builder = ItemBuilder(id, itemStack)
-
-            // Add recipes
-            val recipes: Any = section.get("recipes") ?: listOf<Recipe<*, *>>()
-            if (recipes !is List<*>) {
-                throw IllegalArgumentException("Invalid property 'recipes'")
-            }
-            for (recipe in recipes) {
-                if (recipe !is Recipe<*, *>) {
-                    Bukkit.getLogger().warning("Unable to add recipe to ${builder.build()}, invalid format")
-                    continue
-                }
-                builder.addRecipe(recipe)
-            }
-
-            return builder.build()
-        }
     }
 }
 
