@@ -49,13 +49,6 @@ public open class ItemBuilder(
         return this
     }
 
-    public open fun getAmount(): Int = result.amount
-
-    public open fun setAmount(amount: Int): ItemBuilder {
-        result.amount = amount
-        return this
-    }
-
     public open fun getName(): Component? = result.itemMeta.displayName()
 
     public open fun hasName(): Boolean = getName() != null
