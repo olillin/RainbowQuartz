@@ -7,6 +7,7 @@ import com.olillin.rainbowquartz.plugin.command.GetItemCommand
 import com.olillin.rainbowquartz.plugin.command.MenuCommand
 import com.olillin.rainbowquartz.plugin.command.ViewItemCommand
 import com.olillin.rainbowquartz.plugin.gui.GuiEventDispatcher
+import com.olillin.rainbowquartz.item.ItemUpdater
 import me.lucko.commodore.Commodore
 import me.lucko.commodore.CommodoreProvider
 import me.lucko.commodore.file.CommodoreFileReader
@@ -24,6 +25,7 @@ public open class RainbowQuartz : JavaPlugin() {
         itemEventDispatcher = ItemEventDispatcher(this)
         guiEventDispatcher = GuiEventDispatcher(this)
         itemManager = ItemManager(this)
+        itemUpdater = ItemUpdater(itemManager)
 
         guiEventDispatcher.start()
         itemManager.reload()
@@ -95,6 +97,8 @@ public open class RainbowQuartz : JavaPlugin() {
 
     public companion object {
         internal lateinit var itemEventDispatcher: ItemEventDispatcher
+            private set
+        internal lateinit var itemUpdater: ItemUpdater
             private set
         public lateinit var itemManager: ItemManager
             private set

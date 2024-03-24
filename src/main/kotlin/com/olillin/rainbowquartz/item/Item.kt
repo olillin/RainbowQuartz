@@ -32,7 +32,11 @@ public class Item(
 
     public val recipes: List<Recipe<*, *>> = recipes.toList()
 
-    public fun getItem(): ItemStack = ItemStack(item)
+    public fun getItem(): ItemStack {
+        val stack = ItemStack(item)
+        stack.itemHash = hashCode()
+        return stack
+    }
 
     /**
      * Register an [EventHandlerGroup]
@@ -226,13 +230,9 @@ public class Item(
 }
 
 public var ItemMeta.rainbowQuartzId: NamespacedKey?
-    get() {
-        val id = persistentDataContainer.get(
+    get() = persistentDataContainer.get(
             NamespacedKey.fromString("rainbowquartz:id")!!, PersistentDataType.STRING
-        ) ?: return null
-        return NamespacedKey.fromString(id)
-
-    }
+        )?.let { NamespacedKey.fromString(it) }
     set(value) {
         if (value == null) {
             persistentDataContainer.remove(
@@ -249,5 +249,28 @@ public var ItemStack.rainbowQuartzId: NamespacedKey?
     set(value) {
         itemMeta = itemMeta.apply {
             rainbowQuartzId = value
+        }
+    }
+
+internal var ItemMeta.itemHash: Int?
+    get() = persistentDataContainer.get(
+        NamespacedKey.fromString("rainbowquartz:hash")!!, PersistentDataType.INTEGER
+    )
+    set(value) {
+        if (value == null) {
+            persistentDataContainer.remove(
+                NamespacedKey.fromString("rainbowquartz:hash")!!
+            )
+        } else {
+            persistentDataContainer.set(
+                NamespacedKey.fromString("rainbowquartz:hash")!!, PersistentDataType.STRING, value.toString()
+            )
+        }
+    }
+internal var ItemStack.itemHash: Int?
+    get() = itemMeta.itemHash
+    set(value) {
+        itemMeta = itemMeta.apply {
+            itemHash = value
         }
     }
