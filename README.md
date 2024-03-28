@@ -24,10 +24,12 @@ RainbowQuartz enables two ways of creating items: by [using the API in another p
 
 ### Creating items with the API
 
-<details>
+<details open>
 <summary>Kotlin example</summary>
-`MyPlugin.kt`
-```kt
+<br>
+
+**MyPlugin.kt**
+```kotlin
 val builder = ItemBuilder(NamespacedKey(this, "emerald_pickaxe"))
     .setName(Component.text("Emerald pickaxe")
         .color(NamedTextColor.GREEN))
@@ -38,9 +40,26 @@ val builder = ItemBuilder(NamespacedKey(this, "emerald_pickaxe"))
             .setIngredient('S', Material.STICK))
 RainbowQuartz.itemManager.registerDefault(builder.build())
 ```
-</details>
 
-// TODO: Java example
+</details>
+<details>
+<summary>Java example</summary>
+<br>
+
+**MyPlugin.java**
+```java
+ItemBuilder builder = new ItemBuilder(new NamespacedKey(this, "emerald_pickaxe"), Material.DIAMOND_PICKAXE, new ArrayList<>())
+    .setName(Component.text("Emerald pickaxe")
+         .color(NamedTextColor.GREEN))
+    .addLore("Lorem ipsum")
+    .addRecipe(
+        new ShapedRecipe("RRR", " S ", " S ")
+            .setIngredient('R', new Ingredient(Material.EMERALD, null))
+            .setIngredient('S', new Ingredient(Material.STICK, null)));
+RainbowQuartz.Companion.getItemManager().registerDefault(builder.build());
+```
+
+</details>
 
 For more examples using the API have a look at the [RainbowQuartzExample](https://github.com/olillin/RainbowQuartzExample) plugin.
 
