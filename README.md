@@ -84,8 +84,8 @@ The GUI is the selling feature of RainbowQuartz, allowing for the creation and m
 ![Click on Set material](doc/new-item-set-material.png)  
 ![Place your material in the first slot and click Submit](doc/material-submit.png)  
 
-6. Click the `Submit` button
-![Click on Submit](doc/new-item-submit.png)
+6. Click the `Submit` button  
+![Click on Submit](doc/new-item-submit.png)  
 
 7. Modify any additional properties
 8. Click the `Back` button to save the item
