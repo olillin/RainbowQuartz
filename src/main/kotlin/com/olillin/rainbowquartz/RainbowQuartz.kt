@@ -1,12 +1,12 @@
 package com.olillin.rainbowquartz
 
-import com.olillin.rainbowquartz.craft.*
-import com.olillin.rainbowquartz.event.ItemEventDispatcher
-import com.olillin.rainbowquartz.item.ItemManager
 import com.olillin.rainbowquartz.command.GetItemCommand
 import com.olillin.rainbowquartz.command.MenuCommand
 import com.olillin.rainbowquartz.command.ViewItemCommand
+import com.olillin.rainbowquartz.craft.*
+import com.olillin.rainbowquartz.event.ItemEventDispatcher
 import com.olillin.rainbowquartz.gui.GuiEventDispatcher
+import com.olillin.rainbowquartz.item.ItemManager
 import me.lucko.commodore.Commodore
 import me.lucko.commodore.CommodoreProvider
 import me.lucko.commodore.file.CommodoreFileReader
@@ -54,7 +54,7 @@ public open class RainbowQuartz : JavaPlugin() {
     private fun registerCommands() {
 
         val getItemCommand = server.getPluginCommand("getitem")
-        var executor: TabExecutor = com.olillin.rainbowquartz.command.GetItemCommand()
+        var executor: TabExecutor = GetItemCommand()
         getItemCommand!!.setExecutor(executor)
         getItemCommand.tabCompleter = executor
 

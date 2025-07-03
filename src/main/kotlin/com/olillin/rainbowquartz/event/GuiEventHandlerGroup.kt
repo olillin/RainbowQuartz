@@ -1,6 +1,5 @@
 package com.olillin.rainbowquartz.event
 
-import com.olillin.rainbowquartz.item.Item
 import org.bukkit.configuration.MemoryConfiguration
 import org.bukkit.configuration.serialization.ConfigurationSerializable
 import org.bukkit.event.Event

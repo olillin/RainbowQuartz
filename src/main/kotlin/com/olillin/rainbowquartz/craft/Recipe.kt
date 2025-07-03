@@ -6,7 +6,7 @@ import org.bukkit.configuration.serialization.ConfigurationSerializable
 import org.bukkit.inventory.Recipe as BukkitRecipe
 
 @Suppress("UNCHECKED_CAST")
-public abstract class Recipe<Self : Recipe<Self, T>, T : BukkitRecipe> : ConfigurationSerializable {
+public abstract class Recipe<Self : Recipe<Self, T>, T : BukkitRecipe> {
     public var amount: Int = 1
     public var group: String = ""
     protected abstract val recipeId: String
